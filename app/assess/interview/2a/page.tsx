@@ -214,7 +214,7 @@ function InterviewContent() {
             <div className="font-semibold mt-0.5">{currentGroup.name}</div>
           </div>
 
-          <div className="flex-1 p-6 flex flex-col justify-center items-center">
+          <div className="flex-1 p-6 flex flex-col justify-start items-center overflow-y-auto">
             <div
               className={`text-xs font-semibold uppercase tracking-wide mb-4 px-3 py-1 rounded-full border ${
                 COLOR_LIGHT[currentGroup.color]
@@ -223,8 +223,13 @@ function InterviewContent() {
               Show to Student / Read Aloud
             </div>
 
+            {/* Current item display — shown FIRST so teacher sees it before administering */}
+            <div className="w-full mb-4">
+              <CurrentItemDisplay group={currentGroup} />
+            </div>
+
             {/* Instructions */}
-            <div className="bg-gray-50 rounded-xl border border-gray-200 p-4 w-full mb-4">
+            <div className="bg-gray-50 rounded-xl border border-gray-200 p-4 w-full">
               <div className="text-xs text-gray-500 font-medium mb-1">Teacher Instruction:</div>
               <div className="text-sm text-gray-800 italic">{currentGroup.instructions}</div>
               {currentGroup.materials && (
@@ -233,9 +238,6 @@ function InterviewContent() {
                 </div>
               )}
             </div>
-
-            {/* Current item display */}
-            <CurrentItemDisplay group={currentGroup} />
           </div>
         </div>
 

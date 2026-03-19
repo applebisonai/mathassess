@@ -7,7 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: "⊞" },
   { href: "/students", label: "My Students", icon: "👥" },
-  { href: "/assess", label: "Assess", icon: "📋" },
+  { href: "/assess", label: "Assessment Categories", icon: "📋" },
 ];
 
 export default function Nav({ teacherName }: { teacherName: string }) {

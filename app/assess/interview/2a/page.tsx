@@ -650,23 +650,29 @@ function InlineFluency({ value, onChange }: { value: string; onChange: (v: strin
 
 // --- Left panel: student prompt display ---
 function StudentPromptDisplay({ group }: { group: TaskGroup }) {
-  const uniquePrompts = group.items
-    .filter((item) => item.displayText)
-    .reduce((acc: AssessmentItem[], item) => {
-      if (!acc.find((i) => i.displayText === item.displayText)) acc.push(item);
-      return acc;
-    }, []);
+  // Group items by sub-level number (e.g. "2.1", "2.2", "2.3")
+  const subLevelMap = new Map<string, AssessmentItem[]>();
+  group.items.filter((item) => item.displayText).forEach((item) => {
+    if (!subLevelMap.has(item.number)) subLevelMap.set(item.number, []);
+    subLevelMap.get(item.number)!.push(item);
+  });
 
-  if (uniquePrompts.length === 0) return null;
+  if (subLevelMap.size === 0) return null;
 
   return (
     <div className="bg-white border border-gray-200 rounded-xl p-3">
       <div className="text-xs text-gray-400 font-medium mb-2 text-center">Items in this group:</div>
-      <div className="space-y-1 max-h-52 overflow-y-auto">
-        {uniquePrompts.map((item) => (
-          <div key={item.id} className="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2 border border-gray-100">
-            <span className="text-xs text-gray-400 font-mono w-8 shrink-0">{item.number}</span>
-            <span className="text-sm font-semibold text-gray-800">{item.displayText}</span>
+      <div className="space-y-3 max-h-64 overflow-y-auto">
+        {Array.from(subLevelMap.entries()).map(([subLevel, items]) => (
+          <div key={subLevel}>
+            <div className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1 px-1">{subLevel}</div>
+            <div className="space-y-1">
+              {items.map((item) => (
+                <div key={item.id} className="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2 border border-gray-100">
+                  <span className="text-sm font-semibold text-gray-800">{item.displayText}</span>
+                </div>
+              ))}
+            </div>
           </div>
         ))}
       </div>

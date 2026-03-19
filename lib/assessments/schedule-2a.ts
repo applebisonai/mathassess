@@ -301,6 +301,8 @@ export const schedule2A = {
       color: "purple",
       instructions:
         'Say: "The number that comes just before 2 is 1. What number comes before ___?"',
+      startAtItem: "6.2",
+      startNote: "If not fluent go back and do 6.1",
       items: [
         { id: "6.1a", number: "6.1", prompt: "What comes before 6?", displayText: "___,  6", targetLevel: 2, responseFields: [{ label: "Response", type: "correct_incorrect" }] },
         { id: "6.1b", number: "6.1", prompt: "What comes before 3?", displayText: "___,  3", targetLevel: 2, responseFields: [{ label: "Response", type: "correct_incorrect" }] },

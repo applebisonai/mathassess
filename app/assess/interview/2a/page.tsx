@@ -503,11 +503,12 @@ function ItemRow({
         </button>
       </div>
 
-      {/* Clickable number grid for FNWS items */}
+      {/* Clickable number grid for FNWS/BNWS items */}
       {hasNumberGrid && (
         <ClickableNumberGrid
           start={item.numberRangeStart!}
           end={item.numberRangeEnd!}
+          reverse={item.id.startsWith("5.")}
           value={getResponse(item.id, "incorrect_numbers")}
           onChange={(v) => setResponse(item.id, "incorrect_numbers", v)}
         />
@@ -533,12 +534,13 @@ function ItemRow({
 
 // --- Clickable number grid ---
 function ClickableNumberGrid({
-  start, end, value, onChange,
+  start, end, value, onChange, reverse = false,
 }: {
   start: number;
   end: number;
   value: string;
   onChange: (v: string) => void;
+  reverse?: boolean;
 }) {
   const incorrect = new Set(value ? value.split(",").map(Number) : []);
 
@@ -550,6 +552,7 @@ function ClickableNumberGrid({
   }
 
   const numbers = Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  if (reverse) numbers.reverse();
 
   return (
     <div className="mt-2 mb-1">

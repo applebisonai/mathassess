@@ -279,11 +279,11 @@ export const schedule2A = {
       instructions: 'Say: "Count backwards from ___ and I\'ll tell you when to stop."',
       branchingNote: "Start with 5.1 for younger students. Jump to 5.3 for Grade 1+",
       items: [
-        { id: "5.1", number: "5.1", prompt: "Count backwards from 5 (to 1)", displayText: "5, 4, 3...", targetLevel: 1, responseFields: [{ label: "Fluency", type: "fluency_scale" }] },
-        { id: "5.2", number: "5.2", prompt: "Count backwards from 10 (to 1)", displayText: "10, 9, 8...", targetLevel: 1, responseFields: [{ label: "Fluency", type: "fluency_scale" }] },
-        { id: "5.3", number: "5.3", prompt: "Count backwards from 12 (to 1)", displayText: "12, 11, 10...", targetLevel: 2, responseFields: [{ label: "Fluency", type: "fluency_scale" }] },
-        { id: "5.4", number: "5.4", prompt: "Count backwards from 35 (to 17)", displayText: "35, 34...", targetLevel: 4, responseFields: [{ label: "Fluency", type: "fluency_scale" }] },
-        { id: "5.5", number: "5.5", prompt: "Count backwards from 72 (to 58)", displayText: "72, 71...", targetLevel: 5, responseFields: [{ label: "Fluency", type: "fluency_scale" }] },
+        { id: "5.1", number: "5.1", prompt: "Count backwards from 5 (to 1)", displayText: "5, 4, 3...", targetLevel: 1, numberRangeStart: 1, numberRangeEnd: 5, responseFields: [{ label: "Fluency", type: "fluency_scale" }] },
+        { id: "5.2", number: "5.2", prompt: "Count backwards from 10 (to 1)", displayText: "10, 9, 8...", targetLevel: 1, numberRangeStart: 1, numberRangeEnd: 10, responseFields: [{ label: "Fluency", type: "fluency_scale" }] },
+        { id: "5.3", number: "5.3", prompt: "Count backwards from 12 (to 1)", displayText: "12, 11, 10...", targetLevel: 2, numberRangeStart: 1, numberRangeEnd: 12, responseFields: [{ label: "Fluency", type: "fluency_scale" }] },
+        { id: "5.4", number: "5.4", prompt: "Count backwards from 35 (to 17)", displayText: "35, 34...", targetLevel: 4, numberRangeStart: 17, numberRangeEnd: 35, responseFields: [{ label: "Fluency", type: "fluency_scale" }] },
+        { id: "5.5", number: "5.5", prompt: "Count backwards from 72 (to 58)", displayText: "72, 71...", targetLevel: 5, numberRangeStart: 58, numberRangeEnd: 72, responseFields: [{ label: "Fluency", type: "fluency_scale" }] },
       ],
     },
     {

@@ -19,6 +19,8 @@ export interface AssessmentItem {
   responseFields: ResponseField[];
   targetLevel: number;      // Which LFIN level this item assesses (0-7)
   notes?: string;           // Guidance for teacher
+  numberRangeStart?: number; // For clickable number grids (FNWS/BNWS)
+  numberRangeEnd?: number;
 }
 
 export interface ResponseField {
@@ -75,8 +77,9 @@ export const schedule2A = {
           prompt: "Start counting from 1. (Stop at 32)",
           displayText: "Count from 1",
           targetLevel: 1,
+          numberRangeStart: 1,
+          numberRangeEnd: 32,
           responseFields: [
-            { label: "Highest number reached", type: "number_entry", placeholder: "e.g. 32" },
             { label: "Fluency", type: "fluency_scale" },
           ],
         },
@@ -86,8 +89,9 @@ export const schedule2A = {
           prompt: "Start counting from 68. (Stop at 83)",
           displayText: "Count from 68",
           targetLevel: 5,
+          numberRangeStart: 68,
+          numberRangeEnd: 83,
           responseFields: [
-            { label: "Highest number reached", type: "number_entry", placeholder: "e.g. 83" },
             { label: "Fluency", type: "fluency_scale" },
           ],
         },
@@ -97,9 +101,10 @@ export const schedule2A = {
           prompt: "Start counting from 97. (Stop at 112)",
           displayText: "Count from 97",
           targetLevel: 5,
+          numberRangeStart: 97,
+          numberRangeEnd: 112,
           notes: "Level 5+ if crosses 100 fluently",
           responseFields: [
-            { label: "Highest number reached", type: "number_entry", placeholder: "e.g. 112" },
             { label: "Fluency", type: "fluency_scale" },
           ],
         },

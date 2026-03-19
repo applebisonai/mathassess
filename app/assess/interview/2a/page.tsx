@@ -464,14 +464,14 @@ function ItemRow({
   setResponse: (id: string, field: string, value: string) => void;
 }) {
   const [notesOpen, setNotesOpen] = useState(false);
+  const hasNumberGrid = item.numberRangeStart !== undefined && item.numberRangeEnd !== undefined;
 
   return (
     <div className="px-3 py-2">
       <div className="flex items-center gap-2 flex-wrap">
-        {/* Item prompt */}
         <span className="text-sm text-gray-800 flex-1 min-w-0">{item.prompt}</span>
 
-        {/* Response fields inline */}
+        {/* Fluency and other inline fields */}
         {item.responseFields.map((field) => (
           <span key={field.label} className="flex items-center gap-1 shrink-0">
             {field.type === "correct_incorrect" && (
@@ -498,7 +498,6 @@ function ItemRow({
           </span>
         ))}
 
-        {/* Notes toggle */}
         <button
           onClick={() => setNotesOpen((o) => !o)}
           className="text-gray-300 hover:text-gray-500 text-xs ml-1"
@@ -508,7 +507,16 @@ function ItemRow({
         </button>
       </div>
 
-      {/* Notes field */}
+      {/* Clickable number grid for FNWS items */}
+      {hasNumberGrid && (
+        <ClickableNumberGrid
+          start={item.numberRangeStart!}
+          end={item.numberRangeEnd!}
+          value={getResponse(item.id, "incorrect_numbers")}
+          onChange={(v) => setResponse(item.id, "incorrect_numbers", v)}
+        />
+      )}
+
       {notesOpen && (
         <input
           type="text"
@@ -520,9 +528,60 @@ function ItemRow({
         />
       )}
 
-      {/* Item guidance note */}
       {item.notes && (
         <div className="text-xs text-amber-600 mt-0.5 italic">{item.notes}</div>
+      )}
+    </div>
+  );
+}
+
+// --- Clickable number grid ---
+function ClickableNumberGrid({
+  start, end, value, onChange,
+}: {
+  start: number;
+  end: number;
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  const incorrect = new Set(value ? value.split(",").map(Number) : []);
+
+  function toggle(n: number) {
+    const next = new Set(incorrect);
+    if (next.has(n)) next.delete(n);
+    else next.add(n);
+    onChange(next.size > 0 ? Array.from(next).sort((a, b) => a - b).join(",") : "");
+  }
+
+  const numbers = Array.from({ length: end - start + 1 }, (_, i) => start + i);
+
+  return (
+    <div className="mt-2 mb-1">
+      <div className="text-xs text-blue-600 font-medium mb-2 flex items-center gap-1.5">
+        <span>👆</span> Click on the numbers that are incorrect
+      </div>
+      <div className="flex flex-wrap gap-1">
+        {numbers.map((n) => {
+          const isWrong = incorrect.has(n);
+          return (
+            <button
+              key={n}
+              onClick={() => toggle(n)}
+              className={`w-8 h-8 rounded text-xs font-semibold border transition-all select-none ${
+                isWrong
+                  ? "bg-red-100 border-red-400 text-red-600 line-through opacity-70"
+                  : "bg-white border-gray-200 text-gray-700 hover:border-blue-300 hover:bg-blue-50"
+              }`}
+            >
+              {n}
+            </button>
+          );
+        })}
+      </div>
+      {incorrect.size > 0 && (
+        <div className="text-xs text-red-500 mt-1.5">
+          Incorrect: {Array.from(incorrect).sort((a, b) => a - b).join(", ")}
+        </div>
       )}
     </div>
   );
@@ -563,7 +622,7 @@ function InlineFluency({ value, onChange }: { value: string; onChange: (v: strin
       {[
         { v: "fluent", label: "Fluent", active: "bg-green-100 border-green-400 text-green-700" },
         { v: "hesitant", label: "Hesitant", active: "bg-yellow-100 border-yellow-400 text-yellow-700" },
-        { v: "error", label: "Error", active: "bg-red-100 border-red-400 text-red-700" },
+        { v: "error", label: "Not Fluent", active: "bg-red-100 border-red-400 text-red-700" },
       ].map(({ v, label, active }) => (
         <button
           key={v}

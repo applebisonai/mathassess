@@ -661,7 +661,10 @@ function StudentPromptDisplay({ group }: { group: TaskGroup }) {
 
   return (
     <div className="bg-white border border-gray-200 rounded-xl p-3">
-      <div className="text-xs text-gray-400 font-medium mb-2 text-center">Items in this group:</div>
+      <div className="mb-2 text-center">
+        <div className="text-sm font-bold text-gray-700">{group.name}</div>
+        <div className="text-xs text-gray-400 font-medium tracking-wide">{group.model}</div>
+      </div>
       <div className="space-y-3 max-h-64 overflow-y-auto">
         {Array.from(subLevelMap.entries()).map(([subLevel, items]) => (
           <div key={subLevel}>

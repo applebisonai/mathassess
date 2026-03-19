@@ -9,78 +9,95 @@ export function SomatLogo({ size = 40 }: { size?: number }) {
     >
       <defs>
         <linearGradient id="bgGrad" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#1d4ed8" />
-          <stop offset="60%" stopColor="#2563eb" />
+          <stop offset="0%" stopColor="#0f172a" />
+          <stop offset="45%" stopColor="#1d4ed8" />
           <stop offset="100%" stopColor="#4338ca" />
         </linearGradient>
         <linearGradient id="barGrad" x1="0" y1="0" x2="0" y2="100" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#93c5fd" stopOpacity="0.5" />
-          <stop offset="100%" stopColor="#60a5fa" stopOpacity="0.15" />
+          <stop offset="0%" stopColor="#60a5fa" stopOpacity="0.6" />
+          <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.1" />
         </linearGradient>
+        <linearGradient id="glowGrad" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.4" />
+          <stop offset="100%" stopColor="#818cf8" stopOpacity="0.0" />
+        </linearGradient>
+        <filter id="glow">
+          <feGaussianBlur stdDeviation="2.5" result="coloredBlur" />
+          <feMerge>
+            <feMergeNode in="coloredBlur" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
         <clipPath id="bgClip">
-          <rect width="100" height="100" rx="22" />
+          <rect width="100" height="100" rx="20" />
         </clipPath>
+        <style>{`@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@900&display=swap');`}</style>
       </defs>
 
       {/* Background */}
-      <rect width="100" height="100" rx="22" fill="url(#bgGrad)" />
+      <rect width="100" height="100" rx="20" fill="url(#bgGrad)" />
 
-      {/* Clipped inner content */}
       <g clipPath="url(#bgClip)">
-        {/* Subtle dot grid */}
-        {[20, 40, 60, 80].map((x) =>
-          [20, 40, 60, 80].map((y) => (
-            <circle key={`${x}-${y}`} cx={x} cy={y} r="1.2" fill="white" fillOpacity="0.08" />
-          ))
-        )}
+        {/* Top-left glow */}
+        <ellipse cx="20" cy="20" rx="40" ry="40" fill="url(#glowGrad)" />
 
-        {/* Ascending bars — the data metaphor */}
-        <rect x="10" y="78" width="9" height="22" rx="2.5" fill="url(#barGrad)" />
-        <rect x="23" y="68" width="9" height="32" rx="2.5" fill="url(#barGrad)" />
-        <rect x="36" y="55" width="9" height="45" rx="2.5" fill="url(#barGrad)" />
-        <rect x="49" y="40" width="9" height="60" rx="2.5" fill="url(#barGrad)" />
-        <rect x="62" y="26" width="9" height="74" rx="2.5" fill="url(#barGrad)" />
-        <rect x="75" y="12" width="9" height="88" rx="2.5" fill="url(#barGrad)" />
+        {/* Subtle scan lines */}
+        {[10, 20, 30, 40, 50, 60, 70, 80, 90].map((y) => (
+          <line key={y} x1="0" y1={y} x2="100" y2={y} stroke="white" strokeOpacity="0.03" strokeWidth="1" />
+        ))}
 
-        {/* Trend line over bars */}
+        {/* Ascending bars */}
+        <rect x="9"  y="80" width="8" height="20" rx="2" fill="url(#barGrad)" />
+        <rect x="21" y="70" width="8" height="30" rx="2" fill="url(#barGrad)" />
+        <rect x="33" y="57" width="8" height="43" rx="2" fill="url(#barGrad)" />
+        <rect x="45" y="42" width="8" height="58" rx="2" fill="url(#barGrad)" />
+        <rect x="57" y="28" width="8" height="72" rx="2" fill="url(#barGrad)" />
+        <rect x="69" y="14" width="8" height="86" rx="2" fill="url(#barGrad)" />
+        <rect x="81" y="4"  width="8" height="96" rx="2" fill="url(#barGrad)" />
+
+        {/* Trend line with glow */}
         <polyline
-          points="14,76 27,66 40,53 53,38 66,24 79,10"
-          stroke="white"
-          strokeOpacity="0.25"
+          points="13,78 25,68 37,55 49,40 61,26 73,12 85,2"
+          stroke="#38bdf8"
+          strokeOpacity="0.5"
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
           fill="none"
+          filter="url(#glow)"
         />
 
-        {/* S — bold, centered, overlaid */}
+        {/* Trend dots */}
+        {[[13,78],[49,40],[85,2]].map(([x,y]) => (
+          <circle key={`${x}-${y}`} cx={x} cy={y} r="2.5" fill="#7dd3fc" fillOpacity="0.8" filter="url(#glow)" />
+        ))}
+
+        {/* The S — Orbitron futuristic font */}
         <text
           x="50"
-          y="72"
-          fontFamily="'Arial Black', 'Impact', 'Helvetica Neue', Arial, sans-serif"
-          fontSize="70"
-          fontWeight="900"
+          y="74"
+          style={{ fontFamily: "'Orbitron', 'Arial Black', sans-serif", fontWeight: 900 }}
+          fontSize="66"
           fill="white"
           textAnchor="middle"
+          filter="url(#glow)"
         >
           S
         </text>
 
-        {/* Top-right accent dot */}
-        <circle cx="83" cy="14" r="4" fill="white" fillOpacity="0.3" />
-        <circle cx="83" cy="14" r="2" fill="white" fillOpacity="0.6" />
+        {/* Corner accent marks */}
+        <line x1="6" y1="6" x2="14" y2="6" stroke="#38bdf8" strokeOpacity="0.6" strokeWidth="1.5" strokeLinecap="round" />
+        <line x1="6" y1="6" x2="6" y2="14" stroke="#38bdf8" strokeOpacity="0.6" strokeWidth="1.5" strokeLinecap="round" />
+        <line x1="94" y1="6" x2="86" y2="6" stroke="#38bdf8" strokeOpacity="0.6" strokeWidth="1.5" strokeLinecap="round" />
+        <line x1="94" y1="6" x2="94" y2="14" stroke="#38bdf8" strokeOpacity="0.6" strokeWidth="1.5" strokeLinecap="round" />
+        <line x1="6" y1="94" x2="14" y2="94" stroke="#38bdf8" strokeOpacity="0.6" strokeWidth="1.5" strokeLinecap="round" />
+        <line x1="6" y1="94" x2="6" y2="86" stroke="#38bdf8" strokeOpacity="0.6" strokeWidth="1.5" strokeLinecap="round" />
+        <line x1="94" y1="94" x2="86" y2="94" stroke="#38bdf8" strokeOpacity="0.6" strokeWidth="1.5" strokeLinecap="round" />
+        <line x1="94" y1="94" x2="94" y2="86" stroke="#38bdf8" strokeOpacity="0.6" strokeWidth="1.5" strokeLinecap="round" />
       </g>
 
-      {/* Border shine */}
-      <rect
-        width="100"
-        height="100"
-        rx="22"
-        stroke="white"
-        strokeOpacity="0.12"
-        strokeWidth="1.5"
-        fill="none"
-      />
+      {/* Border */}
+      <rect width="100" height="100" rx="20" stroke="#38bdf8" strokeOpacity="0.25" strokeWidth="1.5" fill="none" />
     </svg>
   );
 }

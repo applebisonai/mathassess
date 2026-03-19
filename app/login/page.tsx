@@ -41,18 +41,18 @@ export default function LoginPage() {
           <div className="absolute -bottom-16 left-1/4 w-64 h-64 bg-blue-300 rounded-full opacity-10" />
         </div>
 
-        {/* Logo */}
-        <div className="relative z-10 flex items-center gap-3">
-          <SomatLogo size={42} />
-          <div>
-            <div className="text-white text-xl font-bold tracking-wide">SOMAT</div>
-            <div className="text-blue-300 text-xs">Slade Online Math Assessment Tool</div>
+        {/* Logo — large centerpiece */}
+        <div className="relative z-10 flex flex-col items-center text-center">
+          <SomatLogo size={320} />
+          <div className="mt-4">
+            <div className="text-white text-3xl font-bold tracking-widest" style={{ fontFamily: "'Orbitron', sans-serif" }}>SOMAT</div>
+            <div className="text-blue-300 text-sm mt-1 tracking-wide">Slade Online Math Assessment Tool</div>
           </div>
         </div>
 
         {/* Center content */}
         <div className="relative z-10">
-          <h2 className="text-4xl font-bold text-white leading-tight mb-4">
+          <h2 className="text-3xl font-bold text-white leading-tight mb-4">
             Math assessment,<br />
             <span className="text-blue-300">made simple.</span>
           </h2>

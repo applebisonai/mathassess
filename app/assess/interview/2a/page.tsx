@@ -169,14 +169,49 @@ function InterviewContent() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
-    await supabase.from("assessment_sessions").insert({
-      student_id: student.id,
-      teacher_id: user.id,
-      assessment_id: "schedule-2a",
-      date_administered: new Date().toISOString().split("T")[0],
-      status: "completed",
-      raw_responses: responses,
-    });
+    const today = new Date().toISOString().split("T")[0];
+
+    const { data: sessionData } = await supabase
+      .from("assessment_sessions")
+      .insert({
+        student_id: student.id,
+        teacher_id: user.id,
+        assessment_id: "schedule-2a",
+        date_administered: today,
+        status: "completed",
+        raw_responses: responses,
+      })
+      .select("id")
+      .single();
+
+    if (sessionData?.id) {
+      await supabase.from("construct_placements").insert([
+        {
+          session_id: sessionData.id,
+          student_id: student.id,
+          model_name: "FNWS",
+          suggested_level: calc.fnwsLevel,
+          confirmed_level: calc.fnwsLevel,
+          date_placed: today,
+        },
+        {
+          session_id: sessionData.id,
+          student_id: student.id,
+          model_name: "BNWS",
+          suggested_level: calc.bnwsLevel,
+          confirmed_level: calc.bnwsLevel,
+          date_placed: today,
+        },
+        {
+          session_id: sessionData.id,
+          student_id: student.id,
+          model_name: "NID",
+          suggested_level: calc.nidLevel,
+          confirmed_level: calc.nidLevel,
+          date_placed: today,
+        },
+      ]);
+    }
 
     setSaving(false);
     setDone(true);

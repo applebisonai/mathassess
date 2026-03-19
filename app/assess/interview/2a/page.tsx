@@ -648,34 +648,28 @@ function InlineFluency({ value, onChange }: { value: string; onChange: (v: strin
   );
 }
 
-// --- Left panel: student prompt display ---
+// --- Left panel: level descriptions ---
 function StudentPromptDisplay({ group }: { group: TaskGroup }) {
-  // Group items by sub-level number (e.g. "2.1", "2.2", "2.3")
-  const subLevelMap = new Map<string, AssessmentItem[]>();
-  group.items.filter((item) => item.displayText).forEach((item) => {
-    if (!subLevelMap.has(item.number)) subLevelMap.set(item.number, []);
-    subLevelMap.get(item.number)!.push(item);
-  });
+  const levelMap: Record<string, { level: number; name: string; description: string }[]> = {
+    FNWS: schedule2A.fnwsLevels,
+    BNWS: schedule2A.bnwsLevels,
+    NID:  schedule2A.nidLevels,
+  };
+  const levels = levelMap[group.model] ?? [];
 
-  if (subLevelMap.size === 0) return null;
+  if (levels.length === 0) return null;
 
   return (
     <div className="bg-white border border-gray-200 rounded-xl p-3">
-      <div className="mb-2 text-center">
+      <div className="mb-3 text-center">
         <div className="text-sm font-bold text-gray-700">{group.name}</div>
-        <div className="text-xs text-gray-400 font-medium tracking-wide">{group.model}</div>
+        <div className="text-xs text-gray-400 font-medium tracking-wide">Student Levels</div>
       </div>
-      <div className="space-y-3 max-h-64 overflow-y-auto">
-        {Array.from(subLevelMap.entries()).map(([subLevel, items]) => (
-          <div key={subLevel}>
-            <div className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1 px-1">{subLevel}</div>
-            <div className="space-y-1">
-              {items.map((item) => (
-                <div key={item.id} className="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2 border border-gray-100">
-                  <span className="text-sm font-semibold text-gray-800">{item.displayText}</span>
-                </div>
-              ))}
-            </div>
+      <div className="space-y-1.5 max-h-64 overflow-y-auto">
+        {levels.map(({ level, name }) => (
+          <div key={level} className="flex items-start gap-2 bg-gray-50 rounded-lg px-3 py-2 border border-gray-100">
+            <span className="text-xs font-bold text-gray-400 w-4 shrink-0 mt-0.5">{level}</span>
+            <span className="text-xs text-gray-700 leading-snug">{name}</span>
           </div>
         ))}
       </div>

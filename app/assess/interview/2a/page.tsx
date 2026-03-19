@@ -329,7 +329,7 @@ function InterviewContent() {
 
           <div className="flex-1 p-4 flex flex-col gap-4 overflow-y-auto">
             <div className={`text-xs font-semibold uppercase tracking-wide px-3 py-1 rounded-full border self-center ${COLOR_LIGHT[currentGroup.color]}`}>
-              Show to Student / Read Aloud
+              Read Aloud
             </div>
 
             <StudentPromptDisplay group={currentGroup} />

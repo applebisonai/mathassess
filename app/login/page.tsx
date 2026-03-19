@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
+import { SomatLogo } from "@/components/somat-logo";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -42,10 +43,11 @@ export default function LoginPage() {
 
         {/* Logo */}
         <div className="relative z-10 flex items-center gap-3">
-          <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-lg">
-            <span className="text-blue-700 text-lg font-black">S</span>
+          <SomatLogo size={42} />
+          <div>
+            <div className="text-white text-xl font-bold tracking-wide">SOMAT</div>
+            <div className="text-blue-300 text-xs">Slade Online Math Assessment Tool</div>
           </div>
-          <span className="text-white text-xl font-bold tracking-wide">SOMAT</span>
         </div>
 
         {/* Center content */}
@@ -81,10 +83,11 @@ export default function LoginPage() {
 
           {/* Mobile logo (hidden on desktop) */}
           <div className="flex items-center gap-3 mb-10 lg:hidden">
-            <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center">
-              <span className="text-white text-lg font-black">S</span>
+            <SomatLogo size={42} />
+            <div>
+              <div className="text-white text-xl font-bold">SOMAT</div>
+              <div className="text-slate-400 text-xs">Slade Online Math Assessment Tool</div>
             </div>
-            <span className="text-white text-xl font-bold">SOMAT</span>
           </div>
 
           <div className="mb-8">

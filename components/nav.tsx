@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { SomatLogo } from "./somat-logo";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: "⊞" },
@@ -25,9 +26,7 @@ export default function Nav({ teacherName }: { teacherName: string }) {
     <nav className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
       {/* Logo */}
       <Link href="/dashboard" className="flex items-center gap-2">
-        <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-          <span className="text-white text-sm font-bold">S</span>
-        </div>
+        <SomatLogo size={34} />
         <span className="font-bold text-gray-900 text-sm">SOMAT</span>
       </Link>
 

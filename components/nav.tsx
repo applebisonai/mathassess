@@ -26,9 +26,9 @@ export default function Nav({ teacherName }: { teacherName: string }) {
       {/* Logo */}
       <Link href="/dashboard" className="flex items-center gap-2">
         <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-          <span className="text-white text-sm font-bold">M</span>
+          <span className="text-white text-sm font-bold">S</span>
         </div>
-        <span className="font-bold text-gray-900 text-sm">MathAssess</span>
+        <span className="font-bold text-gray-900 text-sm">SOMAT</span>
       </Link>
 
       {/* Nav Links */}

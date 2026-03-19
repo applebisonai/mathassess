@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "MathAssess",
-  description: "Math Assessment & Progress Monitoring Platform",
+  title: "SOMAT",
+  description: "Slade Online Math Assessment Tool",
 };
 
 export default function RootLayout({

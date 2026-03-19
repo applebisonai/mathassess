@@ -1,7 +1,7 @@
 {
-  "name": "mathassess",
+  "name": "somat",
   "version": "1.0.0",
-  "description": "Math Assessment & Progress Monitoring Platform",
+  "description": "SOMAT — Slade Online Math Assessment Tool",
   "private": true,
   "scripts": {
     "dev": "next dev",

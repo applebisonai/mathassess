@@ -14,10 +14,22 @@ interface Student {
 
 type Responses = Record<string, Record<string, string>>;
 
-const COLOR_MAP: Record<string, string> = {
-  blue: "bg-blue-600",
-  green: "bg-green-600",
-  purple: "bg-purple-600",
+const COLOR_HEADER: Record<string, string> = {
+  blue: "bg-blue-600 text-white",
+  green: "bg-green-600 text-white",
+  purple: "bg-purple-600 text-white",
+};
+
+const COLOR_SUBGROUP: Record<string, string> = {
+  blue: "border-blue-200 bg-blue-50",
+  green: "border-green-200 bg-green-50",
+  purple: "border-purple-200 bg-purple-50",
+};
+
+const COLOR_SUBHEAD: Record<string, string> = {
+  blue: "bg-blue-100 text-blue-800",
+  green: "bg-green-100 text-green-800",
+  purple: "bg-purple-100 text-purple-800",
 };
 
 const COLOR_LIGHT: Record<string, string> = {
@@ -28,6 +40,85 @@ const COLOR_LIGHT: Record<string, string> = {
 
 function gradeLabel(g: number) {
   return g === 0 ? "K" : `${g}`;
+}
+
+// Group items by their sub-level number (e.g. all "2.1" items together)
+function groupBySubLevel(items: AssessmentItem[]) {
+  const map = new Map<string, AssessmentItem[]>();
+  items.forEach((item) => {
+    if (!map.has(item.number)) map.set(item.number, []);
+    map.get(item.number)!.push(item);
+  });
+  return Array.from(map.entries()); // [ ["2.1", [...items]], ["2.2", [...]], ... ]
+}
+
+// Calculate score for a group of items
+function calcScore(items: AssessmentItem[], responses: Responses) {
+  const scoreable = items.filter((i) =>
+    i.responseFields.some((f) => f.type === "correct_incorrect")
+  );
+  if (scoreable.length === 0) return null;
+  const correct = scoreable.filter(
+    (i) => responses[i.id]?.["Response"] === "correct"
+  ).length;
+  return { correct, total: scoreable.length };
+}
+
+// --- SCORING LOGIC ---
+function calculateResults(responses: Responses) {
+  const groups = schedule2A.taskGroups;
+
+  // FNWS level: based on TG1 (sequences) and TG2 (NWA)
+  const tg2 = groups[1]; // NWA
+  const nwa01 = tg2.items.filter((i) => i.number === "2.1");
+  const nwa1130 = tg2.items.filter((i) => i.number === "2.2");
+  const nwa31100 = tg2.items.filter((i) => i.number === "2.3");
+  const nwa01Score = calcScore(nwa01, responses);
+  const nwa1130Score = calcScore(nwa1130, responses);
+  const nwa31100Score = calcScore(nwa31100, responses);
+
+  let fnwsLevel = 1;
+  if (nwa01Score && nwa01Score.correct >= 4) fnwsLevel = 2;
+  if (nwa1130Score && nwa1130Score.correct >= 4) fnwsLevel = 3;
+  if (nwa31100Score && nwa31100Score.correct >= 4) fnwsLevel = 5;
+
+  // NID level: based on TG3 (numeral ID)
+  const tg3 = groups[2];
+  const nid1 = tg3.items.filter((i) => i.number === "3.1");
+  const nid2 = tg3.items.filter((i) => i.number === "3.2");
+  const nid3 = tg3.items.filter((i) => i.number === "3.3");
+  const nid4 = tg3.items.filter((i) => i.number === "3.4");
+  const nid1Score = calcScore(nid1, responses);
+  const nid2Score = calcScore(nid2, responses);
+  const nid3Score = calcScore(nid3, responses);
+  const nid4Score = calcScore(nid4, responses);
+
+  let nidLevel = 0;
+  if (nid1Score && nid1Score.correct >= 5) nidLevel = 1;
+  if (nid2Score && nid2Score.correct >= 5) nidLevel = 2;
+  if (nid3Score && nid3Score.correct >= 6) nidLevel = 3;
+  if (nid4Score && nid4Score.correct >= 4) nidLevel = 4;
+
+  // BNWS level: TG5 (sequences) + TG6 (NWB)
+  const tg6 = groups[5]; // NWB
+  const nwb110 = tg6.items.filter((i) => i.number === "6.1");
+  const nwb1130 = tg6.items.filter((i) => i.number === "6.2");
+  const nwb31100 = tg6.items.filter((i) => i.number === "6.3");
+  const nwb110Score = calcScore(nwb110, responses);
+  const nwb1130Score = calcScore(nwb1130, responses);
+  const nwb31100Score = calcScore(nwb31100, responses);
+
+  let bnwsLevel = 1;
+  if (nwb110Score && nwb110Score.correct >= 4) bnwsLevel = 2;
+  if (nwb1130Score && nwb1130Score.correct >= 4) bnwsLevel = 4;
+  if (nwb31100Score && nwb31100Score.correct >= 4) bnwsLevel = 5;
+
+  return {
+    fnwsLevel,
+    nidLevel,
+    bnwsLevel,
+    details: { nwa01Score, nwa1130Score, nwa31100Score, nid1Score, nid2Score, nid3Score, nid4Score, nwb110Score, nwb1130Score, nwb31100Score },
+  };
 }
 
 function InterviewContent() {
@@ -41,6 +132,7 @@ function InterviewContent() {
   const [responses, setResponses] = useState<Responses>({});
   const [saving, setSaving] = useState(false);
   const [done, setDone] = useState(false);
+  const [results, setResults] = useState<ReturnType<typeof calculateResults> | null>(null);
 
   const groups = schedule2A.taskGroups;
   const currentGroup = groups[currentGroupIdx];
@@ -54,9 +146,7 @@ function InterviewContent() {
       .select("id, first_name, last_name, grade_level")
       .eq("id", studentId)
       .single()
-      .then(({ data }) => {
-        if (data) setStudent(data);
-      });
+      .then(({ data }) => { if (data) setStudent(data); });
   }, [studentId]);
 
   function setResponse(itemId: string, field: string, value: string) {
@@ -73,60 +163,106 @@ function InterviewContent() {
   async function handleFinish() {
     if (!student) return;
     setSaving(true);
+    const calc = calculateResults(responses);
+    setResults(calc);
 
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
-    // 1. Create assessment session
-    const { data: session, error: sessionError } = await supabase
-      .from("assessment_sessions")
-      .insert({
-        student_id: student.id,
-        teacher_id: user.id,
-        assessment_id: "schedule-2a",
-        date_administered: new Date().toISOString().split("T")[0],
-        status: "completed",
-        raw_responses: responses,
-      })
-      .select()
-      .single();
-
-    if (sessionError) {
-      console.error("Error saving session:", sessionError);
-      setSaving(false);
-      return;
-    }
+    await supabase.from("assessment_sessions").insert({
+      student_id: student.id,
+      teacher_id: user.id,
+      assessment_id: "schedule-2a",
+      date_administered: new Date().toISOString().split("T")[0],
+      status: "completed",
+      raw_responses: responses,
+    });
 
     setSaving(false);
     setDone(true);
   }
 
-  if (done && student) {
+  // --- DONE / RESULTS SCREEN ---
+  if (done && student && results) {
+    const fnwsDesc = schedule2A.fnwsLevels[results.fnwsLevel];
+    const bnwsDesc = schedule2A.bnwsLevels[results.bnwsLevel];
+    const nidDesc = schedule2A.nidLevels[results.nidLevel];
+
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm max-w-md w-full p-8 text-center">
-          <div className="text-5xl mb-4">✅</div>
-          <h2 className="text-xl font-bold text-gray-900 mb-2">Assessment Saved!</h2>
-          <p className="text-gray-500 text-sm mb-6">
-            Schedule 2A for{" "}
-            <strong>
-              {student.first_name} {student.last_name}
-            </strong>{" "}
-            has been recorded.
-          </p>
-          <div className="space-y-2">
-            <button
-              onClick={() => router.push(`/assess/select`)}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg py-2.5 text-sm"
-            >
-              Assess Another Student
-            </button>
-            <button
-              onClick={() => router.push(`/students`)}
-              className="w-full border border-gray-200 text-gray-600 font-medium rounded-lg py-2.5 text-sm hover:bg-gray-50"
-            >
-              Back to Students
-            </button>
+      <div className="min-h-screen bg-gray-50 p-4">
+        <div className="max-w-2xl mx-auto">
+          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 mb-4">
+            <div className="text-center mb-6">
+              <div className="text-4xl mb-2">✅</div>
+              <h2 className="text-xl font-bold text-gray-900">Assessment Complete</h2>
+              <p className="text-gray-500 text-sm mt-1">
+                Schedule 2A — {student.first_name} {student.last_name} (Grade {gradeLabel(student.grade_level)})
+              </p>
+            </div>
+
+            <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wide mb-3">Suggested LFIN Placement</h3>
+            <div className="grid grid-cols-3 gap-3 mb-6">
+              {[
+                { label: "FNWS", level: results.fnwsLevel, desc: fnwsDesc?.name, color: "blue" },
+                { label: "BNWS", level: results.bnwsLevel, desc: bnwsDesc?.name, color: "purple" },
+                { label: "NID",  level: results.nidLevel,  desc: nidDesc?.name,  color: "green" },
+              ].map(({ label, level, desc, color }) => (
+                <div key={label} className={`rounded-xl border-2 p-3 text-center ${
+                  color === "blue" ? "border-blue-200 bg-blue-50" :
+                  color === "purple" ? "border-purple-200 bg-purple-50" :
+                  "border-green-200 bg-green-50"
+                }`}>
+                  <div className={`text-xs font-bold uppercase mb-1 ${
+                    color === "blue" ? "text-blue-600" :
+                    color === "purple" ? "text-purple-600" : "text-green-600"
+                  }`}>{label}</div>
+                  <div className="text-3xl font-black text-gray-800">{level}</div>
+                  <div className="text-xs text-gray-500 mt-1 leading-tight">{desc}</div>
+                </div>
+              ))}
+            </div>
+
+            <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wide mb-3">Score Breakdown</h3>
+            <div className="space-y-1 text-sm mb-6">
+              {[
+                { label: "NWA 0–10", score: results.details.nwa01Score },
+                { label: "NWA 11–30", score: results.details.nwa1130Score },
+                { label: "NWA 31–100", score: results.details.nwa31100Score },
+                { label: "NID Single digits", score: results.details.nid1Score },
+                { label: "NID Teens/2-digit", score: results.details.nid2Score },
+                { label: "NID 2-digit (larger)", score: results.details.nid3Score },
+                { label: "NID 3-digit", score: results.details.nid4Score },
+                { label: "NWB 1–10", score: results.details.nwb110Score },
+                { label: "NWB 11–30", score: results.details.nwb1130Score },
+                { label: "NWB 31–100", score: results.details.nwb31100Score },
+              ].map(({ label, score }) => score ? (
+                <div key={label} className="flex items-center justify-between py-1 border-b border-gray-100">
+                  <span className="text-gray-600">{label}</span>
+                  <span className={`font-semibold ${score.correct / score.total >= 0.8 ? "text-green-600" : score.correct / score.total >= 0.6 ? "text-yellow-600" : "text-red-500"}`}>
+                    {score.correct} / {score.total}
+                  </span>
+                </div>
+              ) : null)}
+            </div>
+
+            <p className="text-xs text-gray-400 mb-4">
+              * Suggested placement is based on scoring thresholds. Teacher judgment should confirm final placement.
+            </p>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => router.push("/assess/select")}
+                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg py-2.5 text-sm"
+              >
+                Assess Another Student
+              </button>
+              <button
+                onClick={() => router.push("/students")}
+                className="flex-1 border border-gray-200 text-gray-600 font-medium rounded-lg py-2.5 text-sm hover:bg-gray-50"
+              >
+                Back to Students
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -146,26 +282,13 @@ function InterviewContent() {
       {/* Top Bar */}
       <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <button
-            onClick={() => router.back()}
-            className="text-gray-400 hover:text-gray-600 text-sm"
-          >
-            ← Exit
-          </button>
+          <button onClick={() => router.back()} className="text-gray-400 hover:text-gray-600 text-sm">← Exit</button>
           <div className="h-4 w-px bg-gray-200" />
-          <div>
-            <span className="font-semibold text-gray-900 text-sm">
-              {student.first_name} {student.last_name}
-            </span>
-            <span className="text-gray-400 text-sm ml-2">
-              Grade {gradeLabel(student.grade_level)}
-            </span>
-          </div>
+          <span className="font-semibold text-gray-900 text-sm">{student.first_name} {student.last_name}</span>
+          <span className="text-gray-400 text-sm">Grade {gradeLabel(student.grade_level)}</span>
           <div className="h-4 w-px bg-gray-200" />
           <span className="text-gray-500 text-sm">{schedule2A.name}</span>
         </div>
-
-        {/* Progress */}
         <div className="flex items-center gap-2 text-sm text-gray-500">
           Task Group {currentGroupIdx + 1} of {groups.length}
           <div className="flex gap-1 ml-2">
@@ -174,11 +297,7 @@ function InterviewContent() {
                 key={i}
                 onClick={() => setCurrentGroupIdx(i)}
                 className={`w-3 h-3 rounded-full transition-colors ${
-                  i === currentGroupIdx
-                    ? "bg-blue-600"
-                    : i < currentGroupIdx
-                    ? "bg-blue-200"
-                    : "bg-gray-200"
+                  i === currentGroupIdx ? "bg-blue-600" : i < currentGroupIdx ? "bg-blue-200" : "bg-gray-200"
                 }`}
               />
             ))}
@@ -186,67 +305,49 @@ function InterviewContent() {
         </div>
       </div>
 
-      {/* Materials reminder (first group only) */}
+      {/* Materials reminder */}
       {currentGroupIdx === 0 && (
         <div className="bg-amber-50 border-b border-amber-200 px-4 py-2 text-xs text-amber-700 flex items-center gap-2">
           <span>📦 Materials needed:</span>
           {schedule2A.materials.map((m) => (
-            <span
-              key={m}
-              className="bg-amber-100 border border-amber-300 rounded px-2 py-0.5"
-            >
-              {m}
-            </span>
+            <span key={m} className="bg-amber-100 border border-amber-300 rounded px-2 py-0.5">{m}</span>
           ))}
         </div>
       )}
 
       {/* Main Two-Panel Layout */}
-      <div className="flex flex-1 gap-0">
+      <div className="flex flex-1 gap-0 overflow-hidden">
+
         {/* LEFT: Student Prompt */}
-        <div className="w-2/5 bg-white border-r border-gray-200 flex flex-col">
-          <div
-            className={`${COLOR_MAP[currentGroup.color]} px-4 py-3 text-white`}
-          >
+        <div className="w-2/5 bg-white border-r border-gray-200 flex flex-col overflow-hidden">
+          <div className={`${COLOR_HEADER[currentGroup.color]} px-4 py-3`}>
             <div className="text-xs font-semibold uppercase tracking-wide opacity-75">
               Task Group {currentGroup.number} — {currentGroup.model}
             </div>
             <div className="font-semibold mt-0.5">{currentGroup.name}</div>
           </div>
 
-          <div className="flex-1 p-6 flex flex-col justify-start items-center overflow-y-auto">
-            <div
-              className={`text-xs font-semibold uppercase tracking-wide mb-4 px-3 py-1 rounded-full border ${
-                COLOR_LIGHT[currentGroup.color]
-              }`}
-            >
+          <div className="flex-1 p-4 flex flex-col gap-4 overflow-y-auto">
+            <div className={`text-xs font-semibold uppercase tracking-wide px-3 py-1 rounded-full border self-center ${COLOR_LIGHT[currentGroup.color]}`}>
               Show to Student / Read Aloud
             </div>
 
-            {/* Current item display — shown FIRST so teacher sees it before administering */}
-            <div className="w-full mb-4">
-              <CurrentItemDisplay group={currentGroup} />
-            </div>
+            <StudentPromptDisplay group={currentGroup} />
 
-            {/* Instructions */}
-            <div className="bg-gray-50 rounded-xl border border-gray-200 p-4 w-full">
+            <div className="bg-gray-50 rounded-xl border border-gray-200 p-4">
               <div className="text-xs text-gray-500 font-medium mb-1">Teacher Instruction:</div>
               <div className="text-sm text-gray-800 italic">{currentGroup.instructions}</div>
               {currentGroup.materials && (
-                <div className="text-xs text-gray-400 mt-2">
-                  📦 {currentGroup.materials}
-                </div>
+                <div className="text-xs text-gray-400 mt-2">📦 {currentGroup.materials}</div>
               )}
             </div>
           </div>
         </div>
 
         {/* RIGHT: Teacher Scoring */}
-        <div className="w-3/5 flex flex-col">
+        <div className="w-3/5 flex flex-col overflow-hidden">
           <div className="bg-gray-50 border-b border-gray-200 px-4 py-3">
-            <div className="text-sm font-semibold text-gray-700">
-              ✏️ Teacher Scoring Panel
-            </div>
+            <div className="text-sm font-semibold text-gray-700">✏️ Teacher Scoring — {currentGroup.name}</div>
             {currentGroup.branchingNote && (
               <div className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1 mt-2">
                 ℹ️ {currentGroup.branchingNote}
@@ -255,10 +356,14 @@ function InterviewContent() {
           </div>
 
           <div className="flex-1 overflow-y-auto p-4 space-y-3">
-            {currentGroup.items.map((item) => (
-              <ItemScoringCard
-                key={item.id}
-                item={item}
+            {groupBySubLevel(currentGroup.items).map(([subLevel, items], idx) => (
+              <SubGroupSection
+                key={subLevel}
+                subLevel={subLevel}
+                items={items}
+                isFirst={idx === 0}
+                color={currentGroup.color}
+                responses={responses}
                 getResponse={getResponse}
                 setResponse={setResponse}
               />
@@ -272,20 +377,16 @@ function InterviewContent() {
               disabled={isFirst}
               className="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-40"
             >
-              ← Previous Group
+              ← Previous
             </button>
-
-            <div className="text-xs text-gray-400">
-              Tap dots above to jump to any section
-            </div>
-
+            <div className="text-xs text-gray-400">Tap dots above to jump</div>
             {isLast ? (
               <button
                 onClick={handleFinish}
                 disabled={saving}
                 className="px-5 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium disabled:bg-green-400"
               >
-                {saving ? "Saving…" : "✓ Finish & Save"}
+                {saving ? "Saving…" : "✓ Finish & Score"}
               </button>
             ) : (
               <button
@@ -302,8 +403,184 @@ function InterviewContent() {
   );
 }
 
-function CurrentItemDisplay({ group }: { group: TaskGroup }) {
-  // Show all display texts for this group as a scrollable list
+// --- Sub-group section (bordered box with all items inside) ---
+function SubGroupSection({
+  subLevel, items, isFirst, color, responses, getResponse, setResponse,
+}: {
+  subLevel: string;
+  items: AssessmentItem[];
+  isFirst: boolean;
+  color: string;
+  responses: Responses;
+  getResponse: (id: string, field: string) => string;
+  setResponse: (id: string, field: string, value: string) => void;
+}) {
+  const score = calcScore(items, responses);
+
+  return (
+    <div className={`rounded-xl border-2 overflow-hidden ${COLOR_SUBGROUP[color]}`}>
+      {/* START HERE badge */}
+      {isFirst && (
+        <div className="bg-green-500 text-white text-xs font-bold px-3 py-1.5 flex items-center gap-1.5">
+          <span>▶</span> START HERE
+        </div>
+      )}
+
+      {/* Sub-group header */}
+      <div className={`px-3 py-2 flex items-center justify-between ${COLOR_SUBHEAD[color]}`}>
+        <span className="text-xs font-bold">{subLevel} — {items[0]?.prompt?.split("?")[0]?.split("(")[0]?.trim() ?? ""}</span>
+        {score && (
+          <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+            score.correct / score.total >= 0.8 ? "bg-green-200 text-green-800" :
+            score.correct / score.total >= 0.6 ? "bg-yellow-200 text-yellow-800" :
+            "bg-red-100 text-red-700"
+          }`}>
+            {score.correct}/{score.total} ✓
+          </span>
+        )}
+      </div>
+
+      {/* Items */}
+      <div className="divide-y divide-white/60 bg-white/60">
+        {items.map((item, i) => (
+          <ItemRow
+            key={item.id}
+            item={item}
+            getResponse={getResponse}
+            setResponse={setResponse}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// --- Individual item row ---
+function ItemRow({
+  item, getResponse, setResponse,
+}: {
+  item: AssessmentItem;
+  getResponse: (id: string, field: string) => string;
+  setResponse: (id: string, field: string, value: string) => void;
+}) {
+  const [notesOpen, setNotesOpen] = useState(false);
+
+  return (
+    <div className="px-3 py-2">
+      <div className="flex items-center gap-2 flex-wrap">
+        {/* Item prompt */}
+        <span className="text-sm text-gray-800 flex-1 min-w-0">{item.prompt}</span>
+
+        {/* Response fields inline */}
+        {item.responseFields.map((field) => (
+          <span key={field.label} className="flex items-center gap-1 shrink-0">
+            {field.type === "correct_incorrect" && (
+              <InlineCorrectIncorrect
+                value={getResponse(item.id, field.label)}
+                onChange={(v) => setResponse(item.id, field.label, v)}
+              />
+            )}
+            {field.type === "fluency_scale" && (
+              <InlineFluency
+                value={getResponse(item.id, field.label)}
+                onChange={(v) => setResponse(item.id, field.label, v)}
+              />
+            )}
+            {field.type === "number_entry" && (
+              <input
+                type="text"
+                placeholder={field.placeholder ?? "Enter #"}
+                value={getResponse(item.id, field.label)}
+                onChange={(e) => setResponse(item.id, field.label, e.target.value)}
+                className="w-20 border border-gray-300 rounded px-2 py-1 text-xs focus:outline-none focus:border-blue-400"
+              />
+            )}
+          </span>
+        ))}
+
+        {/* Notes toggle */}
+        <button
+          onClick={() => setNotesOpen((o) => !o)}
+          className="text-gray-300 hover:text-gray-500 text-xs ml-1"
+          title="Add note"
+        >
+          📝
+        </button>
+      </div>
+
+      {/* Notes field */}
+      {notesOpen && (
+        <input
+          type="text"
+          placeholder="Teacher note…"
+          value={getResponse(item.id, "notes")}
+          onChange={(e) => setResponse(item.id, "notes", e.target.value)}
+          className="mt-1 w-full text-xs border border-gray-200 rounded px-2 py-1 text-gray-500 focus:outline-none focus:border-gray-400"
+          autoFocus
+        />
+      )}
+
+      {/* Item guidance note */}
+      {item.notes && (
+        <div className="text-xs text-amber-600 mt-0.5 italic">{item.notes}</div>
+      )}
+    </div>
+  );
+}
+
+// --- Inline ✓ / ✗ buttons ---
+function InlineCorrectIncorrect({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  return (
+    <div className="flex gap-1">
+      <button
+        onClick={() => onChange(value === "correct" ? "" : "correct")}
+        className={`px-2.5 py-1 rounded text-xs font-semibold border transition-colors ${
+          value === "correct"
+            ? "bg-green-100 border-green-400 text-green-700"
+            : "bg-white border-gray-200 text-gray-400 hover:border-green-300"
+        }`}
+      >
+        ✓
+      </button>
+      <button
+        onClick={() => onChange(value === "incorrect" ? "" : "incorrect")}
+        className={`px-2.5 py-1 rounded text-xs font-semibold border transition-colors ${
+          value === "incorrect"
+            ? "bg-red-100 border-red-400 text-red-700"
+            : "bg-white border-gray-200 text-gray-400 hover:border-red-300"
+        }`}
+      >
+        ✗
+      </button>
+    </div>
+  );
+}
+
+// --- Inline Fluency buttons ---
+function InlineFluency({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  return (
+    <div className="flex gap-1">
+      {[
+        { v: "fluent", label: "Fluent", active: "bg-green-100 border-green-400 text-green-700" },
+        { v: "hesitant", label: "Hesitant", active: "bg-yellow-100 border-yellow-400 text-yellow-700" },
+        { v: "error", label: "Error", active: "bg-red-100 border-red-400 text-red-700" },
+      ].map(({ v, label, active }) => (
+        <button
+          key={v}
+          onClick={() => onChange(value === v ? "" : v)}
+          className={`px-2 py-1 rounded text-xs font-medium border transition-colors ${
+            value === v ? active : "bg-white border-gray-200 text-gray-400 hover:border-gray-300"
+          }`}
+        >
+          {label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+// --- Left panel: student prompt display ---
+function StudentPromptDisplay({ group }: { group: TaskGroup }) {
   const uniquePrompts = group.items
     .filter((item) => item.displayText)
     .reduce((acc: AssessmentItem[], item) => {
@@ -314,191 +591,16 @@ function CurrentItemDisplay({ group }: { group: TaskGroup }) {
   if (uniquePrompts.length === 0) return null;
 
   return (
-    <div className="w-full bg-blue-50 border border-blue-100 rounded-xl p-4">
-      <div className="text-xs text-blue-600 font-medium mb-2 text-center">
-        Items in this group:
-      </div>
-      <div className="space-y-1 max-h-48 overflow-y-auto">
+    <div className="bg-white border border-gray-200 rounded-xl p-3">
+      <div className="text-xs text-gray-400 font-medium mb-2 text-center">Items in this group:</div>
+      <div className="space-y-1 max-h-52 overflow-y-auto">
         {uniquePrompts.map((item) => (
-          <div
-            key={item.id}
-            className="flex items-center gap-2 bg-white rounded-lg px-3 py-2 border border-blue-100"
-          >
-            <span className="text-xs text-blue-400 font-mono w-8">{item.number}</span>
+          <div key={item.id} className="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2 border border-gray-100">
+            <span className="text-xs text-gray-400 font-mono w-8 shrink-0">{item.number}</span>
             <span className="text-sm font-semibold text-gray-800">{item.displayText}</span>
           </div>
         ))}
       </div>
-    </div>
-  );
-}
-
-function ItemScoringCard({
-  item,
-  getResponse,
-  setResponse,
-}: {
-  item: AssessmentItem;
-  getResponse: (id: string, field: string) => string;
-  setResponse: (id: string, field: string, value: string) => void;
-}) {
-  return (
-    <div className="bg-white rounded-xl border border-gray-200 p-4">
-      {/* Item header */}
-      <div className="flex items-start justify-between mb-3">
-        <div>
-          <span className="text-xs font-mono text-gray-400 mr-2">{item.number}</span>
-          <span className="text-sm font-medium text-gray-800">{item.prompt}</span>
-        </div>
-        {item.notes && (
-          <span className="text-xs text-gray-400 italic ml-2">{item.notes}</span>
-        )}
-      </div>
-
-      {/* Response Fields */}
-      <div className="space-y-2">
-        {item.responseFields.map((field) => (
-          <div key={field.label}>
-            {field.type === "correct_incorrect" && (
-              <CorrectIncorrectField
-                label={field.label}
-                value={getResponse(item.id, field.label)}
-                onChange={(v) => setResponse(item.id, field.label, v)}
-              />
-            )}
-            {field.type === "fluency_scale" && (
-              <FluencyField
-                label={field.label}
-                value={getResponse(item.id, field.label)}
-                onChange={(v) => setResponse(item.id, field.label, v)}
-              />
-            )}
-            {field.type === "number_entry" && (
-              <NumberEntryField
-                label={field.label}
-                placeholder={field.placeholder}
-                value={getResponse(item.id, field.label)}
-                onChange={(v) => setResponse(item.id, field.label, v)}
-              />
-            )}
-          </div>
-        ))}
-      </div>
-
-      {/* Notes field */}
-      <div className="mt-2">
-        <input
-          type="text"
-          placeholder="Teacher notes (optional)"
-          value={getResponse(item.id, "notes")}
-          onChange={(e) => setResponse(item.id, "notes", e.target.value)}
-          className="w-full text-xs border border-gray-200 rounded px-2 py-1.5 text-gray-500 placeholder-gray-300 focus:outline-none focus:border-gray-400"
-        />
-      </div>
-    </div>
-  );
-}
-
-function CorrectIncorrectField({
-  label,
-  value,
-  onChange,
-}: {
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-}) {
-  return (
-    <div className="flex items-center gap-2">
-      <span className="text-xs text-gray-500 w-20">{label}:</span>
-      <div className="flex gap-2">
-        <button
-          onClick={() => onChange(value === "correct" ? "" : "correct")}
-          className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
-            value === "correct"
-              ? "bg-green-100 border-green-400 text-green-700"
-              : "bg-white border-gray-200 text-gray-500 hover:border-green-300"
-          }`}
-        >
-          ✓ Correct
-        </button>
-        <button
-          onClick={() => onChange(value === "incorrect" ? "" : "incorrect")}
-          className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
-            value === "incorrect"
-              ? "bg-red-100 border-red-400 text-red-700"
-              : "bg-white border-gray-200 text-gray-500 hover:border-red-300"
-          }`}
-        >
-          ✗ Incorrect
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function FluencyField({
-  label,
-  value,
-  onChange,
-}: {
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-}) {
-  const options = [
-    { value: "fluent", label: "Fluent", color: "green" },
-    { value: "hesitant", label: "Hesitant", color: "yellow" },
-    { value: "error", label: "Errors/Stopped", color: "red" },
-  ];
-
-  return (
-    <div className="flex items-center gap-2">
-      <span className="text-xs text-gray-500 w-20">{label}:</span>
-      <div className="flex gap-1.5">
-        {options.map((opt) => (
-          <button
-            key={opt.value}
-            onClick={() => onChange(value === opt.value ? "" : opt.value)}
-            className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors ${
-              value === opt.value
-                ? opt.color === "green"
-                  ? "bg-green-100 border-green-400 text-green-700"
-                  : opt.color === "yellow"
-                  ? "bg-yellow-100 border-yellow-400 text-yellow-700"
-                  : "bg-red-100 border-red-400 text-red-700"
-                : "bg-white border-gray-200 text-gray-500 hover:border-gray-300"
-            }`}
-          >
-            {opt.label}
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function NumberEntryField({
-  label,
-  placeholder,
-  value,
-  onChange,
-}: {
-  label: string;
-  placeholder?: string;
-  value: string;
-  onChange: (v: string) => void;
-}) {
-  return (
-    <div className="flex items-center gap-2">
-      <span className="text-xs text-gray-500 w-20">{label}:</span>
-      <input
-        type="text"
-        placeholder={placeholder ?? "Enter number"}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-32 border border-gray-200 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-blue-400"
-      />
     </div>
   );
 }

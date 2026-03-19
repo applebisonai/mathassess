@@ -41,6 +41,8 @@ export interface TaskGroup {
   materials?: string;
   items: AssessmentItem[];
   branchingNote?: string;   // Note about when to stop or skip
+  startAtItem?: string;     // Sub-level number where START HERE badge appears (e.g. "3.2")
+  startNote?: string;       // Note shown on START HERE badge (e.g. "If not fluent go back to 3.1")
 }
 
 export interface BranchingRule {
@@ -209,6 +211,8 @@ export const schedule2A = {
       materials: "Numeral cards",
       notes:
         "Start with Level 1 (single digits). Progress through levels. Stop when student cannot identify most in a set.",
+      startAtItem: "3.2",
+      startNote: "If not fluent go back and do 3.1",
       items: [
         // Level 1 - Single digits
         { id: "3.1a", number: "3.1", prompt: "Show card: 5", displayText: "5", targetLevel: 1, responseFields: [{ label: "Response", type: "correct_incorrect" }] },
@@ -278,6 +282,8 @@ export const schedule2A = {
       color: "purple",
       instructions: 'Say: "Count backwards from ___ and I\'ll tell you when to stop."',
       branchingNote: "Start with 5.1 for younger students. Jump to 5.3 for Grade 1+",
+      startAtItem: "5.3",
+      startNote: "If not fluent go back to 5.1",
       items: [
         { id: "5.1", number: "5.1", prompt: "Count backwards from 5 (to 1)", displayText: "5, 4, 3...", targetLevel: 1, numberRangeStart: 1, numberRangeEnd: 5, responseFields: [{ label: "Fluency", type: "fluency_scale" }] },
         { id: "5.2", number: "5.2", prompt: "Count backwards from 10 (to 1)", displayText: "10, 9, 8...", targetLevel: 1, numberRangeStart: 1, numberRangeEnd: 10, responseFields: [{ label: "Fluency", type: "fluency_scale" }] },

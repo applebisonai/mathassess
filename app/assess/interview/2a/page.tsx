@@ -352,18 +352,25 @@ function InterviewContent() {
           </div>
 
           <div className="flex-1 overflow-y-auto p-4 space-y-3">
-            {groupBySubLevel(currentGroup.items).map(([subLevel, items], idx) => (
-              <SubGroupSection
-                key={subLevel}
-                subLevel={subLevel}
-                items={items}
-                isFirst={idx === 0}
-                color={currentGroup.color}
-                responses={responses}
-                getResponse={getResponse}
-                setResponse={setResponse}
-              />
-            ))}
+            {groupBySubLevel(currentGroup.items).map(([subLevel, items], idx) => {
+              const isStartHere = currentGroup.startAtItem
+                ? subLevel === currentGroup.startAtItem
+                : idx === 0;
+              const startNote = isStartHere ? (currentGroup.startNote ?? null) : null;
+              return (
+                <SubGroupSection
+                  key={subLevel}
+                  subLevel={subLevel}
+                  items={items}
+                  isFirst={isStartHere}
+                  startNote={startNote}
+                  color={currentGroup.color}
+                  responses={responses}
+                  getResponse={getResponse}
+                  setResponse={setResponse}
+                />
+              );
+            })}
           </div>
 
           {/* Navigation */}
@@ -401,11 +408,12 @@ function InterviewContent() {
 
 // --- Sub-group section (bordered box with all items inside) ---
 function SubGroupSection({
-  subLevel, items, isFirst, color, responses, getResponse, setResponse,
+  subLevel, items, isFirst, startNote, color, responses, getResponse, setResponse,
 }: {
   subLevel: string;
   items: AssessmentItem[];
   isFirst: boolean;
+  startNote?: string | null;
   color: string;
   responses: Responses;
   getResponse: (id: string, field: string) => string;
@@ -417,8 +425,11 @@ function SubGroupSection({
     <div className={`rounded-xl border-2 overflow-hidden ${COLOR_SUBGROUP[color]}`}>
       {/* START HERE badge */}
       {isFirst && (
-        <div className="bg-green-500 text-white text-xs font-bold px-3 py-1.5 flex items-center gap-1.5">
+        <div className="bg-green-500 text-white text-xs font-bold px-3 py-1.5 flex items-center gap-1.5 flex-wrap">
           <span>▶</span> START HERE
+          {startNote && (
+            <span className="ml-2 font-normal text-green-100">— {startNote}</span>
+          )}
         </div>
       )}
 

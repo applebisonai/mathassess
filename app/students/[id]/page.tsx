@@ -33,24 +33,17 @@ const ASSESSMENT_CONFIG: Record<string, {
     ],
   },
   "schedule-2b": {
-    label: "Schedule 2B — Structuring Numbers",
-    subtitle: "2B · SPAT · FING · TEMP · C&P",
+    label: "Schedule 2B — Early Structuring",
+    subtitle: "2B · SN20",
     modelDefs: [
       {
-        key: "SPAT", color: "#3b82f6", maxLevel: 4,
-        labels: { 0: "Emergent", 1: "Perceptual 1–3", 2: "Perceptual 1–5", 3: "Conceptual 6–10", 4: "Ten-frame patterns" },
-      },
-      {
-        key: "FING", color: "#22c55e", maxLevel: 3,
-        labels: { 0: "Emergent", 1: "Finger patterns 1–5", 2: "Finger patterns 6–10", 3: "Recognizes patterns" },
-      },
-      {
-        key: "TEMP", color: "#a855f7", maxLevel: 3,
-        labels: { 0: "Emergent", 1: "Temporal 1–5", 2: "Temporal 6–10", 3: "Two-part sequences" },
-      },
-      {
-        key: "C&P", color: "#f97316", maxLevel: 3,
-        labels: { 0: "Emergent", 1: "Combining within 5", 2: "Combining within 10", 3: "Combining within 20" },
+        key: "SN20", color: "#10b981", maxLevel: 3,
+        labels: {
+          0: "Emergent",
+          1: "Finger patterns 1–5 & patterns 1–6",
+          2: "Small doubles & partitions of 10",
+          3: "Five-plus facts & partitions of 5",
+        },
       },
     ],
   },

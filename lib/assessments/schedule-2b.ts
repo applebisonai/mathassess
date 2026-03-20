@@ -187,10 +187,16 @@ export const schedule2B = {
 
   ] as TaskGroup[],
 
+  // Full SN20 model — Wright & Ellemor-Collins, 2018
+  // Note: For Levels 4–7, student must use facile strategies (not counting by ones)
   sn20Levels: [
-    { level: 0, name: "Emergent",                              description: "Cannot show finger patterns 1–5 without counting; does not recognize dice configurations" },
-    { level: 1, name: "Finger patterns 1–5 & patterns 1–6",   description: "Shows finger patterns 1–5 and recognizes spatial patterns 1–6 without counting" },
-    { level: 2, name: "Small doubles & partitions of 10",      description: "Facile with small doubles (2&2 to 5&5) and small partitions of 10" },
-    { level: 3, name: "Five-plus facts & partitions of 5",     description: "Facile with five-plus facts and partitions of 5" },
+    { level: 0, name: "Emergent spatial patterns and finger patterns",        description: "Cannot identify spatial patterns or show finger patterns without counting" },
+    { level: 1, name: "Finger patterns 1–5 and spatial patterns 1–6",        description: "Shows finger patterns 1–5 and recognizes spatial patterns 1–6 without counting" },
+    { level: 2, name: "Small doubles and small partitions of 10",             description: "Facile with small doubles (2&2 to 5&5) and small partitions of 10" },
+    { level: 3, name: "Five-plus and partitions of 5",                        description: "Facile with five-plus facts and partitions of 5" },
+    { level: 4, name: "Facile structuring numbers 1 to 10",                   description: "Uses facile (non-counting) strategies to structure all numbers 1–10" },
+    { level: 5, name: "Formal addition (parts ≤ 10)",                         description: "Solves formal addition tasks with parts not exceeding 10, without counting" },
+    { level: 6, name: "Formal addition & subtraction (parts ≤ 10)",           description: "Solves formal addition and subtraction with parts not exceeding 10, without counting" },
+    { level: 7, name: "Formal addition & subtraction (whole ≤ 20)",           description: "Solves formal addition and subtraction with whole not exceeding 20, without counting" },
   ],
 };

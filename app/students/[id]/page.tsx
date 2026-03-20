@@ -37,12 +37,16 @@ const ASSESSMENT_CONFIG: Record<string, {
     subtitle: "2B · SN20",
     modelDefs: [
       {
-        key: "SN20", color: "#10b981", maxLevel: 3,
+        key: "SN20", color: "#10b981", maxLevel: 7,
         labels: {
-          0: "Emergent",
-          1: "Finger patterns 1–5 & patterns 1–6",
-          2: "Small doubles & partitions of 10",
-          3: "Five-plus facts & partitions of 5",
+          0: "Emergent spatial patterns and finger patterns",
+          1: "Finger patterns 1–5 and spatial patterns 1–6",
+          2: "Small doubles and small partitions of 10",
+          3: "Five-plus and partitions of 5",
+          4: "Facile structuring numbers 1 to 10",
+          5: "Formal addition (parts ≤ 10)",
+          6: "Formal addition & subtraction (parts ≤ 10)",
+          7: "Formal addition & subtraction (whole ≤ 20)",
         },
       },
     ],

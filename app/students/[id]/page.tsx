@@ -3,6 +3,10 @@ import { redirect, notFound } from "next/navigation";
 import Nav from "@/components/nav";
 import Link from "next/link";
 import LevelChart, { ChartPoint, ModelDef } from "./LevelChart";
+import { schedule2A } from "@/lib/assessments/schedule-2a";
+import { schedule2B } from "@/lib/assessments/schedule-2b";
+import { schedule2C } from "@/lib/assessments/schedule-2c";
+import { scheduleAvPV } from "@/lib/assessments/schedule-av-pv";
 
 const gradeLabel = (g: number) =>
   g === 0 ? "Kindergarten" : `Grade ${g}`;
@@ -106,6 +110,64 @@ function formatDate(d: string) {
   });
 }
 
+// ── Notes extraction ──────────────────────────────────────────────────────────
+
+// Build a flat itemId → { prompt, groupName } lookup from any schedule
+function buildItemLookup(assessmentId: string): Record<string, { prompt: string; groupName: string }> {
+  const schedules: Record<string, { taskGroups: { name: string; items: { id: string; prompt: string }[] }[] }> = {
+    "schedule-2a": schedule2A as never,
+    "schedule-2b": schedule2B as never,
+    "schedule-2c": schedule2C as never,
+    "av-pv":       scheduleAvPV as never,
+  };
+  const schedule = schedules[assessmentId];
+  if (!schedule) return {};
+  const lookup: Record<string, { prompt: string; groupName: string }> = {};
+  for (const group of schedule.taskGroups) {
+    for (const item of group.items) {
+      lookup[item.id] = { prompt: item.prompt, groupName: group.name };
+    }
+  }
+  return lookup;
+}
+
+type NoteEntry = { itemId: string; prompt: string; groupName: string; fields: { label: string; value: string }[] };
+
+const SKIP_RESPONSE_FIELDS = new Set(["Response"]);
+const SKIP_RESPONSE_VALUES = new Set(["correct", "incorrect"]);
+
+function extractSessionNotes(rawResponses: unknown, assessmentId: string): NoteEntry[] {
+  if (!rawResponses || typeof rawResponses !== "object") return [];
+  const responses = rawResponses as Record<string, Record<string, string>>;
+  const lookup = buildItemLookup(assessmentId);
+  const result: NoteEntry[] = [];
+
+  for (const [itemId, fields] of Object.entries(responses)) {
+    if (!fields || typeof fields !== "object") continue;
+    const entries: { label: string; value: string }[] = [];
+
+    for (const [fieldName, value] of Object.entries(fields)) {
+      if (SKIP_RESPONSE_FIELDS.has(fieldName)) continue;
+      if (!value || SKIP_RESPONSE_VALUES.has(String(value))) continue;
+
+      if (fieldName === "_slashed") {
+        entries.push({ label: "Incorrect numbers", value: String(value).split(",").join(", ") });
+      } else if (fieldName === "_student_said") {
+        // legacy field — skip
+      } else {
+        entries.push({ label: fieldName, value: String(value) });
+      }
+    }
+
+    if (entries.length > 0) {
+      const info = lookup[itemId] ?? { prompt: `Item ${itemId}`, groupName: "" };
+      result.push({ itemId, prompt: info.prompt, groupName: info.groupName, fields: entries });
+    }
+  }
+
+  return result;
+}
+
 export default async function StudentProfilePage({
   params,
 }: {
@@ -126,7 +188,7 @@ export default async function StudentProfilePage({
 
   const { data: sessions } = await supabase
     .from("assessment_sessions")
-    .select("id, date_administered, status, assessment_id, created_at")
+    .select("id, date_administered, status, assessment_id, created_at, raw_responses")
     .eq("student_id", student.id)
     .order("date_administered", { ascending: false });
 
@@ -314,6 +376,34 @@ export default async function StudentProfilePage({
                   ) : (
                     <p className="text-xs text-gray-400 mt-1">No level placements recorded for this session.</p>
                   )}
+
+                  {/* Session notes — all typed responses and teacher observations */}
+                  {(() => {
+                    const notes = extractSessionNotes(session.raw_responses, session.assessment_id);
+                    if (notes.length === 0) return null;
+                    return (
+                      <div className="mt-3 pt-3 border-t border-gray-100">
+                        <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Session Notes</div>
+                        <div className="space-y-2">
+                          {notes.map(({ itemId, prompt, groupName, fields }) => (
+                            <div key={itemId} className="bg-gray-50 rounded-lg px-3 py-2">
+                              {groupName && (
+                                <div className="text-xs text-gray-400 mb-0.5">{groupName}</div>
+                              )}
+                              <div className="text-xs font-medium text-gray-700 mb-1 leading-snug">{prompt}</div>
+                              <div className="space-y-0.5">
+                                {fields.map(({ label, value }) => (
+                                  <div key={label} className="text-xs text-gray-600">
+                                    <span className="font-semibold text-gray-500">{label}:</span>{" "}{value}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })()}
                 </div>
               );
             })}

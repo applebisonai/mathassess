@@ -135,31 +135,12 @@ function DiceFace({ value, size = 48 }: { value: number; size?: number }) {
   );
 }
 
-// Flash card button — shows the dice face for 500 ms then hides it
-function FlashCardButton({ value }: { value: number }) {
-  const [visible, setVisible] = useState(false);
-
-  function flash() {
-    setVisible(true);
-    setTimeout(() => setVisible(false), 500);
-  }
-
+// Static dice card display — always visible as a teacher reference
+function DiceCard({ value }: { value: number }) {
   return (
-    <div className="flex flex-col items-center gap-1">
-      <button
-        onClick={flash}
-        className="border-2 border-blue-300 rounded-xl p-2 bg-blue-50 hover:bg-blue-100 transition-colors cursor-pointer"
-        title="Tap to flash card for ½ second"
-      >
-        {visible ? (
-          <DiceFace value={value} size={56} />
-        ) : (
-          <div className="w-14 h-14 flex items-center justify-center rounded-lg bg-blue-200 border border-blue-300">
-            <span className="text-blue-500 text-lg font-bold">?</span>
-          </div>
-        )}
-      </button>
-      <span className="text-xs text-blue-500">Tap to flash</span>
+    <div className="border-2 border-blue-200 rounded-xl p-2 bg-white inline-flex flex-col items-center gap-0.5">
+      <DiceFace value={value} size={56} />
+      <span className="text-xs font-bold text-blue-400">{value}</span>
     </div>
   );
 }
@@ -365,8 +346,8 @@ function InterviewContent() {
       {/* Flash card reminder for TG2 */}
       {currentGroup.flashCard && (
         <div className="bg-blue-50 border-b border-blue-200 px-4 py-2 text-xs text-blue-700 flex items-center gap-2">
-          <span>⚡</span>
-          <span>Flash each dice pattern card for <strong>½ second only</strong>. Tap the card in each row to flash it on screen.</span>
+          <span>🎴</span>
+          <span>Use the <strong>physical dice pattern cards</strong>. Flash each card to the student for <strong>½ second</strong>. The card shown on screen is for your reference.</span>
         </div>
       )}
 
@@ -563,9 +544,9 @@ function ItemRow({
   return (
     <div className="px-3 py-2">
       <div className="flex items-center gap-3 flex-wrap">
-        {/* Dice flash card for regular configurations */}
+        {/* Dice card reference for regular configurations */}
         {isFlashCard && item.diceValue != null && (
-          <FlashCardButton value={item.diceValue} />
+          <DiceCard value={item.diceValue} />
         )}
 
         {/* Large display text for non-flash items */}

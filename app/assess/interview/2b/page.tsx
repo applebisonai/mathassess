@@ -558,6 +558,8 @@ function ItemRow({
   getResponse: (id: string, field: string) => string;
   setResponse: (id: string, field: string, value: string) => void;
 }) {
+  const [notesOpen, setNotesOpen] = useState(false);
+
   return (
     <div className="px-3 py-2">
       <div className="flex items-center gap-3 flex-wrap">
@@ -603,10 +605,31 @@ function ItemRow({
           </span>
         ))}
 
-        {item.notes && (
-          <div className="w-full text-xs text-gray-400 mt-0.5 italic">{item.notes}</div>
-        )}
+        {/* Notes toggle */}
+        <button
+          onClick={() => setNotesOpen((o) => !o)}
+          className="text-gray-300 hover:text-gray-500 text-xs ml-1"
+          title="Add note"
+        >
+          📝
+        </button>
       </div>
+
+      {/* Expandable teacher note */}
+      {notesOpen && (
+        <input
+          type="text"
+          placeholder="Teacher note…"
+          value={getResponse(item.id, "notes")}
+          onChange={(e) => setResponse(item.id, "notes", e.target.value)}
+          className="mt-1 w-full text-xs border border-gray-200 rounded px-2 py-1 text-gray-500 focus:outline-none focus:border-gray-400"
+          autoFocus
+        />
+      )}
+
+      {item.notes && (
+        <div className="text-xs text-amber-600 mt-0.5 italic">{item.notes}</div>
+      )}
     </div>
   );
 }

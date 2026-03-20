@@ -21,9 +21,9 @@ export interface ChartPoint {
 }
 
 const MODEL_COLORS = {
-  FNWS: "#2563eb",  // blue
-  BNWS: "#7c3aed",  // purple
-  NID:  "#16a34a",  // green
+  FNWS: "#f59e0b",  // amber/orange
+  BNWS: "#ef4444",  // red
+  NID:  "#06b6d4",  // cyan
 };
 
 const FNWS_LABELS: Record<number, string> = {

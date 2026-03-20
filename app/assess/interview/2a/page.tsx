@@ -484,7 +484,7 @@ function SubGroupSection({
 
       {/* Items */}
       <div className="divide-y divide-white/60 bg-white/60">
-        {items.map((item, i) => (
+        {items.map((item) => (
           <ItemRow
             key={item.id}
             item={item}
@@ -493,6 +493,26 @@ function SubGroupSection({
           />
         ))}
       </div>
+
+      {/* All Correct button — only for correct_incorrect items */}
+      {items.some((item) => item.responseFields.some((f) => f.type === "correct_incorrect")) && (
+        <div className="px-3 py-2 bg-white/40 border-t border-white/60 flex justify-end">
+          <button
+            onClick={() => {
+              items.forEach((item) => {
+                item.responseFields.forEach((f) => {
+                  if (f.type === "correct_incorrect") {
+                    setResponse(item.id, f.label, "correct");
+                  }
+                });
+              });
+            }}
+            className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-green-500 hover:bg-green-600 text-white transition-colors flex items-center gap-1.5"
+          >
+            ✓ All Correct
+          </button>
+        </div>
+      )}
     </div>
   );
 }

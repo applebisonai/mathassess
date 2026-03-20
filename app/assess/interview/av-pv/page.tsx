@@ -110,7 +110,52 @@ function calculateResults(responses: Responses) {
   };
 }
 
-// ── Counting Number Bar (tap a number to record student's response) ───────────
+// ── Slashable Sequence (TG1 counting tasks) ───────────────────────────────────
+// Tap a number to slash it through (mark incorrect); tap again to unslash.
+// Stores as comma-separated string in _slashed field.
+
+function SlashableSequence({
+  numbers, slashedStr, onToggle,
+}: { numbers: number[]; slashedStr: string; onToggle: (n: string) => void }) {
+  const slashed = slashedStr ? slashedStr.split(",") : [];
+  return (
+    <div className="mt-3 pt-3 border-t border-gray-100">
+      <div className="text-xs text-gray-400 mb-2">Tap a number to slash it:</div>
+      <div className="flex flex-wrap gap-2">
+        {numbers.map((n) => {
+          const s = String(n);
+          const isSlashed = slashed.includes(s);
+          return (
+            <button
+              key={n}
+              onClick={() => onToggle(s)}
+              className={`relative text-sm font-mono font-bold px-2.5 py-1.5 rounded border transition-all select-none ${
+                isSlashed
+                  ? "bg-red-50 border-red-400 text-red-400"
+                  : "bg-white border-gray-300 text-gray-700 hover:border-red-300 hover:bg-red-50"
+              }`}
+            >
+              {/* Diagonal slash overlay */}
+              {isSlashed && (
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute inset-0 flex items-center justify-center"
+                >
+                  <svg viewBox="0 0 40 24" className="w-full h-full" preserveAspectRatio="none">
+                    <line x1="4" y1="20" x2="36" y2="4" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" />
+                  </svg>
+                </span>
+              )}
+              {n}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ── Counting Number Bar (generic, for non-sequence items) ─────────────────────
 
 const COUNTING_NUMBERS = Array.from({ length: 15 }, (_, i) => (i + 1) * 10); // 10…150
 
@@ -425,7 +470,7 @@ function InterviewContent() {
             )}
           </div>
 
-          <div className="flex-1 overflow-y-auto p-4 space-y-3">
+          <div className="flex-1 overflow-y-auto p-4 space-y-4">
             {groupBySubLevel(currentGroup.items).map(([subLevel, items], idx) => (
               <SubGroupSection
                 key={subLevel}
@@ -551,7 +596,7 @@ function ItemRow({
   const [notesOpen, setNotesOpen] = useState(false);
 
   return (
-    <div className="px-3 py-2.5">
+    <div className="px-3 py-3">
       <div className="flex items-start gap-3 flex-wrap">
 
         {/* Large display text */}
@@ -623,8 +668,22 @@ function ItemRow({
         />
       )}
 
-      {/* Counting number bar — always shown on items with a correct/incorrect field */}
-      {item.responseFields.some((f) => f.type === "correct_incorrect") && (
+      {/* Slashable sequence (TG1) — specific numbers the student should say */}
+      {item.countingSequence && item.countingSequence.length > 0 && (
+        <SlashableSequence
+          numbers={item.countingSequence}
+          slashedStr={getResponse(item.id, "_slashed")}
+          onToggle={(n) => {
+            const current = getResponse(item.id, "_slashed");
+            const arr = current ? current.split(",") : [];
+            const next = arr.includes(n) ? arr.filter((x) => x !== n) : [...arr, n];
+            setResponse(item.id, "_slashed", next.join(","));
+          }}
+        />
+      )}
+
+      {/* Generic counting bar for non-sequence items with correct/incorrect fields */}
+      {!item.countingSequence && item.responseFields.some((f) => f.type === "correct_incorrect") && (
         <CountingNumberBar
           value={getResponse(item.id, "_student_said")}
           onChange={(v) => setResponse(item.id, "_student_said", v)}

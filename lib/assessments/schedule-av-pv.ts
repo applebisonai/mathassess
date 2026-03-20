@@ -17,6 +17,8 @@ export interface AssessmentItem {
   responseFields: ResponseField[];
   targetLevel: number;
   notes?: string;
+  /** Specific counting sequence to display as slashable number buttons */
+  countingSequence?: number[];
 }
 
 export interface ResponseField {
@@ -71,33 +73,37 @@ export const scheduleAvPV = {
       teacherScript: "\"Counting by 10's, I will tell you when to stop.\" / \"Start at ___ and count up/backwards by 10's, I will tell you when to stop.\"",
       items: [
         {
-          id: "1.1", number: "Number Word Sequences Involving Tens",
+          id: "1.1", number: "10 → 150",
           prompt: "Count by 10's from 10 to 150",
           displayText: "10 → 150",
           targetLevel: 1,
           responseFields: [{ label: "Response", type: "correct_incorrect" }],
+          countingSequence: [10,20,30,40,50,60,70,80,90,100,110,120,130,140,150],
         },
         {
-          id: "1.2", number: "Number Word Sequences Involving Tens",
+          id: "1.2", number: "4 → 134",
           prompt: "Count up by 10's starting at 4 (to 134)",
           displayText: "4 → 134",
           targetLevel: 1,
           responseFields: [{ label: "Response", type: "correct_incorrect" }],
+          countingSequence: [4,14,24,34,44,54,64,74,84,94,104,114,124,134],
           notes: "Non-multiple starting point — key indicator for Level 1.",
         },
         {
-          id: "1.3", number: "Number Word Sequences Involving Tens",
+          id: "1.3", number: "93 → 3",
           prompt: "Count backwards by 10's starting at 93 (to 3)",
           displayText: "93 → 3",
           targetLevel: 2,
           responseFields: [{ label: "Response", type: "correct_incorrect" }],
+          countingSequence: [93,83,73,63,53,43,33,23,13,3],
         },
         {
-          id: "1.4", number: "Number Word Sequences Involving Tens",
+          id: "1.4", number: "176 → 86",
           prompt: "Count backwards by 10's starting at 176 (to 86)",
           displayText: "176 → 86",
           targetLevel: 2,
           responseFields: [{ label: "Response", type: "correct_incorrect" }],
+          countingSequence: [176,166,156,146,136,126,116,106,96,86],
         },
       ],
     },

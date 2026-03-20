@@ -110,37 +110,32 @@ function calculateResults(responses: Responses) {
   };
 }
 
-// ── Number Pad (records what the student said on incorrect) ───────────────────
+// ── Counting Number Bar (tap a number to record student's response) ───────────
 
-function NumberPad({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+const COUNTING_NUMBERS = Array.from({ length: 15 }, (_, i) => (i + 1) * 10); // 10…150
+
+function CountingNumberBar({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   return (
-    <div className="mt-2 rounded-lg border border-red-200 bg-red-50 p-2">
-      <div className="text-xs font-medium text-red-600 mb-1.5">Student said:</div>
-      <div className="text-center text-lg font-bold text-red-700 mb-2 min-h-[1.75rem]">
-        {value
-          ? value
-          : <span className="text-red-300 text-sm font-normal">tap numbers below</span>}
-      </div>
-      <div className="grid grid-cols-3 gap-1">
-        {["1","2","3","4","5","6","7","8","9"].map((d) => (
-          <button
-            key={d}
-            onClick={() => onChange(value + d)}
-            className="h-8 rounded bg-white border border-red-200 text-sm font-semibold text-gray-700 hover:bg-red-100 active:bg-red-200 transition-colors"
-          >{d}</button>
-        ))}
-        <button
-          onClick={() => onChange(value.slice(0, -1))}
-          className="h-8 rounded bg-white border border-red-200 text-sm text-gray-500 hover:bg-red-100 active:bg-red-200 transition-colors"
-        >⌫</button>
-        <button
-          onClick={() => onChange(value + "0")}
-          className="h-8 rounded bg-white border border-red-200 text-sm font-semibold text-gray-700 hover:bg-red-100 active:bg-red-200 transition-colors"
-        >0</button>
-        <button
-          onClick={() => onChange("")}
-          className="h-8 rounded bg-red-100 border border-red-300 text-xs text-red-600 hover:bg-red-200 active:bg-red-300 transition-colors"
-        >clear</button>
+    <div className="mt-2 pt-2 border-t border-gray-100">
+      <div className="text-xs text-gray-400 mb-1.5">Student said:</div>
+      <div className="flex flex-wrap gap-1">
+        {COUNTING_NUMBERS.map((n) => {
+          const s = String(n);
+          const selected = value === s;
+          return (
+            <button
+              key={n}
+              onClick={() => onChange(selected ? "" : s)}
+              className={`text-xs px-2 py-1 rounded-full border font-semibold transition-colors ${
+                selected
+                  ? "bg-red-500 border-red-600 text-white"
+                  : "bg-white border-gray-200 text-gray-500 hover:border-red-300 hover:text-red-600"
+              }`}
+            >
+              {n}
+            </button>
+          );
+        })}
       </div>
     </div>
   );
@@ -501,9 +496,8 @@ function SubGroupSection({
         </div>
       )}
 
-      <div className={`px-3 py-2 flex items-center justify-between ${COLOR_SUBHEAD[color] ?? "bg-gray-100 text-gray-900"}`}>
-        <span className="text-xs font-bold">{subLevel}</span>
-        {score && (
+      {score && (
+        <div className={`px-3 py-1.5 flex items-center justify-end ${COLOR_SUBHEAD[color] ?? "bg-gray-100 text-gray-900"}`}>
           <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
             score.correct / score.total >= 0.75 ? "bg-green-200 text-green-800" :
             score.correct / score.total >= 0.5  ? "bg-yellow-200 text-yellow-800" :
@@ -511,8 +505,8 @@ function SubGroupSection({
           }`}>
             {score.correct}/{score.total} ✓
           </span>
-        )}
-      </div>
+        </div>
+      )}
 
       <div className="divide-y divide-white/60 bg-white/60">
         {items.map((item) => (
@@ -629,11 +623,9 @@ function ItemRow({
         />
       )}
 
-      {/* Number pad — appears when any correct/incorrect field is marked incorrect */}
-      {item.responseFields.some(
-        (f) => f.type === "correct_incorrect" && getResponse(item.id, f.label) === "incorrect"
-      ) && (
-        <NumberPad
+      {/* Counting number bar — always shown on items with a correct/incorrect field */}
+      {item.responseFields.some((f) => f.type === "correct_incorrect") && (
+        <CountingNumberBar
           value={getResponse(item.id, "_student_said")}
           onChange={(v) => setResponse(item.id, "_student_said", v)}
         />

@@ -33,7 +33,7 @@ const CATEGORIES = [
         route: "/assess/interview/2a",
         available: true,
       },
-      { id: "schedule-2b", name: "Schedule 2B", description: "Structuring Numbers", gradeRange: "K–2", models: ["SPAT", "FING", "TEMP", "C&P"], route: "/assess/interview/2b", available: true },
+      { id: "schedule-2b", name: "Schedule 2B", description: "Early Structuring", gradeRange: "K–2", models: ["SN20"], route: "/assess/interview/2b", available: true },
       { id: "schedule-2c", name: "Schedule 2C", description: "Addition & Subtraction", gradeRange: "1–3", models: ["A&S"], route: "", available: false },
       { id: "schedule-3a", name: "Schedule 3A", description: "Place Value", gradeRange: "2–4", models: ["CPV"], route: "", available: false },
       { id: "schedule-3b", name: "Schedule 3B", description: "Multiplication & Division", gradeRange: "2–5", models: ["M&D"], route: "", available: false },

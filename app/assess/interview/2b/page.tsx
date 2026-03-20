@@ -215,6 +215,7 @@ function InterviewContent() {
         {
           session_id: sessionData.id,
           student_id: student.id,
+          teacher_id: user.id,
           model_name: "SN20",
           suggested_level: calc.sn20Level,
           confirmed_level: calc.sn20Level,
@@ -371,12 +372,24 @@ function InterviewContent() {
                 <div className="text-xs text-gray-400 font-medium tracking-wide">SN20 Model Levels</div>
               </div>
               <div className="space-y-1.5 max-h-64 overflow-y-auto">
-                {schedule2B.sn20Levels.map(({ level, name }) => (
-                  <div key={level} className="flex items-start gap-2 bg-gray-50 rounded-lg px-3 py-2 border border-gray-100">
-                    <span className="text-xs font-bold text-gray-400 w-4 shrink-0 mt-0.5">{level}</span>
-                    <span className="text-xs text-gray-700 leading-snug">{name}</span>
-                  </div>
-                ))}
+                {schedule2B.sn20Levels.map(({ level, name }) => {
+                  const isGreyedOut = level >= 4;
+                  return (
+                    <div key={level} className={`flex items-start gap-2 rounded-lg px-3 py-2 border ${
+                      isGreyedOut
+                        ? "bg-gray-50/40 border-gray-100 opacity-40"
+                        : "bg-gray-50 border-gray-100"
+                    }`}>
+                      <span className="text-xs font-bold text-gray-400 w-4 shrink-0 mt-0.5">{level}</span>
+                      <span className={`text-xs leading-snug ${isGreyedOut ? "text-gray-400" : "text-gray-700"}`}>
+                        {name}
+                      </span>
+                      {isGreyedOut && (
+                        <span className="text-xs text-gray-300 ml-auto shrink-0">3B</span>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
 
               {/* PDF notes */}

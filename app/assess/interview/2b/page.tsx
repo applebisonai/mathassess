@@ -215,7 +215,6 @@ function InterviewContent() {
         {
           session_id: sessionData.id,
           student_id: student.id,
-          teacher_id: user.id,
           model_name: "SN20",
           suggested_level: calc.sn20Level,
           confirmed_level: calc.sn20Level,

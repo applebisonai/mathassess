@@ -20,20 +20,45 @@ export interface ChartPoint {
 
 function CustomTooltip({ active, payload, modelDefs }: any) {
   if (!active || !payload?.length) return null;
+  const fullDate = payload[0]?.payload?.fullDate;
+
   return (
-    <div className="bg-white border border-gray-200 rounded-xl shadow-lg p-3 text-xs min-w-[180px]">
-      <div className="font-semibold text-gray-700 mb-2">{payload[0]?.payload?.fullDate}</div>
-      {payload.map((entry: any) => {
-        const def: ModelDef | undefined = modelDefs.find((m: ModelDef) => m.key === entry.dataKey);
-        const levelName = def?.labels[entry.value] ?? "";
-        return (
-          <div key={entry.dataKey} className="flex items-center gap-2 mb-1">
-            <span className="w-2 h-2 rounded-full shrink-0" style={{ background: entry.color }} />
-            <span className="font-bold" style={{ color: entry.color }}>{entry.dataKey}</span>
-            <span className="text-gray-600">L{entry.value}{levelName ? ` — ${levelName}` : ""}</span>
-          </div>
-        );
-      })}
+    <div className="bg-white border border-gray-200 rounded-2xl shadow-xl p-3 text-xs min-w-[200px]">
+      <div className="font-semibold text-gray-500 text-xs mb-3 border-b border-gray-100 pb-2">
+        {fullDate}
+      </div>
+      <div className="flex flex-wrap gap-2">
+        {payload.map((entry: any) => {
+          const def: ModelDef | undefined = modelDefs.find(
+            (m: ModelDef) => m.key === entry.dataKey
+          );
+          const level = entry.value as number;
+          const levelName = def?.labels[level] ?? "";
+          return (
+            <div
+              key={entry.dataKey}
+              className="rounded-xl border-2 px-3 py-2 min-w-[72px] text-center bg-white"
+              style={{ borderColor: entry.color }}
+            >
+              <div
+                className="text-xs font-bold uppercase tracking-wide mb-0.5"
+                style={{ color: entry.color }}
+              >
+                {entry.dataKey}
+              </div>
+              <div
+                className="text-xl font-black leading-none mb-1"
+                style={{ color: entry.color }}
+              >
+                {level}
+              </div>
+              <div className="text-gray-500 leading-snug" style={{ fontSize: "10px", maxWidth: "80px" }}>
+                {levelName}
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -78,10 +103,17 @@ export default function LevelChart({ title, subtitle, data, modelDefs }: LevelCh
               const level = data[0][m.key] as number | undefined;
               if (level === undefined) return null;
               return (
-                <div key={m.key} className="text-center px-4 py-3 rounded-xl border-2 min-w-[80px]"
-                  style={{ borderColor: m.color }}>
-                  <div className="text-xs font-bold mb-1" style={{ color: m.color }}>{m.key}</div>
-                  <div className="text-2xl font-black" style={{ color: m.color }}>{level}</div>
+                <div
+                  key={m.key}
+                  className="text-center px-4 py-3 rounded-xl border-2 min-w-[80px] bg-white"
+                  style={{ borderColor: m.color }}
+                >
+                  <div className="text-xs font-bold uppercase tracking-wide mb-1" style={{ color: m.color }}>
+                    {m.key}
+                  </div>
+                  <div className="text-2xl font-black leading-none mb-1" style={{ color: m.color }}>
+                    {level}
+                  </div>
                   <div className="text-xs text-gray-500 mt-0.5 leading-tight max-w-[100px]">
                     {m.labels[level] ?? ""}
                   </div>
@@ -91,7 +123,7 @@ export default function LevelChart({ title, subtitle, data, modelDefs }: LevelCh
           </div>
         </>
       ) : (
-        <ResponsiveContainer width="100%" height={240}>
+        <ResponsiveContainer width="100%" height={260}>
           <LineChart data={data} margin={{ top: 4, right: 16, left: 0, bottom: 4 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
             <XAxis
@@ -109,7 +141,11 @@ export default function LevelChart({ title, subtitle, data, modelDefs }: LevelCh
               width={28}
               tickFormatter={(v) => `L${v}`}
             />
-            <Tooltip content={<CustomTooltip modelDefs={activeModels} />} />
+            <Tooltip
+              content={(props) => (
+                <CustomTooltip {...props} modelDefs={activeModels} />
+              )}
+            />
             <Legend
               wrapperStyle={{ fontSize: 12, paddingTop: 10 }}
               formatter={(value) => {
@@ -125,7 +161,7 @@ export default function LevelChart({ title, subtitle, data, modelDefs }: LevelCh
                 stroke={m.color}
                 strokeWidth={2.5}
                 dot={<CustomDot fill={m.color} />}
-                activeDot={{ r: 7 }}
+                activeDot={{ r: 7, stroke: m.color, strokeWidth: 2, fill: "#fff" }}
                 connectNulls
               />
             ))}

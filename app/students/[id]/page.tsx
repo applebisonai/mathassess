@@ -16,8 +16,12 @@ const ASSESSMENT_CONFIG: Record<string, {
 }> = {
   "schedule-2a": {
     label: "Schedule 2A — Early Number Words and Numerals",
-    subtitle: "2A · FNWS · BNWS · NID",
+    subtitle: "2A · NID · FNWS · BNWS",
     modelDefs: [
+      {
+        key: "NID", color: "#06b6d4", maxLevel: 4,
+        labels: { 0: "Emergent", 1: "Numerals to 10", 2: "Numerals to 20", 3: "Numerals to 100", 4: "Numerals to 1,000" },
+      },
       {
         key: "FNWS", color: "#f59e0b", maxLevel: 7,
         labels: { 0: "Emergent", 1: "Initial to 'ten'", 2: "Intermediate to 'ten'", 3: "Facile to 'ten'", 4: "Facile to 'thirty'", 5: "Facile to 'hundred'", 6: "Facile to 'thousand'", 7: "Facile to 'ten thousand'" },
@@ -25,10 +29,6 @@ const ASSESSMENT_CONFIG: Record<string, {
       {
         key: "BNWS", color: "#ef4444", maxLevel: 5,
         labels: { 0: "Emergent", 1: "Initial to 'ten'", 2: "Intermediate to 'ten'", 3: "Facile to 'ten'", 4: "Facile to 'thirty'", 5: "Facile to 'hundred'" },
-      },
-      {
-        key: "NID", color: "#06b6d4", maxLevel: 4,
-        labels: { 0: "Emergent", 1: "Numerals to 10", 2: "Numerals to 20", 3: "Numerals to 100", 4: "Numerals to 1,000" },
       },
     ],
   },
@@ -240,8 +240,14 @@ export default async function StudentProfilePage({
         {sessions && sessions.length > 0 ? (
           <div className="space-y-3">
             {sessions.map((session) => {
-              const sessionPlacements = placementsBySession[session.id] ?? [];
               const cfg = ASSESSMENT_CONFIG[session.assessment_id];
+              const modelOrder = cfg?.modelDefs.map((m) => m.key) ?? [];
+              const rawPlacements = placementsBySession[session.id] ?? [];
+              const sessionPlacements = [...rawPlacements].sort((a, b) => {
+                const ai = modelOrder.indexOf(a.model_name);
+                const bi = modelOrder.indexOf(b.model_name);
+                return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
+              });
               const assessLabel = cfg?.label ?? session.assessment_id;
               return (
                 <div key={session.id} className="bg-white rounded-xl border border-gray-200 p-4">

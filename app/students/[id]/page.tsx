@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
 import Nav from "@/components/nav";
 import Link from "next/link";
+import LevelChart, { ChartPoint } from "./LevelChart";
 
 const gradeLabel = (g: number) =>
   g === 0 ? "Kindergarten" : `Grade ${g}`;
@@ -107,6 +108,31 @@ export default async function StudentProfilePage({
     placementsBySession[p.session_id]!.push(p);
   }
 
+  // Build chart data — one point per session date, levels by model
+  // Sort ascending by date for the chart
+  const sortedSessions = [...(sessions ?? [])].sort(
+    (a, b) => new Date(a.date_administered).getTime() - new Date(b.date_administered).getTime()
+  );
+  const chartData: ChartPoint[] = sortedSessions
+    .filter((s) => (placementsBySession[s.id] ?? []).length > 0)
+    .map((s) => {
+      const d = new Date(s.date_administered);
+      const point: ChartPoint = {
+        date: d.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+        fullDate: d.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }),
+      };
+      for (const p of placementsBySession[s.id] ?? []) {
+        const level = p.confirmed_level ?? p.suggested_level;
+        if (level !== null && level !== undefined) {
+          (point as any)[p.model_name] = level;
+        }
+      }
+      return point;
+    });
+  const chartModels = ["FNWS", "BNWS", "NID"].filter((m) =>
+    chartData.some((d) => (d as any)[m] !== undefined)
+  );
+
   const teacherName = user.email?.split("@")[0] ?? "Teacher";
 
   return (
@@ -139,6 +165,11 @@ export default async function StudentProfilePage({
             </Link>
           </div>
         </div>
+
+        {/* Progress chart */}
+        {chartData.length > 0 && (
+          <LevelChart data={chartData} models={chartModels} />
+        )}
 
         {/* Current levels */}
         <h2 className="text-base font-semibold text-gray-700 mb-3">Current Levels</h2>

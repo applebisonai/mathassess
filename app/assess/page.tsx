@@ -32,11 +32,11 @@ const CATEGORIES = [
     icon: "➕",
     description: "US Math Recovery Council — Courses 1 & 2",
     assessments: [
-      { id: "av-nwn", name: "AVMR 1A — Number Words & Numerals", description: "Forward/backward sequences, numeral ID to 100", gradeRange: "K–1", models: ["FNWS", "BNWS", "NID"], available: false },
-      { id: "av-spatial", name: "AVMR 1B — Spatial & Finger Patterns", description: "Domino/dice patterns, finger patterns, doubles", gradeRange: "K–2", models: ["SF"], available: false },
-      { id: "av-arith", name: "AVMR 1C — Early Arithmetical Strategies", description: "Counting-on/back, combining & partitioning to 20", gradeRange: "K–2", models: ["SEAL"], available: false },
-      { id: "av-pv", name: "AVMR 2A — Tens & Ones", description: "Bundling, place value tasks, adding/subtracting decades", gradeRange: "1–3", models: ["CPV"], available: false },
-      { id: "av-multdiv", name: "AVMR 2B — Multiplication & Division", description: "Equal groups, arrays, skip counting, sharing", gradeRange: "2–5", models: ["M&D"], available: false },
+      { id: "av-nwn", name: "Number Words & Numerals", description: "Course 1 — FNWS, NWA, Numeral ID, BNWS, NWB, Numeral Sequences", gradeRange: "K–2", models: ["FNWS", "BNWS", "NID"], available: false },
+      { id: "av-struct", name: "Structuring Numbers", description: "Course 1 — Spatial patterns, finger patterns, combining & partitioning to 20", gradeRange: "K–2", models: ["SN"], available: false },
+      { id: "av-addsub", name: "Addition & Subtraction", description: "Course 1 — Screened collections, missing addend, bare numbers, relational thinking", gradeRange: "K–3", models: ["SEAL"], available: false },
+      { id: "av-pv", name: "Place Value", description: "Course 2 — Tens & ones sequences, two-digit addition/subtraction with & without materials", gradeRange: "2–4", models: ["CPV"], available: false },
+      { id: "av-multdiv", name: "Multiplication & Division", description: "Course 2 — Equal groups, arrays, relational thinking, proportional reasoning", gradeRange: "2–5", models: ["M&D"], available: false },
     ],
   },
   {

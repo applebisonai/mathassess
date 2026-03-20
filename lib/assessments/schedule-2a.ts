@@ -70,7 +70,7 @@ export const schedule2A = {
       name: "Forward Number Word Sequences",
       shortName: "FNWS",
       model: "FNWS",
-      color: "blue",
+      color: "green",
       instructions: 'Say: "Start counting from ___ and I\'ll tell you when to stop."',
       items: [
         {
@@ -118,7 +118,7 @@ export const schedule2A = {
       name: "Number Word After",
       shortName: "NWA",
       model: "FNWS",
-      color: "blue",
+      color: "green",
       instructions:
         'Say: "The number that comes just after 1 is 2. What is the next number after ___?"',
       items: [
@@ -279,7 +279,7 @@ export const schedule2A = {
       name: "Backward Number Word Sequences",
       shortName: "BNWS",
       model: "BNWS",
-      color: "purple",
+      color: "green",
       instructions: 'Say: "Count backwards from ___ and I\'ll tell you when to stop."',
       branchingNote: "Start with 5.1 for younger students. Jump to 5.3 for Grade 1+",
       startAtItem: "5.3",
@@ -298,7 +298,7 @@ export const schedule2A = {
       name: "Number Word Before",
       shortName: "NWB",
       model: "BNWS",
-      color: "purple",
+      color: "green",
       instructions:
         'Say: "The number that comes just before 2 is 1. What number comes before ___?"',
       startAtItem: "6.2",

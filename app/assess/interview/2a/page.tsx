@@ -15,27 +15,19 @@ interface Student {
 type Responses = Record<string, Record<string, string>>;
 
 const COLOR_HEADER: Record<string, string> = {
-  blue: "bg-blue-600 text-white",
   green: "bg-green-600 text-white",
-  purple: "bg-purple-600 text-white",
 };
 
 const COLOR_SUBGROUP: Record<string, string> = {
-  blue: "border-blue-200 bg-blue-50",
   green: "border-green-200 bg-green-50",
-  purple: "border-purple-200 bg-purple-50",
 };
 
 const COLOR_SUBHEAD: Record<string, string> = {
-  blue: "bg-blue-100 text-blue-800",
   green: "bg-green-100 text-green-800",
-  purple: "bg-purple-100 text-purple-800",
 };
 
 const COLOR_LIGHT: Record<string, string> = {
-  blue: "bg-blue-50 border-blue-200 text-blue-800",
   green: "bg-green-50 border-green-200 text-green-800",
-  purple: "bg-purple-50 border-purple-200 text-purple-800",
 };
 
 function gradeLabel(g: number) {
@@ -238,19 +230,12 @@ function InterviewContent() {
             <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wide mb-3">Suggested LFIN Placement</h3>
             <div className="grid grid-cols-3 gap-3 mb-6">
               {[
-                { label: "FNWS", level: results.fnwsLevel, desc: fnwsDesc?.name, color: "blue" },
-                { label: "BNWS", level: results.bnwsLevel, desc: bnwsDesc?.name, color: "purple" },
-                { label: "NID",  level: results.nidLevel,  desc: nidDesc?.name,  color: "green" },
-              ].map(({ label, level, desc, color }) => (
-                <div key={label} className={`rounded-xl border-2 p-3 text-center ${
-                  color === "blue" ? "border-blue-200 bg-blue-50" :
-                  color === "purple" ? "border-purple-200 bg-purple-50" :
-                  "border-green-200 bg-green-50"
-                }`}>
-                  <div className={`text-xs font-bold uppercase mb-1 ${
-                    color === "blue" ? "text-blue-600" :
-                    color === "purple" ? "text-purple-600" : "text-green-600"
-                  }`}>{label}</div>
+                { label: "FNWS", level: results.fnwsLevel, desc: fnwsDesc?.name },
+                { label: "BNWS", level: results.bnwsLevel, desc: bnwsDesc?.name },
+                { label: "NID",  level: results.nidLevel,  desc: nidDesc?.name  },
+              ].map(({ label, level, desc }) => (
+                <div key={label} className="rounded-xl border-2 p-3 text-center border-green-200 bg-green-50">
+                  <div className="text-xs font-bold uppercase mb-1 text-green-600">{label}</div>
                   <div className="text-3xl font-black text-gray-800">{level}</div>
                   <div className="text-xs text-gray-500 mt-1 leading-tight">{desc}</div>
                 </div>

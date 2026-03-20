@@ -17,30 +17,15 @@ type Responses = Record<string, Record<string, string>>;
 // ── Color maps ───────────────────────────────────────────────────────────────
 
 const COLOR_HEADER: Record<string, string> = {
-  blue:   "bg-blue-600 text-white",
-  green:  "bg-green-600 text-white",
-  purple: "bg-purple-600 text-white",
-  orange: "bg-orange-500 text-white",
-  teal:   "bg-teal-600 text-white",
-  red:    "bg-red-600 text-white",
+  amber: "bg-amber-500 text-white",
 };
 
 const COLOR_SUBGROUP: Record<string, string> = {
-  blue:   "border-blue-200 bg-blue-50/30",
-  green:  "border-green-200 bg-green-50/30",
-  purple: "border-purple-200 bg-purple-50/30",
-  orange: "border-orange-200 bg-orange-50/30",
-  teal:   "border-teal-200 bg-teal-50/30",
-  red:    "border-red-200 bg-red-50/30",
+  amber: "border-amber-200 bg-amber-50/30",
 };
 
 const COLOR_SUBHEAD: Record<string, string> = {
-  blue:   "bg-blue-100/60 text-blue-900",
-  green:  "bg-green-100/60 text-green-900",
-  purple: "bg-purple-100/60 text-purple-900",
-  orange: "bg-orange-100/60 text-orange-900",
-  teal:   "bg-teal-100/60 text-teal-900",
-  red:    "bg-red-100/60 text-red-900",
+  amber: "bg-amber-100/60 text-amber-900",
 };
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -252,14 +237,14 @@ function InterviewContent() {
             </div>
 
             <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wide mb-3">Suggested SN20 Placement</h3>
-            <div className="rounded-2xl border-2 border-emerald-300 bg-emerald-50 p-5 flex items-center gap-5 mb-6">
+            <div className="rounded-2xl border-2 border-amber-300 bg-amber-50 p-5 flex items-center gap-5 mb-6">
               <div className="text-center">
-                <div className="text-xs font-bold text-emerald-600 uppercase tracking-wide mb-1">SN20</div>
-                <div className="text-5xl font-black text-emerald-700">{results.sn20Level}</div>
+                <div className="text-xs font-bold text-amber-600 uppercase tracking-wide mb-1">SN20</div>
+                <div className="text-5xl font-black text-amber-700">{results.sn20Level}</div>
               </div>
               <div>
-                <div className="font-semibold text-emerald-800 text-sm">{levelInfo?.name}</div>
-                <div className="text-emerald-700 text-xs mt-1 leading-snug">{levelInfo?.description}</div>
+                <div className="font-semibold text-amber-800 text-sm">{levelInfo?.name}</div>
+                <div className="text-amber-700 text-xs mt-1 leading-snug">{levelInfo?.description}</div>
               </div>
             </div>
 

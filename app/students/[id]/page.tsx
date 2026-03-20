@@ -19,15 +19,15 @@ const ASSESSMENT_CONFIG: Record<string, {
     subtitle: "2A · NID · FNWS · BNWS",
     modelDefs: [
       {
-        key: "NID", color: "#06b6d4", maxLevel: 4,
+        key: "NID", color: "#22c55e", maxLevel: 4,
         labels: { 0: "Emergent", 1: "Numerals to 10", 2: "Numerals to 20", 3: "Numerals to 100", 4: "Numerals to 1,000" },
       },
       {
-        key: "FNWS", color: "#f59e0b", maxLevel: 7,
+        key: "FNWS", color: "#15803d", maxLevel: 7,
         labels: { 0: "Emergent", 1: "Initial to 'ten'", 2: "Intermediate to 'ten'", 3: "Facile to 'ten'", 4: "Facile to 'thirty'", 5: "Facile to 'hundred'", 6: "Facile to 'thousand'", 7: "Facile to 'ten thousand'" },
       },
       {
-        key: "BNWS", color: "#ef4444", maxLevel: 5,
+        key: "BNWS", color: "#4ade80", maxLevel: 5,
         labels: { 0: "Emergent", 1: "Initial to 'ten'", 2: "Intermediate to 'ten'", 3: "Facile to 'ten'", 4: "Facile to 'thirty'", 5: "Facile to 'hundred'" },
       },
     ],
@@ -37,7 +37,7 @@ const ASSESSMENT_CONFIG: Record<string, {
     subtitle: "2B · SN20",
     modelDefs: [
       {
-        key: "SN20", color: "#10b981", maxLevel: 7,
+        key: "SN20", color: "#eab308", maxLevel: 7,
         labels: {
           0: "Emergent spatial patterns and finger patterns",
           1: "Finger patterns 1–5 and spatial patterns 1–6",

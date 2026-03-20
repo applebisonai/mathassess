@@ -40,15 +40,30 @@ function groupBySubLevel(items: AssessmentItem[]) {
 }
 
 function calcGroupScore(items: AssessmentItem[], responses: Responses) {
-  const scoreable = items.filter((i) =>
+  // Items with correct/incorrect buttons
+  const ciItems = items.filter((i) =>
     i.responseFields.some((f) => f.type === "correct_incorrect")
   );
-  if (scoreable.length === 0) return null;
-  const correct = scoreable.filter((i) => {
+  // Items with typed answer boxes (expectedAnswer)
+  const inputItems = items.filter((i) => i.expectedAnswer !== undefined);
+
+  if (ciItems.length === 0 && inputItems.length === 0) return null;
+
+  const ciCorrect = ciItems.filter((i) => {
     const f = i.responseFields.find((f) => f.type === "correct_incorrect");
     return f ? responses[i.id]?.[f.label] === "correct" : false;
   }).length;
-  return { correct, total: scoreable.length };
+
+  const inputCorrect = inputItems.filter((i) => {
+    const f = i.responseFields.find((f) => f.type === "number_entry");
+    const entered = parseInt(responses[i.id]?.[f?.label ?? ""] ?? "");
+    return !isNaN(entered) && entered === i.expectedAnswer;
+  }).length;
+
+  return {
+    correct: ciCorrect + inputCorrect,
+    total: ciItems.length + inputItems.length,
+  };
 }
 
 // ── CPV Scoring ───────────────────────────────────────────────────────────────
@@ -66,9 +81,16 @@ function calculateResults(responses: Responses) {
 
   const tg2Seq1 = ["2.2a","2.2b","2.2c","2.2d","2.2e","2.2f","2.2g","2.2h"];
   const tg2Seq2 = ["2.3a","2.3b","2.3c","2.3d","2.3e","2.3f"];
-  const tg2Correct = [...tg2Seq1, ...tg2Seq2].filter(
-    (id) => responses[id]?.Response === "correct"
-  ).length;
+  const TG2_EXPECTED: Record<string, number> = {
+    "2.2a": 10, "2.2b": 13, "2.2c": 33, "2.2d": 37,
+    "2.2e": 40, "2.2f": 50, "2.2g": 52, "2.2h": 72,
+    "2.3a":  4, "2.3b": 14, "2.3c": 44, "2.3d": 48,
+    "2.3e": 61, "2.3f": 85,
+  };
+  const tg2Correct = [...tg2Seq1, ...tg2Seq2].filter((id) => {
+    const entered = parseInt(responses[id]?.["Student said"] ?? "");
+    return !isNaN(entered) && entered === TG2_EXPECTED[id];
+  }).length;
   const tg2Total = tg2Seq1.length + tg2Seq2.length;
 
   const tg2Strat1 = responses["2.2s"]?.Strategy ?? "";
@@ -182,6 +204,40 @@ function CountingNumberBar({ value, onChange }: { value: string; onChange: (v: s
           );
         })}
       </div>
+    </div>
+  );
+}
+
+// ── Sequence Input (TG2 typed answer box) ────────────────────────────────────
+// Teacher types what the student said; turns green/red vs expected answer.
+
+function SequenceInput({
+  value, onChange, expectedAnswer,
+}: { value: string; onChange: (v: string) => void; expectedAnswer: number }) {
+  const entered = parseInt(value);
+  const hasValue = value.trim() !== "";
+  const isCorrect = hasValue && !isNaN(entered) && entered === expectedAnswer;
+  const isWrong   = hasValue && !isNaN(entered) && entered !== expectedAnswer;
+
+  return (
+    <div className="flex items-center gap-2 shrink-0">
+      <input
+        type="number"
+        inputMode="numeric"
+        placeholder="___"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className={`w-16 border-2 rounded-lg px-2 py-1.5 text-center text-base font-bold focus:outline-none transition-colors ${
+          isCorrect ? "border-green-400 bg-green-50 text-green-700" :
+          isWrong   ? "border-red-400 bg-red-50 text-red-600"       :
+          "border-gray-300 bg-white text-gray-700 focus:border-teal-400"
+        }`}
+      />
+      {hasValue && (
+        <span className={`text-sm font-bold ${isCorrect ? "text-green-600" : "text-red-500"}`}>
+          {isCorrect ? "✓" : "✗"}
+        </span>
+      )}
     </div>
   );
 }
@@ -619,7 +675,14 @@ function ItemRow({
                   onChange={(v) => setResponse(item.id, field.label, v)}
                 />
               )}
-              {field.type === "number_entry" && (
+              {field.type === "number_entry" && item.expectedAnswer !== undefined && (
+                <SequenceInput
+                  value={getResponse(item.id, field.label)}
+                  onChange={(v) => setResponse(item.id, field.label, v)}
+                  expectedAnswer={item.expectedAnswer}
+                />
+              )}
+              {field.type === "number_entry" && item.expectedAnswer === undefined && (
                 <input
                   type="text"
                   placeholder={field.placeholder ?? "Enter #"}
@@ -688,8 +751,9 @@ function ItemRow({
         />
       )}
 
-      {/* Generic counting bar for non-sequence items with correct/incorrect fields */}
-      {!item.countingSequence && item.responseFields.some((f) => f.type === "correct_incorrect") && (
+      {/* Generic counting bar — only for correct/incorrect items that are not sequence/input items */}
+      {!item.countingSequence && item.expectedAnswer === undefined &&
+        item.responseFields.some((f) => f.type === "correct_incorrect") && (
         <CountingNumberBar
           value={getResponse(item.id, "_student_said")}
           onChange={(v) => setResponse(item.id, "_student_said", v)}

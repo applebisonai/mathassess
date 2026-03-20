@@ -8,6 +8,7 @@ import { schedule2A } from "@/lib/assessments/schedule-2a";
 import { schedule2B } from "@/lib/assessments/schedule-2b";
 import { schedule2C } from "@/lib/assessments/schedule-2c";
 import { scheduleAvPV } from "@/lib/assessments/schedule-av-pv";
+import { schedule3A } from "@/lib/assessments/schedule-3a";
 
 const gradeLabel = (g: number) =>
   g === 0 ? "Kindergarten" : `Grade ${g}`;
@@ -90,6 +91,24 @@ const ASSESSMENT_CONFIG: Record<string, {
       },
     ],
   },
+  "schedule-3a": {
+    label: "Schedule 3A — Number Words and Numerals",
+    subtitle: "3A · NID · FNWS · BNWS",
+    modelDefs: [
+      {
+        key: "NID", color: "#7c3aed", maxLevel: 6,
+        labels: { 0: "Emergent", 1: "Some single-digit numerals", 2: "All single-digit numerals", 3: "Two-digit numerals", 4: "Three-digit numerals", 5: "Four-digit numerals", 6: "Five-digit numerals" },
+      },
+      {
+        key: "FNWS", color: "#8b5cf6", maxLevel: 7,
+        labels: { 0: "Emergent", 1: "Initial FNWS to 'ten'", 2: "Intermediate FNWS to 'ten'", 3: "Facile FNWS to 'ten'", 4: "Facile FNWS to 100", 5: "Facile FNWS to 1000", 6: "Facile FNWS to 10 000", 7: "Facile FNWS beyond 10 000" },
+      },
+      {
+        key: "BNWS", color: "#a78bfa", maxLevel: 7,
+        labels: { 0: "Emergent", 1: "Initial BNWS to 'ten'", 2: "Intermediate BNWS to 'ten'", 3: "Facile BNWS to 'ten'", 4: "Facile BNWS to 100", 5: "Facile BNWS to 1000", 6: "Facile BNWS to 10 000", 7: "Facile BNWS beyond 10 000" },
+      },
+    ],
+  },
 };
 
 // All known model → level name mappings (for history cards)
@@ -120,6 +139,7 @@ function buildItemLookup(assessmentId: string): Record<string, { prompt: string;
     "schedule-2b": schedule2B as never,
     "schedule-2c": schedule2C as never,
     "av-pv":       scheduleAvPV as never,
+    "schedule-3a": schedule3A as never,
   };
   const schedule = schedules[assessmentId];
   if (!schedule) return {};

@@ -54,11 +54,11 @@ const CATEGORIES = [
       {
         id: "schedule-3a",
         name: "Schedule 3A",
-        description: "Hundreds, Tens & Ones — Conceptual Place Value",
-        gradeRange: "2–4",
-        models: ["CPV"],
-        route: "",
-        available: false,
+        description: "Number Words and Numerals — NID, FNWS & BNWS",
+        gradeRange: "K–3",
+        models: ["NID", "FNWS", "BNWS"],
+        route: "/assess/interview/3a",
+        available: true,
       },
       {
         id: "schedule-3b",
@@ -448,6 +448,11 @@ function SelectContent() {
                       <li>• 15+ loose sticks</li>
                       <li>• Numeral task cards (63+21, 38+24, 57−34, 43−15, 257+30, 342+120, 672+151, 304−198)</li>
                       <li>• Cover / screen</li>
+                    </>
+                  ) : selectedAssessmentId === "schedule-3a" ? (
+                    <>
+                      <li>• Numeral task cards (two-digit, three-digit, four-digit, five-digit)</li>
+                      <li>• Paper and marker pen for student (writing numerals task)</li>
                     </>
                   ) : (
                     <>

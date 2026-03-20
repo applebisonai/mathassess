@@ -751,14 +751,6 @@ function ItemRow({
         />
       )}
 
-      {/* Generic counting bar — only for correct/incorrect items that are not sequence/input items */}
-      {!item.countingSequence && item.expectedAnswer === undefined &&
-        item.responseFields.some((f) => f.type === "correct_incorrect") && (
-        <CountingNumberBar
-          value={getResponse(item.id, "_student_said")}
-          onChange={(v) => setResponse(item.id, "_student_said", v)}
-        />
-      )}
 
       {item.notes && (
         <div className="text-xs text-teal-600 mt-0.5 italic">{item.notes}</div>

@@ -68,6 +68,23 @@ const ASSESSMENT_CONFIG: Record<string, {
       },
     ],
   },
+  "av-pv": {
+    label: "Add+VantageMR Place Value",
+    subtitle: "PV · CPV",
+    modelDefs: [
+      {
+        key: "CPV", color: "#0d9488", maxLevel: 5,
+        labels: {
+          0: "Emergent",
+          1: "Tens or Ones",
+          2: "Tens and Ones with Material",
+          3: "Tens and Ones without Material",
+          4: "Facile — Structuring to 100",
+          5: "Facile — Structuring to 1000",
+        },
+      },
+    ],
+  },
 };
 
 // All known model → level name mappings (for history cards)

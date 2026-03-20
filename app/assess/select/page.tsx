@@ -148,8 +148,8 @@ const CATEGORIES = [
         description: "Course 2 — Tens & ones sequences, two-digit addition/subtraction with & without materials",
         gradeRange: "2–4",
         models: ["CPV"],
-        route: "",
-        available: false,
+        route: "/assess/interview/av-pv",
+        available: true,
       },
       {
         id: "av-multdiv",
@@ -441,6 +441,13 @@ function SelectContent() {
                       <li>• Task cards (number sentences for TG6)</li>
                       <li>• Counters — two colours (~30 of each)</li>
                       <li>• Two screens (small boards or folders)</li>
+                    </>
+                  ) : selectedAssessmentId === "av-pv" ? (
+                    <>
+                      <li>• 7 bundles of 10 sticks</li>
+                      <li>• 15+ loose sticks</li>
+                      <li>• Numeral task cards (63+21, 38+24, 57−34, 43−15, 257+30, 342+120, 672+151, 304−198)</li>
+                      <li>• Cover / screen</li>
                     </>
                   ) : (
                     <>

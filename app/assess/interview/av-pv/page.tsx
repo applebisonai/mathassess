@@ -1,0 +1,635 @@
+"use client";
+
+import { useEffect, useState, Suspense } from "react";
+import { createClient } from "@/lib/supabase/client";
+import { useRouter, useSearchParams } from "next/navigation";
+import { scheduleAvPV, TaskGroup, AssessmentItem } from "@/lib/assessments/schedule-av-pv";
+
+interface Student {
+  id: string;
+  first_name: string;
+  last_name: string;
+  grade_level: number;
+}
+
+type Responses = Record<string, Record<string, string>>;
+
+// ── Color maps ────────────────────────────────────────────────────────────────
+
+const COLOR_HEADER: Record<string, string> = {
+  teal: "bg-teal-600 text-white",
+};
+const COLOR_SUBGROUP: Record<string, string> = {
+  teal: "border-teal-200 bg-teal-50/30",
+};
+const COLOR_SUBHEAD: Record<string, string> = {
+  teal: "bg-teal-100/60 text-teal-900",
+};
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+function gradeLabel(g: number) { return g === 0 ? "K" : `${g}`; }
+
+function groupBySubLevel(items: AssessmentItem[]) {
+  const map = new Map<string, AssessmentItem[]>();
+  items.forEach((item) => {
+    if (!map.has(item.number)) map.set(item.number, []);
+    map.get(item.number)!.push(item);
+  });
+  return Array.from(map.entries());
+}
+
+function calcGroupScore(items: AssessmentItem[], responses: Responses) {
+  const scoreable = items.filter((i) =>
+    i.responseFields.some((f) => f.type === "correct_incorrect")
+  );
+  if (scoreable.length === 0) return null;
+  const correct = scoreable.filter((i) => {
+    const f = i.responseFields.find((f) => f.type === "correct_incorrect");
+    return f ? responses[i.id]?.[f.label] === "correct" : false;
+  }).length;
+  return { correct, total: scoreable.length };
+}
+
+// ── CPV Scoring ───────────────────────────────────────────────────────────────
+// Level 0: Cannot produce counting sequences by tens
+// Level 1: Counts by 10s from multiples AND from non-multiples (TG1)
+// Level 2: Uses bundles effectively with Jump/Split strategies (TG2)
+// Level 3: Solves 2-digit +/− without materials (TG3: ≥2 of first 4)
+// Level 4: All 2-digit correct with efficient (non-counting) strategies
+// Level 5: Solves 3-digit tasks (TG3: ≥2 of last 4)
+
+function calculateResults(responses: Responses) {
+  const tg1Correct = ["1.1", "1.2", "1.3", "1.4"].filter(
+    (id) => responses[id]?.Response === "correct"
+  ).length;
+
+  const tg2Seq1 = ["2.2a","2.2b","2.2c","2.2d","2.2e","2.2f","2.2g","2.2h"];
+  const tg2Seq2 = ["2.3a","2.3b","2.3c","2.3d","2.3e","2.3f"];
+  const tg2Correct = [...tg2Seq1, ...tg2Seq2].filter(
+    (id) => responses[id]?.Response === "correct"
+  ).length;
+  const tg2Total = tg2Seq1.length + tg2Seq2.length;
+
+  const tg2Strat1 = responses["2.2s"]?.Strategy ?? "";
+  const tg2Strat2 = responses["2.3s"]?.Strategy ?? "";
+  const tg2UsesJumpOrSplit =
+    tg2Strat1 === "Jump" || tg2Strat1 === "Split" ||
+    tg2Strat2 === "Jump" || tg2Strat2 === "Split";
+
+  const tg3_2digit = ["3.1","3.2","3.3","3.4"];
+  const tg3_3digit = ["3.5","3.6","3.7","3.8"];
+  const tg3Correct2 = tg3_2digit.filter((id) => responses[id]?.Response === "correct").length;
+  const tg3Correct3 = tg3_3digit.filter((id) => responses[id]?.Response === "correct").length;
+
+  const tg3EfficientCount = tg3_2digit.filter((id) => {
+    const s = responses[id]?.Strategy;
+    return s === "Jump" || s === "Split" || s === "Split-Jump";
+  }).length;
+  const tg3CountingBy1s = [...tg3_2digit, ...tg3_3digit].some(
+    (id) => responses[id]?.Strategy === "Counts by 1's"
+  );
+
+  let cpvLevel = 0;
+  if (tg1Correct >= 1) cpvLevel = 1;
+  if (tg1Correct >= 3 && tg2Correct >= 8 && tg2UsesJumpOrSplit) cpvLevel = Math.max(cpvLevel, 2);
+  if (cpvLevel >= 2 && tg3Correct2 >= 2) cpvLevel = Math.max(cpvLevel, 3);
+  if (cpvLevel >= 3 && tg3Correct2 >= 4 && tg3EfficientCount >= 2 && !tg3CountingBy1s) cpvLevel = Math.max(cpvLevel, 4);
+  if (cpvLevel >= 3 && tg3Correct3 >= 2) cpvLevel = Math.max(cpvLevel, 5);
+
+  return {
+    cpvLevel,
+    scores: {
+      tg1: { correct: tg1Correct, total: 4 },
+      tg2: { correct: tg2Correct, total: tg2Total },
+      tg3_2digit: { correct: tg3Correct2, total: 4 },
+      tg3_3digit: { correct: tg3Correct3, total: 4 },
+    },
+    tg2UsesJumpOrSplit,
+    tg3EfficientCount,
+  };
+}
+
+// ── Strategy Picker ───────────────────────────────────────────────────────────
+
+function StrategyPicker({
+  options, value, onChange,
+}: {
+  options: string[];
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  return (
+    <div className="flex flex-wrap gap-1 mt-1">
+      {options.map((opt) => (
+        <button
+          key={opt}
+          onClick={() => onChange(value === opt ? "" : opt)}
+          className={`text-xs px-2 py-1 rounded-full border font-medium transition-colors ${
+            value === opt
+              ? "bg-teal-600 border-teal-700 text-white"
+              : "bg-white border-gray-200 text-gray-500 hover:border-teal-300 hover:text-teal-700"
+          }`}
+        >
+          {opt}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+// ── Main interview component ──────────────────────────────────────────────────
+
+function InterviewContent() {
+  const searchParams = useSearchParams();
+  const studentId = searchParams.get("student");
+  const router = useRouter();
+  const supabase = createClient();
+
+  const [student, setStudent] = useState<Student | null>(null);
+  const [currentGroupIdx, setCurrentGroupIdx] = useState(0);
+  const [responses, setResponses] = useState<Responses>({});
+  const [saving, setSaving] = useState(false);
+  const [done, setDone] = useState(false);
+  const [results, setResults] = useState<ReturnType<typeof calculateResults> | null>(null);
+
+  const groups = scheduleAvPV.taskGroups;
+  const currentGroup = groups[currentGroupIdx];
+  const isFirst = currentGroupIdx === 0;
+  const isLast = currentGroupIdx === groups.length - 1;
+
+  useEffect(() => {
+    if (!studentId) return;
+    supabase
+      .from("students")
+      .select("id, first_name, last_name, grade_level")
+      .eq("id", studentId)
+      .single()
+      .then(({ data }) => { if (data) setStudent(data); });
+  }, [studentId]);
+
+  function setResponse(itemId: string, field: string, value: string) {
+    setResponses((prev) => ({
+      ...prev,
+      [itemId]: { ...(prev[itemId] ?? {}), [field]: value },
+    }));
+  }
+
+  function getResponse(itemId: string, field: string) {
+    return responses[itemId]?.[field] ?? "";
+  }
+
+  async function handleFinish() {
+    if (!student) return;
+    setSaving(true);
+    const calc = calculateResults(responses);
+    setResults(calc);
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { setSaving(false); return; }
+
+    const today = new Date().toISOString().split("T")[0];
+
+    const { data: sessionData } = await supabase
+      .from("assessment_sessions")
+      .insert({
+        student_id: student.id,
+        teacher_id: user.id,
+        assessment_id: "av-pv",
+        date_administered: today,
+        status: "completed",
+        raw_responses: responses,
+      })
+      .select("id")
+      .single();
+
+    if (sessionData?.id) {
+      await supabase.from("construct_placements").insert([
+        {
+          session_id: sessionData.id,
+          student_id: student.id,
+          model_name: "CPV",
+          suggested_level: calc.cpvLevel,
+          confirmed_level: calc.cpvLevel,
+          date_placed: today,
+        },
+      ]);
+    }
+
+    setSaving(false);
+    setDone(true);
+  }
+
+  // ── Results screen ──────────────────────────────────────────────────────────
+  if (done && student && results) {
+    const levelInfo = scheduleAvPV.cpvLevels[results.cpvLevel];
+    const scoreRows = [
+      { label: "TG1 — Number Word Sequences (Tens)", score: results.scores.tg1 },
+      { label: "TG2 — Two-Digit +/− With Materials", score: results.scores.tg2 },
+      { label: "TG3 — Two-Digit +/− No Materials",  score: results.scores.tg3_2digit },
+      { label: "TG3 — Three-Digit +/− No Materials", score: results.scores.tg3_3digit },
+    ];
+
+    return (
+      <div className="min-h-screen bg-gray-50 p-4">
+        <div className="max-w-2xl mx-auto">
+          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 mb-4">
+            <div className="text-center mb-6">
+              <div className="text-4xl mb-2">✅</div>
+              <h2 className="text-xl font-bold text-gray-900">Assessment Complete</h2>
+              <p className="text-gray-500 text-sm mt-1">
+                Add+VantageMR Place Value — {student.first_name} {student.last_name} (Grade {gradeLabel(student.grade_level)})
+              </p>
+            </div>
+
+            <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wide mb-3">Suggested CPV Placement</h3>
+            <div className="rounded-2xl border-2 border-teal-300 bg-teal-50 p-5 flex items-center gap-5 mb-6">
+              <div className="text-center">
+                <div className="text-xs font-bold text-teal-600 uppercase tracking-wide mb-1">CPV</div>
+                <div className="text-5xl font-black text-teal-700">{results.cpvLevel}</div>
+              </div>
+              <div>
+                <div className="font-semibold text-teal-800 text-sm">{levelInfo?.name}</div>
+                <div className="text-teal-700 text-xs mt-1 leading-snug">{levelInfo?.description}</div>
+              </div>
+            </div>
+
+            <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wide mb-3">Score Breakdown</h3>
+            <div className="space-y-1 text-sm mb-4">
+              {scoreRows.map(({ label, score }) => score ? (
+                <div key={label} className="flex items-center justify-between py-1.5 border-b border-gray-100">
+                  <span className="text-gray-600">{label}</span>
+                  <span className={`font-semibold ${
+                    score.correct / score.total >= 0.75 ? "text-green-600" :
+                    score.correct / score.total >= 0.5  ? "text-yellow-600" : "text-red-500"
+                  }`}>
+                    {score.correct} / {score.total} {score.correct / score.total >= 0.75 ? "✓" : ""}
+                  </span>
+                </div>
+              ) : null)}
+            </div>
+
+            {results.tg2UsesJumpOrSplit && (
+              <div className="text-xs bg-teal-50 border border-teal-200 rounded-lg px-3 py-2 text-teal-700 mb-4">
+                ✓ Jump/Split strategy observed in TG2 (materials tasks)
+              </div>
+            )}
+
+            <p className="text-xs text-gray-400 mb-4">
+              * Suggested placement based on scoring thresholds. Teacher judgment should confirm final level.
+            </p>
+
+            <div className="flex gap-3">
+              <button onClick={() => router.push("/assess/select")}
+                className="flex-1 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-lg py-2.5 text-sm">
+                Assess Another Student
+              </button>
+              <button onClick={() => router.push("/students")}
+                className="flex-1 border border-gray-200 text-gray-600 font-medium rounded-lg py-2.5 text-sm hover:bg-gray-50">
+                Back to Students
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!student) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-gray-400">Loading…</div>
+      </div>
+    );
+  }
+
+  // ── Interview screen ────────────────────────────────────────────────────────
+  return (
+    <div className="min-h-screen bg-gray-100 flex flex-col">
+      {/* Top bar */}
+      <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <button onClick={() => router.back()} className="text-gray-400 hover:text-gray-600 text-sm">← Exit</button>
+          <div className="h-4 w-px bg-gray-200" />
+          <span className="font-semibold text-gray-900 text-sm">{student.first_name} {student.last_name}</span>
+          <span className="text-gray-400 text-sm">Grade {gradeLabel(student.grade_level)}</span>
+          <div className="h-4 w-px bg-gray-200" />
+          <span className="text-gray-500 text-sm">{scheduleAvPV.name}</span>
+        </div>
+        <div className="flex items-center gap-2 text-sm text-gray-500">
+          Task Group {currentGroupIdx + 1} of {groups.length}
+          <div className="flex gap-1 ml-2">
+            {groups.map((_, i) => (
+              <button key={i} onClick={() => setCurrentGroupIdx(i)}
+                className={`w-3 h-3 rounded-full transition-colors ${
+                  i === currentGroupIdx ? "bg-teal-600" : i < currentGroupIdx ? "bg-teal-200" : "bg-gray-200"
+                }`}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Materials banner on TG1 */}
+      {currentGroupIdx === 0 && (
+        <div className="bg-teal-50 border-b border-teal-200 px-4 py-2 text-xs text-teal-700 flex items-center gap-2 flex-wrap">
+          <span>📦 Materials needed:</span>
+          {scheduleAvPV.materials.map((m) => (
+            <span key={m} className="bg-teal-100 border border-teal-300 rounded px-2 py-0.5">{m}</span>
+          ))}
+        </div>
+      )}
+
+      {/* Two-panel layout */}
+      <div className="flex flex-1 gap-0 overflow-hidden">
+
+        {/* LEFT: CPV level descriptions */}
+        <div className="w-2/5 bg-white border-r border-gray-200 flex flex-col overflow-hidden">
+          <div className={`${COLOR_HEADER[currentGroup.color] ?? "bg-gray-700 text-white"} px-4 py-3`}>
+            <div className="text-xs font-semibold uppercase tracking-wide opacity-75">
+              Task Group {currentGroup.number} — CPV
+            </div>
+            <div className="font-semibold mt-0.5">{currentGroup.name}</div>
+          </div>
+
+          <div className="flex-1 p-4 flex flex-col gap-4 overflow-y-auto">
+            {/* CPV Level descriptions */}
+            <div className="bg-white border border-gray-200 rounded-xl p-3">
+              <div className="mb-3 text-center">
+                <div className="text-sm font-bold text-gray-700">Place Value Construct Model</div>
+                <div className="text-xs text-gray-400 font-medium tracking-wide">CPV Levels</div>
+              </div>
+              <div className="space-y-1.5">
+                {scheduleAvPV.cpvLevels.map(({ level, name }) => (
+                  <div key={level} className="flex items-start gap-2 rounded-lg px-3 py-2 border bg-gray-50 border-gray-100">
+                    <span className="text-xs font-bold text-gray-400 w-4 shrink-0 mt-0.5">{level}</span>
+                    <span className="text-xs leading-snug text-gray-700">{name}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Teacher script */}
+            <div className="bg-gray-50 rounded-xl border border-gray-200 p-4">
+              <div className="text-xs text-gray-500 font-medium mb-1">Teacher Script:</div>
+              <div className="text-sm text-gray-800 italic">{currentGroup.teacherScript ?? currentGroup.instructions}</div>
+              {currentGroup.materials && (
+                <div className="text-xs text-gray-400 mt-2">📦 {currentGroup.materials}</div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* RIGHT: Scoring */}
+        <div className="w-3/5 flex flex-col overflow-hidden">
+          <div className="bg-gray-50 border-b border-gray-200 px-4 py-3">
+            <div className="text-sm font-semibold text-gray-700">✏️ Teacher Scoring — {currentGroup.name}</div>
+            {currentGroup.branchingNote && (
+              <div className="text-xs text-red-700 bg-red-50 border border-red-200 rounded px-2 py-1.5 mt-2 font-medium">
+                ⚠️ {currentGroup.branchingNote}
+              </div>
+            )}
+          </div>
+
+          <div className="flex-1 overflow-y-auto p-4 space-y-3">
+            {groupBySubLevel(currentGroup.items).map(([subLevel, items], idx) => (
+              <SubGroupSection
+                key={subLevel}
+                subLevel={subLevel}
+                items={items}
+                isFirst={idx === 0}
+                color={currentGroup.color}
+                responses={responses}
+                getResponse={getResponse}
+                setResponse={setResponse}
+              />
+            ))}
+          </div>
+
+          {/* Navigation */}
+          <div className="border-t border-gray-200 bg-white px-4 py-3 flex justify-between items-center">
+            <button
+              onClick={() => setCurrentGroupIdx((i) => Math.max(0, i - 1))}
+              disabled={isFirst}
+              className="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-40"
+            >
+              ← Previous
+            </button>
+            <div className="text-xs text-gray-400">Tap dots above to jump</div>
+            {isLast ? (
+              <button
+                onClick={handleFinish}
+                disabled={saving}
+                className="px-5 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium disabled:bg-green-400"
+              >
+                {saving ? "Saving…" : "✓ Finish & Score"}
+              </button>
+            ) : (
+              <button
+                onClick={() => setCurrentGroupIdx((i) => Math.min(groups.length - 1, i + 1))}
+                className="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-sm font-medium"
+              >
+                Next Group →
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Sub-group section ─────────────────────────────────────────────────────────
+
+function SubGroupSection({
+  subLevel, items, isFirst, color, responses, getResponse, setResponse,
+}: {
+  subLevel: string;
+  items: AssessmentItem[];
+  isFirst: boolean;
+  color: string;
+  responses: Responses;
+  getResponse: (id: string, field: string) => string;
+  setResponse: (id: string, field: string, value: string) => void;
+}) {
+  const score = calcGroupScore(items, responses);
+
+  return (
+    <div className={`rounded-xl border-2 overflow-hidden ${COLOR_SUBGROUP[color] ?? "border-gray-200 bg-gray-50/30"}`}>
+      {isFirst && (
+        <div className="bg-green-500 text-white text-xs font-bold px-3 py-1.5 flex items-center gap-1.5">
+          <span>▶</span> START HERE
+        </div>
+      )}
+
+      <div className={`px-3 py-2 flex items-center justify-between ${COLOR_SUBHEAD[color] ?? "bg-gray-100 text-gray-900"}`}>
+        <span className="text-xs font-bold">{subLevel}</span>
+        {score && (
+          <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+            score.correct / score.total >= 0.75 ? "bg-green-200 text-green-800" :
+            score.correct / score.total >= 0.5  ? "bg-yellow-200 text-yellow-800" :
+            "bg-red-100 text-red-700"
+          }`}>
+            {score.correct}/{score.total} ✓
+          </span>
+        )}
+      </div>
+
+      <div className="divide-y divide-white/60 bg-white/60">
+        {items.map((item) => (
+          <ItemRow
+            key={item.id}
+            item={item}
+            getResponse={getResponse}
+            setResponse={setResponse}
+          />
+        ))}
+      </div>
+
+      {items.some((item) => item.responseFields.some((f) => f.type === "correct_incorrect")) && (
+        <div className="px-3 py-2 bg-white/40 border-t border-white/60 flex justify-end">
+          <button
+            onClick={() => {
+              items.forEach((item) => {
+                item.responseFields.forEach((f) => {
+                  if (f.type === "correct_incorrect") setResponse(item.id, f.label, "correct");
+                });
+              });
+            }}
+            className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-green-500 hover:bg-green-600 text-white transition-colors flex items-center gap-1.5"
+          >
+            ✓ All Correct
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Item row ──────────────────────────────────────────────────────────────────
+
+function ItemRow({
+  item, getResponse, setResponse,
+}: {
+  item: AssessmentItem;
+  getResponse: (id: string, field: string) => string;
+  setResponse: (id: string, field: string, value: string) => void;
+}) {
+  const [notesOpen, setNotesOpen] = useState(false);
+
+  return (
+    <div className="px-3 py-2.5">
+      <div className="flex items-start gap-3 flex-wrap">
+
+        {/* Large display text */}
+        {item.displayText && (
+          <span className="text-xl font-black text-gray-700 min-w-[3rem] text-center shrink-0">
+            {item.displayText}
+          </span>
+        )}
+
+        {/* Prompt */}
+        <span className="text-sm text-gray-700 flex-1 min-w-0 pt-0.5">{item.prompt}</span>
+
+        {/* Response fields */}
+        <div className="flex flex-col gap-1.5 shrink-0">
+          {item.responseFields.map((field) => (
+            <span key={field.label} className="flex items-center gap-1">
+              {field.type === "correct_incorrect" && (
+                <InlineCorrectIncorrect
+                  value={getResponse(item.id, field.label)}
+                  onChange={(v) => setResponse(item.id, field.label, v)}
+                />
+              )}
+              {field.type === "number_entry" && (
+                <input
+                  type="text"
+                  placeholder={field.placeholder ?? "Enter #"}
+                  value={getResponse(item.id, field.label)}
+                  onChange={(e) => setResponse(item.id, field.label, e.target.value)}
+                  className="w-20 border border-gray-300 rounded px-2 py-1 text-xs focus:outline-none focus:border-teal-400"
+                />
+              )}
+            </span>
+          ))}
+        </div>
+
+        {/* Notes toggle */}
+        <button
+          onClick={() => setNotesOpen((o) => !o)}
+          className="text-gray-300 hover:text-gray-500 text-xs ml-1 pt-0.5"
+          title="Add note"
+        >
+          📝
+        </button>
+      </div>
+
+      {/* Strategy pickers — rendered below the main row */}
+      {item.responseFields.map((field) =>
+        field.type === "strategy_observed" && field.options ? (
+          <div key={field.label} className="mt-1.5 ml-1">
+            <div className="text-xs text-gray-400 mb-1">{field.label}:</div>
+            <StrategyPicker
+              options={field.options}
+              value={getResponse(item.id, field.label)}
+              onChange={(v) => setResponse(item.id, field.label, v)}
+            />
+          </div>
+        ) : null
+      )}
+
+      {/* Expandable teacher note */}
+      {notesOpen && (
+        <input
+          type="text"
+          placeholder="Teacher note…"
+          value={getResponse(item.id, "notes")}
+          onChange={(e) => setResponse(item.id, "notes", e.target.value)}
+          className="mt-1.5 w-full text-xs border border-gray-200 rounded px-2 py-1 text-gray-500 focus:outline-none focus:border-gray-400"
+          autoFocus
+        />
+      )}
+
+      {item.notes && (
+        <div className="text-xs text-teal-600 mt-0.5 italic">{item.notes}</div>
+      )}
+    </div>
+  );
+}
+
+// ── Inline controls ───────────────────────────────────────────────────────────
+
+function InlineCorrectIncorrect({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  return (
+    <div className="flex gap-1">
+      <button
+        onClick={() => onChange(value === "correct" ? "" : "correct")}
+        className={`w-7 h-7 rounded text-sm font-bold border transition-all ${
+          value === "correct"
+            ? "bg-green-500 border-green-600 text-white"
+            : "bg-white border-gray-300 text-gray-400 hover:border-green-400"
+        }`}
+      >✓</button>
+      <button
+        onClick={() => onChange(value === "incorrect" ? "" : "incorrect")}
+        className={`w-7 h-7 rounded text-sm font-bold border transition-all ${
+          value === "incorrect"
+            ? "bg-red-500 border-red-600 text-white"
+            : "bg-white border-gray-300 text-gray-400 hover:border-red-400"
+        }`}
+      >✗</button>
+    </div>
+  );
+}
+
+// ── Page export ───────────────────────────────────────────────────────────────
+
+export default function InterviewAvPVPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center text-gray-400">Loading…</div>
+    }>
+      <InterviewContent />
+    </Suspense>
+  );
+}

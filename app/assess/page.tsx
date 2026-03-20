@@ -35,7 +35,7 @@ const CATEGORIES = [
       { id: "av-nwn", name: "Number Words & Numerals", description: "Course 1 — FNWS, NWA, Numeral ID, BNWS, NWB, Numeral Sequences", gradeRange: "K–2", models: ["FNWS", "BNWS", "NID"], available: false },
       { id: "av-struct", name: "Structuring Numbers", description: "Course 1 — Spatial patterns, finger patterns, combining & partitioning to 20", gradeRange: "K–2", models: ["SN"], available: false },
       { id: "av-addsub", name: "Addition & Subtraction", description: "Course 1 — Screened collections, missing addend, bare numbers, relational thinking", gradeRange: "K–3", models: ["SEAL"], available: false },
-      { id: "av-pv", name: "Place Value", description: "Course 2 — Tens & ones sequences, two-digit addition/subtraction with & without materials", gradeRange: "2–4", models: ["CPV"], available: false },
+      { id: "av-pv", name: "Place Value", description: "Course 2 — Tens & ones sequences, two-digit addition/subtraction with & without materials", gradeRange: "2–4", models: ["CPV"], available: true },
       { id: "av-multdiv", name: "Multiplication & Division", description: "Course 2 — Equal groups, arrays, relational thinking, proportional reasoning", gradeRange: "2–5", models: ["M&D"], available: false },
     ],
   },

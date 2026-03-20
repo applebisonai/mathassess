@@ -3,6 +3,7 @@ import { redirect, notFound } from "next/navigation";
 import Nav from "@/components/nav";
 import Link from "next/link";
 import LevelChart, { ChartPoint, ModelDef } from "./LevelChart";
+import SessionNotes from "./SessionNotes";
 import { schedule2A } from "@/lib/assessments/schedule-2a";
 import { schedule2B } from "@/lib/assessments/schedule-2b";
 import { schedule2C } from "@/lib/assessments/schedule-2c";
@@ -377,33 +378,8 @@ export default async function StudentProfilePage({
                     <p className="text-xs text-gray-400 mt-1">No level placements recorded for this session.</p>
                   )}
 
-                  {/* Session notes — all typed responses and teacher observations */}
-                  {(() => {
-                    const notes = extractSessionNotes(session.raw_responses, session.assessment_id);
-                    if (notes.length === 0) return null;
-                    return (
-                      <div className="mt-3 pt-3 border-t border-gray-100">
-                        <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Session Notes</div>
-                        <div className="space-y-2">
-                          {notes.map(({ itemId, prompt, groupName, fields }) => (
-                            <div key={itemId} className="bg-gray-50 rounded-lg px-3 py-2">
-                              {groupName && (
-                                <div className="text-xs text-gray-400 mb-0.5">{groupName}</div>
-                              )}
-                              <div className="text-xs font-medium text-gray-700 mb-1 leading-snug">{prompt}</div>
-                              <div className="space-y-0.5">
-                                {fields.map(({ label, value }) => (
-                                  <div key={label} className="text-xs text-gray-600">
-                                    <span className="font-semibold text-gray-500">{label}:</span>{" "}{value}
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    );
-                  })()}
+                  {/* Session notes — collapsible dropdown */}
+                  <SessionNotes notes={extractSessionNotes(session.raw_responses, session.assessment_id)} />
                 </div>
               );
             })}

@@ -71,14 +71,14 @@ export const scheduleAvPV = {
       teacherScript: "\"Counting by 10's, I will tell you when to stop.\" / \"Start at ___ and count up/backwards by 10's, I will tell you when to stop.\"",
       items: [
         {
-          id: "1.1", number: "1.1",
+          id: "1.1", number: "Number Word Sequences Involving Tens",
           prompt: "Count by 10's from 10 to 150",
           displayText: "10 → 150",
           targetLevel: 1,
           responseFields: [{ label: "Response", type: "correct_incorrect" }],
         },
         {
-          id: "1.2", number: "1.2",
+          id: "1.2", number: "Number Word Sequences Involving Tens",
           prompt: "Count up by 10's starting at 4 (to 134)",
           displayText: "4 → 134",
           targetLevel: 1,
@@ -86,14 +86,14 @@ export const scheduleAvPV = {
           notes: "Non-multiple starting point — key indicator for Level 1.",
         },
         {
-          id: "1.3", number: "1.3",
+          id: "1.3", number: "Number Word Sequences Involving Tens",
           prompt: "Count backwards by 10's starting at 93 (to 3)",
           displayText: "93 → 3",
           targetLevel: 2,
           responseFields: [{ label: "Response", type: "correct_incorrect" }],
         },
         {
-          id: "1.4", number: "1.4",
+          id: "1.4", number: "Number Word Sequences Involving Tens",
           prompt: "Count backwards by 10's starting at 176 (to 86)",
           displayText: "176 → 86",
           targetLevel: 2,
@@ -119,7 +119,7 @@ export const scheduleAvPV = {
 
         // 2.1 — Get 40 sticks (strategy observation)
         {
-          id: "2.1", number: "2.1",
+          id: "2.1", number: "Get 40 Sticks",
           prompt: "Put out 15 loose sticks + 7 bundles. \"Get 40 sticks.\" Observe strategy.",
           displayText: "Get 40",
           targetLevel: 2,
@@ -143,63 +143,63 @@ export const scheduleAvPV = {
 
         // 2.2 — Sequence 1: place beside cover one section at a time
         {
-          id: "2.2a", number: "2.2",
+          id: "2.2a", number: "Sequence 1: Bundles & Sticks",
           prompt: "Place: 1 bundle. \"How many?\" (= 10)",
           displayText: "1B → 10",
           targetLevel: 2,
           responseFields: [{ label: "Response", type: "correct_incorrect" }],
         },
         {
-          id: "2.2b", number: "2.2",
+          id: "2.2b", number: "Sequence 1: Bundles & Sticks",
           prompt: "Add: 3 sticks. \"How many altogether?\" (= 13)",
           displayText: "+3S → 13",
           targetLevel: 2,
           responseFields: [{ label: "Response", type: "correct_incorrect" }],
         },
         {
-          id: "2.2c", number: "2.2",
+          id: "2.2c", number: "Sequence 1: Bundles & Sticks",
           prompt: "Add: 2 bundles. \"How many altogether?\" (= 33)",
           displayText: "+2B → 33",
           targetLevel: 2,
           responseFields: [{ label: "Response", type: "correct_incorrect" }],
         },
         {
-          id: "2.2d", number: "2.2",
+          id: "2.2d", number: "Sequence 1: Bundles & Sticks",
           prompt: "Add: 4 sticks. \"How many altogether?\" (= 37)",
           displayText: "+4S → 37",
           targetLevel: 2,
           responseFields: [{ label: "Response", type: "correct_incorrect" }],
         },
         {
-          id: "2.2e", number: "2.2",
+          id: "2.2e", number: "Sequence 1: Bundles & Sticks",
           prompt: "Add: 3 sticks. \"How many altogether?\" (= 40)",
           displayText: "+3S → 40",
           targetLevel: 2,
           responseFields: [{ label: "Response", type: "correct_incorrect" }],
         },
         {
-          id: "2.2f", number: "2.2",
+          id: "2.2f", number: "Sequence 1: Bundles & Sticks",
           prompt: "Add: 1 bundle. \"How many altogether?\" (= 50)",
           displayText: "+1B → 50",
           targetLevel: 2,
           responseFields: [{ label: "Response", type: "correct_incorrect" }],
         },
         {
-          id: "2.2g", number: "2.2",
+          id: "2.2g", number: "Sequence 1: Bundles & Sticks",
           prompt: "Add: 2 sticks. \"How many altogether?\" (= 52)",
           displayText: "+2S → 52",
           targetLevel: 2,
           responseFields: [{ label: "Response", type: "correct_incorrect" }],
         },
         {
-          id: "2.2h", number: "2.2",
+          id: "2.2h", number: "Sequence 1: Bundles & Sticks",
           prompt: "Add: 2 bundles. \"How many altogether?\" (= 72)",
           displayText: "+2B → 72",
           targetLevel: 2,
           responseFields: [{ label: "Response", type: "correct_incorrect" }],
         },
         {
-          id: "2.2s", number: "2.2",
+          id: "2.2s", number: "Sequence 1: Bundles & Sticks",
           prompt: "Sequence 1 — Observed Strategy",
           displayText: "Strategy ↑",
           targetLevel: 2,
@@ -210,49 +210,49 @@ export const scheduleAvPV = {
 
         // 2.3 — Sequence 2
         {
-          id: "2.3a", number: "2.3",
+          id: "2.3a", number: "Sequence 2: Bundles & Sticks",
           prompt: "Place: 4 sticks. \"How many?\" (= 4)",
           displayText: "4S → 4",
           targetLevel: 2,
           responseFields: [{ label: "Response", type: "correct_incorrect" }],
         },
         {
-          id: "2.3b", number: "2.3",
+          id: "2.3b", number: "Sequence 2: Bundles & Sticks",
           prompt: "Add: 1 bundle. \"How many altogether?\" (= 14)",
           displayText: "+1B → 14",
           targetLevel: 2,
           responseFields: [{ label: "Response", type: "correct_incorrect" }],
         },
         {
-          id: "2.3c", number: "2.3",
+          id: "2.3c", number: "Sequence 2: Bundles & Sticks",
           prompt: "Add: 3 bundles. \"How many altogether?\" (= 44)",
           displayText: "+3B → 44",
           targetLevel: 2,
           responseFields: [{ label: "Response", type: "correct_incorrect" }],
         },
         {
-          id: "2.3d", number: "2.3",
+          id: "2.3d", number: "Sequence 2: Bundles & Sticks",
           prompt: "Add: 4 sticks. \"How many altogether?\" (= 48)",
           displayText: "+4S → 48",
           targetLevel: 2,
           responseFields: [{ label: "Response", type: "correct_incorrect" }],
         },
         {
-          id: "2.3e", number: "2.3",
+          id: "2.3e", number: "Sequence 2: Bundles & Sticks",
           prompt: "Add: 1 bundle + 3 sticks. \"How many altogether?\" (= 61)",
           displayText: "+1B,3S → 61",
           targetLevel: 2,
           responseFields: [{ label: "Response", type: "correct_incorrect" }],
         },
         {
-          id: "2.3f", number: "2.3",
+          id: "2.3f", number: "Sequence 2: Bundles & Sticks",
           prompt: "Add: 2 bundles + 4 sticks. \"How many altogether?\" (= 85)",
           displayText: "+2B,4S → 85",
           targetLevel: 2,
           responseFields: [{ label: "Response", type: "correct_incorrect" }],
         },
         {
-          id: "2.3s", number: "2.3",
+          id: "2.3s", number: "Sequence 2: Bundles & Sticks",
           prompt: "Sequence 2 — Observed Strategy",
           displayText: "Strategy ↑",
           targetLevel: 2,
@@ -279,7 +279,7 @@ export const scheduleAvPV = {
       items: [
         // 2-digit tasks (Levels 3–4)
         {
-          id: "3.1", number: "3.1",
+          id: "3.1", number: "Two-Digit Tasks (No Materials)",
           prompt: "63 + 21",
           displayText: "63 + 21",
           targetLevel: 3,
@@ -289,7 +289,7 @@ export const scheduleAvPV = {
           ],
         },
         {
-          id: "3.2", number: "3.2",
+          id: "3.2", number: "Two-Digit Tasks (No Materials)",
           prompt: "38 + 24",
           displayText: "38 + 24",
           targetLevel: 3,
@@ -299,7 +299,7 @@ export const scheduleAvPV = {
           ],
         },
         {
-          id: "3.3", number: "3.3",
+          id: "3.3", number: "Two-Digit Tasks (No Materials)",
           prompt: "57 − 34",
           displayText: "57 − 34",
           targetLevel: 3,
@@ -309,7 +309,7 @@ export const scheduleAvPV = {
           ],
         },
         {
-          id: "3.4", number: "3.4",
+          id: "3.4", number: "Two-Digit Tasks (No Materials)",
           prompt: "43 − 15",
           displayText: "43 − 15",
           targetLevel: 3,
@@ -320,7 +320,7 @@ export const scheduleAvPV = {
         },
         // 3-digit tasks (Level 5)
         {
-          id: "3.5", number: "3.5",
+          id: "3.5", number: "Three-Digit Tasks (No Materials)",
           prompt: "257 + 30",
           displayText: "257 + 30",
           targetLevel: 5,
@@ -330,7 +330,7 @@ export const scheduleAvPV = {
           ],
         },
         {
-          id: "3.6", number: "3.6",
+          id: "3.6", number: "Three-Digit Tasks (No Materials)",
           prompt: "342 + 120",
           displayText: "342 + 120",
           targetLevel: 5,
@@ -340,7 +340,7 @@ export const scheduleAvPV = {
           ],
         },
         {
-          id: "3.7", number: "3.7",
+          id: "3.7", number: "Three-Digit Tasks (No Materials)",
           prompt: "672 + 151",
           displayText: "672 + 151",
           targetLevel: 5,
@@ -350,7 +350,7 @@ export const scheduleAvPV = {
           ],
         },
         {
-          id: "3.8", number: "3.8",
+          id: "3.8", number: "Three-Digit Tasks (No Materials)",
           prompt: "304 − 198",
           displayText: "304 − 198",
           targetLevel: 5,

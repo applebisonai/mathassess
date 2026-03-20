@@ -110,6 +110,42 @@ function calculateResults(responses: Responses) {
   };
 }
 
+// ── Number Pad (records what the student said on incorrect) ───────────────────
+
+function NumberPad({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  return (
+    <div className="mt-2 rounded-lg border border-red-200 bg-red-50 p-2">
+      <div className="text-xs font-medium text-red-600 mb-1.5">Student said:</div>
+      <div className="text-center text-lg font-bold text-red-700 mb-2 min-h-[1.75rem]">
+        {value
+          ? value
+          : <span className="text-red-300 text-sm font-normal">tap numbers below</span>}
+      </div>
+      <div className="grid grid-cols-3 gap-1">
+        {["1","2","3","4","5","6","7","8","9"].map((d) => (
+          <button
+            key={d}
+            onClick={() => onChange(value + d)}
+            className="h-8 rounded bg-white border border-red-200 text-sm font-semibold text-gray-700 hover:bg-red-100 active:bg-red-200 transition-colors"
+          >{d}</button>
+        ))}
+        <button
+          onClick={() => onChange(value.slice(0, -1))}
+          className="h-8 rounded bg-white border border-red-200 text-sm text-gray-500 hover:bg-red-100 active:bg-red-200 transition-colors"
+        >⌫</button>
+        <button
+          onClick={() => onChange(value + "0")}
+          className="h-8 rounded bg-white border border-red-200 text-sm font-semibold text-gray-700 hover:bg-red-100 active:bg-red-200 transition-colors"
+        >0</button>
+        <button
+          onClick={() => onChange("")}
+          className="h-8 rounded bg-red-100 border border-red-300 text-xs text-red-600 hover:bg-red-200 active:bg-red-300 transition-colors"
+        >clear</button>
+      </div>
+    </div>
+  );
+}
+
 // ── Strategy Picker ───────────────────────────────────────────────────────────
 
 function StrategyPicker({
@@ -360,10 +396,13 @@ function InterviewContent() {
                 <div className="text-xs text-gray-400 font-medium tracking-wide">CPV Levels</div>
               </div>
               <div className="space-y-1.5">
-                {scheduleAvPV.cpvLevels.map(({ level, name }) => (
+                {scheduleAvPV.cpvLevels.map(({ level, name, description }) => (
                   <div key={level} className="flex items-start gap-2 rounded-lg px-3 py-2 border bg-gray-50 border-gray-100">
-                    <span className="text-xs font-bold text-gray-400 w-4 shrink-0 mt-0.5">{level}</span>
-                    <span className="text-xs leading-snug text-gray-700">{name}</span>
+                    <span className="text-xs font-bold text-teal-600 w-4 shrink-0 mt-0.5">{level}</span>
+                    <div>
+                      <div className="text-xs font-semibold leading-snug text-gray-800">{name}</div>
+                      <div className="text-xs leading-snug text-gray-500 mt-0.5">{description}</div>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -587,6 +626,16 @@ function ItemRow({
           onChange={(e) => setResponse(item.id, "notes", e.target.value)}
           className="mt-1.5 w-full text-xs border border-gray-200 rounded px-2 py-1 text-gray-500 focus:outline-none focus:border-gray-400"
           autoFocus
+        />
+      )}
+
+      {/* Number pad — appears when any correct/incorrect field is marked incorrect */}
+      {item.responseFields.some(
+        (f) => f.type === "correct_incorrect" && getResponse(item.id, f.label) === "incorrect"
+      ) && (
+        <NumberPad
+          value={getResponse(item.id, "_student_said")}
+          onChange={(v) => setResponse(item.id, "_student_said", v)}
         />
       )}
 

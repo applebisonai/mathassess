@@ -133,11 +133,10 @@ export default async function StudentProfilePage({
   );
 
   // Which assessment IDs actually have data?
-  const assessmentIdsWithData = [...new Set(
-    (sessions ?? [])
-      .filter((s) => (placementsBySession[s.id] ?? []).length > 0)
-      .map((s) => s.assessment_id)
-  )];
+  const assessmentIdsWithData = (sessions ?? [])
+    .filter((s) => (placementsBySession[s.id] ?? []).length > 0)
+    .map((s) => s.assessment_id)
+    .filter((id, index, arr) => arr.indexOf(id) === index);
 
   // Build chart data per assessment
   const chartsByAssessment: Record<string, ChartPoint[]> = {};

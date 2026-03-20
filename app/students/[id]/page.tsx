@@ -132,15 +132,12 @@ export default async function StudentProfilePage({
     (a, b) => new Date(a.date_administered).getTime() - new Date(b.date_administered).getTime()
   );
 
-  // Which assessment IDs actually have data?
-  const assessmentIdsWithData = (sessions ?? [])
-    .filter((s) => (placementsBySession[s.id] ?? []).length > 0)
-    .map((s) => s.assessment_id)
-    .filter((id, index, arr) => arr.indexOf(id) === index);
+  // Always show all configured assessments in defined order
+  const assessmentIdsOrdered = Object.keys(ASSESSMENT_CONFIG);
 
   // Build chart data per assessment
   const chartsByAssessment: Record<string, ChartPoint[]> = {};
-  for (const assessId of assessmentIdsWithData) {
+  for (const assessId of assessmentIdsOrdered) {
     const sessionsForAssess = sortedSessions.filter(
       (s) => s.assessment_id === assessId && (placementsBySession[s.id] ?? []).length > 0
     );
@@ -190,25 +187,23 @@ export default async function StudentProfilePage({
           </div>
         </div>
 
-        {/* Progress charts — one per assessment */}
-        {assessmentIdsWithData.length > 0 && (
-          <div className="mb-2">
-            <h2 className="text-base font-semibold text-gray-700 mb-4">Progress Over Time</h2>
-            {assessmentIdsWithData.map((assessId) => {
-              const cfg = ASSESSMENT_CONFIG[assessId];
-              if (!cfg) return null;
-              return (
-                <LevelChart
-                  key={assessId}
-                  title={cfg.label}
-                  subtitle={cfg.subtitle}
-                  data={chartsByAssessment[assessId] ?? []}
-                  modelDefs={cfg.modelDefs}
-                />
-              );
-            })}
-          </div>
-        )}
+        {/* Progress charts — one per assessment, always shown */}
+        <div className="mb-2">
+          <h2 className="text-base font-semibold text-gray-700 mb-4">Progress Over Time</h2>
+          {assessmentIdsOrdered.map((assessId) => {
+            const cfg = ASSESSMENT_CONFIG[assessId];
+            if (!cfg) return null;
+            return (
+              <LevelChart
+                key={assessId}
+                title={cfg.label}
+                subtitle={cfg.subtitle}
+                data={chartsByAssessment[assessId] ?? []}
+                modelDefs={cfg.modelDefs}
+              />
+            );
+          })}
+        </div>
 
         {/* Current levels */}
         <h2 className="text-base font-semibold text-gray-700 mb-3">Current Levels</h2>

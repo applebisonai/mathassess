@@ -78,7 +78,33 @@ interface LevelChartProps {
 export default function LevelChart({ title, subtitle, data, modelDefs }: LevelChartProps) {
   // Only show models that actually have data
   const activeModels = modelDefs.filter((m) => data.some((d) => d[m.key] !== undefined));
-  if (activeModels.length === 0 || data.length === 0) return null;
+
+  // Empty state — no assessments completed yet for this schedule
+  if (activeModels.length === 0 || data.length === 0) {
+    return (
+      <div className="bg-white rounded-2xl border border-gray-200 p-5 mb-5">
+        <div className="mb-4">
+          <div className="flex items-center gap-2 mb-0.5">
+            <div className="w-1 h-5 rounded-full bg-blue-500" />
+            <h2 className="text-sm font-bold text-gray-800">{title}</h2>
+          </div>
+          <p className="text-xs text-gray-400 ml-3">{subtitle} · Progress Over Time</p>
+        </div>
+        <div className="flex flex-col items-center justify-center py-8 text-center gap-3">
+          <div className="flex gap-2">
+            {modelDefs.map((m) => (
+              <div key={m.key} className="rounded-xl border-2 px-3 py-2 min-w-[64px] opacity-30"
+                style={{ borderColor: m.color }}>
+                <div className="text-xs font-bold uppercase tracking-wide" style={{ color: m.color }}>{m.key}</div>
+                <div className="text-xl font-black text-gray-300">—</div>
+              </div>
+            ))}
+          </div>
+          <p className="text-xs text-gray-400">No assessments completed yet. Complete this schedule to see results here.</p>
+        </div>
+      </div>
+    );
+  }
 
   const maxY = Math.max(...activeModels.map((m) => m.maxLevel));
 

@@ -34,7 +34,7 @@ const CATEGORIES = [
         available: true,
       },
       { id: "schedule-2b", name: "Schedule 2B", description: "Early Structuring", gradeRange: "K–2", models: ["SN20"], route: "/assess/interview/2b", available: true },
-      { id: "schedule-2c", name: "Schedule 2C", description: "Addition & Subtraction", gradeRange: "1–3", models: ["A&S"], route: "", available: false },
+      { id: "schedule-2c", name: "Schedule 2C", description: "Early Arithmetical Strategies", gradeRange: "K–2", models: ["SEAL"], route: "/assess/interview/2c", available: true },
       { id: "schedule-3a", name: "Schedule 3A", description: "Place Value", gradeRange: "2–4", models: ["CPV"], route: "", available: false },
       { id: "schedule-3b", name: "Schedule 3B", description: "Multiplication & Division", gradeRange: "2–5", models: ["M&D"], route: "", available: false },
       { id: "schedule-3c", name: "Schedule 3C", description: "Early Algebraic Reasoning", gradeRange: "3–5", models: [], route: "", available: false },
@@ -242,10 +242,14 @@ function SelectContent() {
                 <ul className="text-sm text-amber-700 space-y-0.5">
                   {selectedAssessmentId === "schedule-2b" ? (
                     <>
-                      <li>• Dot cards (1–10)</li>
-                      <li>• Ten-frame cards</li>
-                      <li>• Counters and a small screen card</li>
+                      <li>• Dice pattern cards</li>
                       <li>• Paper and pen</li>
+                    </>
+                  ) : selectedAssessmentId === "schedule-2c" ? (
+                    <>
+                      <li>• Task cards (number sentences for TG6)</li>
+                      <li>• Counters — two colours (~30 of each)</li>
+                      <li>• Two screens (small boards or folders)</li>
                     </>
                   ) : (
                     <>

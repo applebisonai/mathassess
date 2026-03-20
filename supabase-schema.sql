@@ -35,7 +35,8 @@ CREATE TABLE IF NOT EXISTS assessments (
 -- Insert the assessments we have so far
 INSERT INTO assessments (id, name, short_name, grade_range, models) VALUES
   ('schedule-2a', 'Schedule 2A: Early Number Words and Numerals', '2A', 'K–1', ARRAY['FNWS', 'BNWS', 'NID']),
-  ('schedule-2b', 'Schedule 2B: Early Structuring',               '2B', 'K–2', ARRAY['SN20'])
+  ('schedule-2b', 'Schedule 2B: Early Structuring',               '2B', 'K–2', ARRAY['SN20']),
+  ('schedule-2c', 'Schedule 2C: Early Arithmetical Strategies',   '2C', 'K–2', ARRAY['SEAL'])
 ON CONFLICT (id) DO NOTHING;
 
 -- ============================================================

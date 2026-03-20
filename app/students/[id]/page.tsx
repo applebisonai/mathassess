@@ -32,6 +32,23 @@ const ASSESSMENT_CONFIG: Record<string, {
       },
     ],
   },
+  "schedule-2c": {
+    label: "Schedule 2C — Early Arithmetical Strategies",
+    subtitle: "2C · SEAL",
+    modelDefs: [
+      {
+        key: "SEAL", color: "#ec4899", maxLevel: 5,
+        labels: {
+          0: "Emergent counting",
+          1: "Perceptual counting",
+          2: "Figurative counting",
+          3: "Initial number sequence — Counting-on and -back",
+          4: "Intermediate number sequence — Counting-down-to",
+          5: "Facile number sequence — Non-count-by-ones strategies",
+        },
+      },
+    ],
+  },
   "schedule-2b": {
     label: "Schedule 2B — Early Structuring",
     subtitle: "2B · SN20",

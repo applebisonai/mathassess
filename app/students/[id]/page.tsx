@@ -2,56 +2,72 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
 import Nav from "@/components/nav";
 import Link from "next/link";
-import LevelChart, { ChartPoint } from "./LevelChart";
+import LevelChart, { ChartPoint, ModelDef } from "./LevelChart";
 
 const gradeLabel = (g: number) =>
   g === 0 ? "Kindergarten" : `Grade ${g}`;
 
-const fnwsLevels: Record<number, string> = {
-  0: "Emergent FNWS",
-  1: "Initial FNWS to 'ten'",
-  2: "Intermediate FNWS to 'ten'",
-  3: "Facile FNWS to 'ten'",
-  4: "Facile FNWS to 'thirty'",
-  5: "Facile FNWS to 'one hundred'",
-  6: "Facile FNWS to 'one thousand'",
-  7: "Facile FNWS to 'ten thousand'",
+// ── Per-assessment config ──────────────────────────────────────────────────
+
+const ASSESSMENT_CONFIG: Record<string, {
+  label: string;
+  subtitle: string;
+  modelDefs: ModelDef[];
+}> = {
+  "schedule-2a": {
+    label: "Schedule 2A — Early Number Words and Numerals",
+    subtitle: "2A · FNWS · BNWS · NID",
+    modelDefs: [
+      {
+        key: "FNWS", color: "#f59e0b", maxLevel: 7,
+        labels: { 0: "Emergent", 1: "Initial to 'ten'", 2: "Intermediate to 'ten'", 3: "Facile to 'ten'", 4: "Facile to 'thirty'", 5: "Facile to 'hundred'", 6: "Facile to 'thousand'", 7: "Facile to 'ten thousand'" },
+      },
+      {
+        key: "BNWS", color: "#ef4444", maxLevel: 5,
+        labels: { 0: "Emergent", 1: "Initial to 'ten'", 2: "Intermediate to 'ten'", 3: "Facile to 'ten'", 4: "Facile to 'thirty'", 5: "Facile to 'hundred'" },
+      },
+      {
+        key: "NID", color: "#06b6d4", maxLevel: 4,
+        labels: { 0: "Emergent", 1: "Numerals to 10", 2: "Numerals to 20", 3: "Numerals to 100", 4: "Numerals to 1,000" },
+      },
+    ],
+  },
+  "schedule-2b": {
+    label: "Schedule 2B — Structuring Numbers",
+    subtitle: "2B · SPAT · FING · TEMP · C&P",
+    modelDefs: [
+      {
+        key: "SPAT", color: "#3b82f6", maxLevel: 4,
+        labels: { 0: "Emergent", 1: "Perceptual 1–3", 2: "Perceptual 1–5", 3: "Conceptual 6–10", 4: "Ten-frame patterns" },
+      },
+      {
+        key: "FING", color: "#22c55e", maxLevel: 3,
+        labels: { 0: "Emergent", 1: "Finger patterns 1–5", 2: "Finger patterns 6–10", 3: "Recognizes patterns" },
+      },
+      {
+        key: "TEMP", color: "#a855f7", maxLevel: 3,
+        labels: { 0: "Emergent", 1: "Temporal 1–5", 2: "Temporal 6–10", 3: "Two-part sequences" },
+      },
+      {
+        key: "C&P", color: "#f97316", maxLevel: 3,
+        labels: { 0: "Emergent", 1: "Combining within 5", 2: "Combining within 10", 3: "Combining within 20" },
+      },
+    ],
+  },
 };
 
-const bnwsLevels: Record<number, string> = {
-  0: "Emergent BNWS",
-  1: "Initial BNWS to 'ten'",
-  2: "Intermediate BNWS to 'ten'",
-  3: "Facile BNWS to 'ten'",
-  4: "Facile BNWS to 'thirty'",
-  5: "Facile BNWS to 'one hundred'",
-};
+// All known model → level name mappings (for history cards)
+const ALL_MODEL_LEVELS: Record<string, Record<number, string>> = Object.fromEntries(
+  Object.values(ASSESSMENT_CONFIG).flatMap((cfg) =>
+    cfg.modelDefs.map((m) => [m.key, m.labels])
+  )
+);
 
-const nidLevels: Record<number, string> = {
-  0: "Emergent NID",
-  1: "Numerals to 10",
-  2: "Numerals to 20",
-  3: "Numerals to 100",
-  4: "Numerals to 1,000",
-};
-
-const modelLevels: Record<string, Record<number, string>> = {
-  FNWS: fnwsLevels,
-  BNWS: bnwsLevels,
-  NID: nidLevels,
-};
-
-const modelColors: Record<string, string> = {
-  FNWS: "bg-blue-50 border-blue-200 text-blue-700",
-  BNWS: "bg-purple-50 border-purple-200 text-purple-700",
-  NID:  "bg-green-50 border-green-200 text-green-700",
-};
-
-const modelBadge: Record<string, string> = {
-  FNWS: "bg-blue-100 text-blue-700",
-  BNWS: "bg-purple-100 text-purple-700",
-  NID:  "bg-green-100 text-green-700",
-};
+const ALL_MODEL_COLORS: Record<string, string> = Object.fromEntries(
+  Object.values(ASSESSMENT_CONFIG).flatMap((cfg) =>
+    cfg.modelDefs.map((m) => [m.key, m.color])
+  )
+);
 
 function formatDate(d: string) {
   return new Date(d).toLocaleDateString("en-US", {
@@ -68,7 +84,6 @@ export default async function StudentProfilePage({
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  // Fetch student
   const { data: student } = await supabase
     .from("students")
     .select("id, first_name, last_name, grade_level, created_at")
@@ -78,26 +93,30 @@ export default async function StudentProfilePage({
 
   if (!student) notFound();
 
-  // Fetch all assessment sessions for this student
   const { data: sessions } = await supabase
     .from("assessment_sessions")
     .select("id, date_administered, status, assessment_id, created_at")
     .eq("student_id", student.id)
     .order("date_administered", { ascending: false });
 
-  // Fetch all construct placements for this student
   const { data: placements } = await supabase
     .from("construct_placements")
     .select("id, session_id, model_name, confirmed_level, suggested_level, date_placed")
     .eq("student_id", student.id)
     .order("date_placed", { ascending: false });
 
-  // Get most recent level per model
-  const currentLevels: Record<string, { level: number; date: string }> = {};
+  // Most recent level per model (across all assessments)
+  const currentLevels: Record<string, { level: number; date: string; assessmentId: string }> = {};
+  const sessionAssessmentMap: Record<string, string> = {};
+  for (const s of sessions ?? []) sessionAssessmentMap[s.id] = s.assessment_id;
+
   for (const p of placements ?? []) {
     const level = p.confirmed_level ?? p.suggested_level;
     if (level !== null && level !== undefined && !(p.model_name in currentLevels)) {
-      currentLevels[p.model_name] = { level, date: p.date_placed };
+      currentLevels[p.model_name] = {
+        level, date: p.date_placed,
+        assessmentId: sessionAssessmentMap[p.session_id] ?? "",
+      };
     }
   }
 
@@ -108,14 +127,25 @@ export default async function StudentProfilePage({
     placementsBySession[p.session_id]!.push(p);
   }
 
-  // Build chart data — one point per session date, levels by model
-  // Sort ascending by date for the chart
+  // Build per-assessment chart data (sorted chronologically)
   const sortedSessions = [...(sessions ?? [])].sort(
     (a, b) => new Date(a.date_administered).getTime() - new Date(b.date_administered).getTime()
   );
-  const chartData: ChartPoint[] = sortedSessions
-    .filter((s) => (placementsBySession[s.id] ?? []).length > 0)
-    .map((s) => {
+
+  // Which assessment IDs actually have data?
+  const assessmentIdsWithData = [...new Set(
+    (sessions ?? [])
+      .filter((s) => (placementsBySession[s.id] ?? []).length > 0)
+      .map((s) => s.assessment_id)
+  )];
+
+  // Build chart data per assessment
+  const chartsByAssessment: Record<string, ChartPoint[]> = {};
+  for (const assessId of assessmentIdsWithData) {
+    const sessionsForAssess = sortedSessions.filter(
+      (s) => s.assessment_id === assessId && (placementsBySession[s.id] ?? []).length > 0
+    );
+    chartsByAssessment[assessId] = sessionsForAssess.map((s) => {
       const d = new Date(s.date_administered);
       const point: ChartPoint = {
         date: d.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
@@ -123,24 +153,21 @@ export default async function StudentProfilePage({
       };
       for (const p of placementsBySession[s.id] ?? []) {
         const level = p.confirmed_level ?? p.suggested_level;
-        if (level !== null && level !== undefined) {
-          (point as any)[p.model_name] = level;
-        }
+        if (level !== null && level !== undefined) point[p.model_name] = level;
       }
       return point;
     });
-  const chartModels = ["FNWS", "BNWS", "NID"].filter((m) =>
-    chartData.some((d) => (d as any)[m] !== undefined)
-  );
+  }
 
   const teacherName = user.email?.split("@")[0] ?? "Teacher";
+  const allModels = Object.keys(currentLevels);
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Nav teacherName={teacherName} />
       <main className="max-w-4xl mx-auto px-4 py-8">
 
-        {/* Back link */}
+        {/* Back */}
         <Link href="/students" className="text-sm text-gray-400 hover:text-gray-600 mb-6 inline-flex items-center gap-1">
           ← My Students
         </Link>
@@ -153,9 +180,7 @@ export default async function StudentProfilePage({
                 {student.first_name} {student.last_name}
               </h1>
               <p className="text-gray-500 text-sm mt-1">{gradeLabel(student.grade_level)}</p>
-              <p className="text-gray-400 text-xs mt-1">
-                Added {formatDate(student.created_at)}
-              </p>
+              <p className="text-gray-400 text-xs mt-1">Added {formatDate(student.created_at)}</p>
             </div>
             <Link
               href={`/assess/select?student=${student.id}`}
@@ -166,37 +191,41 @@ export default async function StudentProfilePage({
           </div>
         </div>
 
-        {/* Progress chart */}
-        {chartData.length > 0 && (
-          <LevelChart data={chartData} models={chartModels} />
+        {/* Progress charts — one per assessment */}
+        {assessmentIdsWithData.length > 0 && (
+          <div className="mb-2">
+            <h2 className="text-base font-semibold text-gray-700 mb-4">Progress Over Time</h2>
+            {assessmentIdsWithData.map((assessId) => {
+              const cfg = ASSESSMENT_CONFIG[assessId];
+              if (!cfg) return null;
+              return (
+                <LevelChart
+                  key={assessId}
+                  title={cfg.label}
+                  subtitle={cfg.subtitle}
+                  data={chartsByAssessment[assessId] ?? []}
+                  modelDefs={cfg.modelDefs}
+                />
+              );
+            })}
+          </div>
         )}
 
         {/* Current levels */}
         <h2 className="text-base font-semibold text-gray-700 mb-3">Current Levels</h2>
-        {Object.keys(currentLevels).length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-8">
-            {["FNWS", "BNWS", "NID"].map((model) => {
+        {allModels.length > 0 ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mb-8">
+            {allModels.map((model) => {
               const entry = currentLevels[model];
-              const levelName = entry
-                ? (modelLevels[model]?.[entry.level] ?? `Level ${entry.level}`)
-                : null;
+              const levelName = ALL_MODEL_LEVELS[model]?.[entry.level] ?? `Level ${entry.level}`;
+              const color = ALL_MODEL_COLORS[model] ?? "#6b7280";
               return (
-                <div
-                  key={model}
-                  className={`rounded-xl border p-4 ${entry ? modelColors[model] : "bg-gray-50 border-gray-200 text-gray-400"}`}
-                >
-                  <div className={`text-xs font-bold uppercase tracking-wide mb-1 ${entry ? "" : "text-gray-400"}`}>
-                    {model}
-                  </div>
-                  {entry ? (
-                    <>
-                      <div className="text-2xl font-bold mb-0.5">{entry.level}</div>
-                      <div className="text-xs font-medium leading-snug">{levelName}</div>
-                      <div className="text-xs mt-2 opacity-70">as of {formatDate(entry.date)}</div>
-                    </>
-                  ) : (
-                    <div className="text-sm mt-1">Not yet assessed</div>
-                  )}
+                <div key={model} className="rounded-xl border-2 p-3 bg-white"
+                  style={{ borderColor: color }}>
+                  <div className="text-xs font-bold uppercase tracking-wide mb-1" style={{ color }}>{model}</div>
+                  <div className="text-2xl font-black mb-0.5" style={{ color }}>{entry.level}</div>
+                  <div className="text-xs text-gray-600 leading-snug">{levelName}</div>
+                  <div className="text-xs text-gray-400 mt-1.5">as of {formatDate(entry.date)}</div>
                 </div>
               );
             })}
@@ -213,14 +242,14 @@ export default async function StudentProfilePage({
           <div className="space-y-3">
             {sessions.map((session) => {
               const sessionPlacements = placementsBySession[session.id] ?? [];
+              const cfg = ASSESSMENT_CONFIG[session.assessment_id];
+              const assessLabel = cfg?.label ?? session.assessment_id;
               return (
                 <div key={session.id} className="bg-white rounded-xl border border-gray-200 p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <div>
-                      <span className="font-semibold text-gray-900 text-sm">
-                        {session.assessment_id === "schedule-2a" ? "Schedule 2A — Early Number Words & Numerals" : session.assessment_id}
-                      </span>
-                      <span className={`ml-2 text-xs px-2 py-0.5 rounded-full font-medium ${
+                  <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-semibold text-gray-900 text-sm">{assessLabel}</span>
+                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
                         session.status === "completed"
                           ? "bg-green-100 text-green-700"
                           : "bg-yellow-100 text-yellow-700"
@@ -236,17 +265,17 @@ export default async function StudentProfilePage({
                       {sessionPlacements.map((p) => {
                         const level = p.confirmed_level ?? p.suggested_level;
                         const levelName = level !== null && level !== undefined
-                          ? (modelLevels[p.model_name]?.[level] ?? `Level ${level}`)
+                          ? (ALL_MODEL_LEVELS[p.model_name]?.[level] ?? `Level ${level}`)
                           : "—";
+                        const color = ALL_MODEL_COLORS[p.model_name] ?? "#6b7280";
                         return (
-                          <div
-                            key={p.id}
-                            className={`flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg border font-medium ${modelColors[p.model_name] ?? "bg-gray-50 border-gray-200 text-gray-600"}`}
-                          >
-                            <span className={`px-1.5 py-0.5 rounded font-bold text-xs ${modelBadge[p.model_name] ?? "bg-gray-100 text-gray-600"}`}>
-                              {p.model_name}
+                          <div key={p.id}
+                            className="flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg border font-medium bg-white"
+                            style={{ borderColor: color, color }}>
+                            <span className="font-bold">{p.model_name}</span>
+                            <span className="text-gray-600">
+                              {level !== null && level !== undefined ? `${level} — ${levelName}` : "—"}
                             </span>
-                            <span>{level !== null && level !== undefined ? `${level} — ` : ""}{levelName}</span>
                           </div>
                         );
                       })}

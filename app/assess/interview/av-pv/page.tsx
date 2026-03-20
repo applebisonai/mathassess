@@ -120,7 +120,7 @@ function SlashableSequence({
   const slashed = slashedStr ? slashedStr.split(",") : [];
   return (
     <div className="mt-3 pt-3 border-t border-gray-100">
-      <div className="text-xs text-gray-400 mb-2">Tap a number to slash it:</div>
+      <div className="text-xs text-gray-400 mb-2">Click incorrect responses:</div>
       <div className="flex flex-wrap gap-2">
         {numbers.map((n) => {
           const s = String(n);

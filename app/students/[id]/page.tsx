@@ -307,10 +307,18 @@ export default async function StudentProfilePage({
               const entry = currentLevels[model];
               const levelName = ALL_MODEL_LEVELS[model]?.[entry.level] ?? `Level ${entry.level}`;
               const color = ALL_MODEL_COLORS[model] ?? "#6b7280";
+              const assessType =
+                entry.assessmentId === "av-pv" ? "Add+VantageMR" :
+                entry.assessmentId.startsWith("schedule-") ? "LFIN" : "";
               return (
                 <div key={model} className="rounded-xl border-2 p-3 bg-white"
                   style={{ borderColor: color }}>
-                  <div className="text-xs font-bold uppercase tracking-wide mb-1" style={{ color }}>{model}</div>
+                  <div className="flex items-center justify-between mb-1">
+                    <div className="text-xs font-bold uppercase tracking-wide" style={{ color }}>{model}</div>
+                    {assessType && (
+                      <span className="text-xs font-medium text-gray-400">{assessType}</span>
+                    )}
+                  </div>
                   <div className="text-2xl font-black mb-0.5" style={{ color }}>{entry.level}</div>
                   <div className="text-xs text-gray-600 leading-snug">{levelName}</div>
                   <div className="text-xs text-gray-400 mt-1.5">as of {formatDate(entry.date)}</div>

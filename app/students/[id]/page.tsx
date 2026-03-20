@@ -32,23 +32,6 @@ const ASSESSMENT_CONFIG: Record<string, {
       },
     ],
   },
-  "schedule-2c": {
-    label: "Schedule 2C — Early Arithmetical Strategies",
-    subtitle: "2C · SEAL",
-    modelDefs: [
-      {
-        key: "SEAL", color: "#ec4899", maxLevel: 5,
-        labels: {
-          0: "Emergent counting",
-          1: "Perceptual counting",
-          2: "Figurative counting",
-          3: "Initial number sequence — Counting-on and -back",
-          4: "Intermediate number sequence — Counting-down-to",
-          5: "Facile number sequence — Non-count-by-ones strategies",
-        },
-      },
-    ],
-  },
   "schedule-2b": {
     label: "Schedule 2B — Early Structuring",
     subtitle: "2B · SN20",
@@ -64,6 +47,23 @@ const ASSESSMENT_CONFIG: Record<string, {
           5: "Formal addition (parts ≤ 10)",
           6: "Formal addition & subtraction (parts ≤ 10)",
           7: "Formal addition & subtraction (whole ≤ 20)",
+        },
+      },
+    ],
+  },
+  "schedule-2c": {
+    label: "Schedule 2C — Early Arithmetical Strategies",
+    subtitle: "2C · SEAL",
+    modelDefs: [
+      {
+        key: "SEAL", color: "#ec4899", maxLevel: 5,
+        labels: {
+          0: "Emergent counting",
+          1: "Perceptual counting",
+          2: "Figurative counting",
+          3: "Initial number sequence — Counting-on and -back",
+          4: "Intermediate number sequence — Counting-down-to",
+          5: "Facile number sequence — Non-count-by-ones strategies",
         },
       },
     ],
@@ -146,8 +146,8 @@ export default async function StudentProfilePage({
     (a, b) => new Date(a.date_administered).getTime() - new Date(b.date_administered).getTime()
   );
 
-  // Always show all configured assessments in defined order
-  const assessmentIdsOrdered = Object.keys(ASSESSMENT_CONFIG);
+  // Show assessments in reverse order (highest/most recent schedule first)
+  const assessmentIdsOrdered = Object.keys(ASSESSMENT_CONFIG).reverse();
 
   // Build chart data per assessment
   const chartsByAssessment: Record<string, ChartPoint[]> = {};

@@ -676,8 +676,14 @@ function ItemRow({
           onToggle={(n) => {
             const current = getResponse(item.id, "_slashed");
             const arr = current ? current.split(",") : [];
-            const next = arr.includes(n) ? arr.filter((x) => x !== n) : [...arr, n];
+            const isAlreadySlashed = arr.includes(n);
+            const next = isAlreadySlashed ? arr.filter((x) => x !== n) : [...arr, n];
             setResponse(item.id, "_slashed", next.join(","));
+            // Auto-mark incorrect when a number is first slashed
+            if (!isAlreadySlashed) {
+              const ciField = item.responseFields.find((f) => f.type === "correct_incorrect");
+              if (ciField) setResponse(item.id, ciField.label, "incorrect");
+            }
           }}
         />
       )}

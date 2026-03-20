@@ -33,7 +33,7 @@ const CATEGORIES = [
         route: "/assess/interview/2a",
         available: true,
       },
-      { id: "schedule-2b", name: "Schedule 2B", description: "Structuring Numbers", gradeRange: "K–2", models: ["SEAL"], route: "", available: false },
+      { id: "schedule-2b", name: "Schedule 2B", description: "Structuring Numbers", gradeRange: "K–2", models: ["SPAT", "FING", "TEMP", "C&P"], route: "/assess/interview/2b", available: true },
       { id: "schedule-2c", name: "Schedule 2C", description: "Addition & Subtraction", gradeRange: "1–3", models: ["A&S"], route: "", available: false },
       { id: "schedule-3a", name: "Schedule 3A", description: "Place Value", gradeRange: "2–4", models: ["CPV"], route: "", available: false },
       { id: "schedule-3b", name: "Schedule 3B", description: "Multiplication & Division", gradeRange: "2–5", models: ["M&D"], route: "", available: false },
@@ -240,8 +240,19 @@ function SelectContent() {
               <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4">
                 <div className="text-sm font-medium text-amber-800 mb-1">📦 You will need:</div>
                 <ul className="text-sm text-amber-700 space-y-0.5">
-                  <li>• Numeral cards (0–100)</li>
-                  <li>• Paper and pen for the student</li>
+                  {selectedAssessmentId === "schedule-2b" ? (
+                    <>
+                      <li>• Dot cards (1–10)</li>
+                      <li>• Ten-frame cards</li>
+                      <li>• Counters and a small screen card</li>
+                      <li>• Paper and pen</li>
+                    </>
+                  ) : (
+                    <>
+                      <li>• Numeral cards (0–100)</li>
+                      <li>• Paper and pen for the student</li>
+                    </>
+                  )}
                 </ul>
               </div>
               <button

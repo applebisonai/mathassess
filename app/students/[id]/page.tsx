@@ -6,6 +6,7 @@ import Nav from "@/components/nav";
 import Link from "next/link";
 import LevelChart, { ChartPoint, ModelDef } from "./LevelChart";
 import SessionNotes from "./SessionNotes";
+import DeleteSessionButton from "./DeleteSessionButton";
 import { schedule2A } from "@/lib/assessments/schedule-2a";
 import { schedule2B } from "@/lib/assessments/schedule-2b";
 import { schedule2C } from "@/lib/assessments/schedule-2c";
@@ -432,7 +433,10 @@ export default async function StudentProfilePage({
                         {session.status === "completed" ? "Completed" : "In Progress"}
                       </span>
                     </div>
-                    <span className="text-xs text-gray-400">{formatDate(session.date_administered)}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-gray-400">{formatDate(session.date_administered)}</span>
+                      <DeleteSessionButton sessionId={session.id} />
+                    </div>
                   </div>
 
                   {sessionPlacements.length > 0 ? (

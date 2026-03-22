@@ -212,7 +212,7 @@ export default function LevelChart({ title, subtitle, data, modelDefs }: LevelCh
             {activeModels.map((m) => (
               <Line
                 key={m.key}
-                type="monotone"
+                type="linear"
                 dataKey={m.key}
                 stroke={m.color}
                 strokeWidth={2.5}

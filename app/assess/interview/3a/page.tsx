@@ -118,6 +118,7 @@ function InterviewContent() {
   const [saving, setSaving] = useState(false);
   const [done, setDone] = useState(false);
   const [results, setResults] = useState<ReturnType<typeof calculateResults> | null>(null);
+  const [validationError, setValidationError] = useState<string | null>(null);
 
   const groups = schedule3A.taskGroups;
   const currentGroup = groups[currentGroupIdx];
@@ -134,15 +135,79 @@ function InterviewContent() {
       .then(({ data }) => { if (data) setStudent(data); });
   }, [studentId]);
 
+  // Auto-fill items above START HERE as correct/efficient when entering a group
+  useEffect(() => {
+    const group = groups[currentGroupIdx];
+    if (!group.startAtItem) return;
+    const subLevels = groupBySubLevel(group.items);
+    const startIdx = subLevels.findIndex(([s]) => s === group.startAtItem);
+    if (startIdx <= 0) return;
+    setResponses((prev) => {
+      const updated = { ...prev };
+      for (let i = 0; i < startIdx; i++) {
+        for (const item of subLevels[i][1]) {
+          const existing = updated[item.id] ?? {};
+          const itemUpdate: Record<string, string> = { ...existing };
+          for (const field of item.responseFields) {
+            if (!itemUpdate[field.label]) {
+              if (field.type === "correct_incorrect") itemUpdate[field.label] = "correct";
+              else if (field.type === "fluency_scale" && field.options?.length) itemUpdate[field.label] = field.options[0];
+            }
+          }
+          updated[item.id] = itemUpdate;
+        }
+      }
+      return updated;
+    });
+    setValidationError(null);
+  }, [currentGroupIdx]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Returns items required but unanswered (AT/BELOW startAtItem, or all if no startAtItem)
+  function getRequiredButUnanswered(group: TaskGroup): AssessmentItem[] {
+    const subLevels = groupBySubLevel(group.items);
+    let startIdx = 0;
+    if (group.startAtItem) {
+      const found = subLevels.findIndex(([s]) => s === group.startAtItem);
+      if (found >= 0) startIdx = found;
+    }
+    return subLevels
+      .slice(startIdx)
+      .flatMap(([, items]) => items)
+      .filter((item) =>
+        item.responseFields.some((f) => f.type === "correct_incorrect" && !responses[item.id]?.[f.label])
+      );
+  }
+
   function setResponse(itemId: string, field: string, value: string) {
     setResponses((prev) => ({
       ...prev,
       [itemId]: { ...(prev[itemId] ?? {}), [field]: value },
     }));
+    if (validationError) setValidationError(null);
   }
 
   function getResponse(itemId: string, field: string) {
     return responses[itemId]?.[field] ?? "";
+  }
+
+  function handleTryNext() {
+    const missing = getRequiredButUnanswered(currentGroup);
+    if (missing.length > 0) {
+      setValidationError(`Please answer all ${missing.length} required item${missing.length > 1 ? "s" : ""} before continuing.`);
+      return;
+    }
+    setValidationError(null);
+    setCurrentGroupIdx((i) => Math.min(groups.length - 1, i + 1));
+  }
+
+  function handleTryFinish() {
+    const missing = getRequiredButUnanswered(currentGroup);
+    if (missing.length > 0) {
+      setValidationError(`Please answer all ${missing.length} required item${missing.length > 1 ? "s" : ""} before submitting.`);
+      return;
+    }
+    setValidationError(null);
+    handleFinish();
   }
 
   async function handleFinish() {
@@ -376,10 +441,17 @@ function InterviewContent() {
             })}
           </div>
 
+          {/* Validation error */}
+          {validationError && (
+            <div className="px-4 py-2 bg-red-50 border-t border-red-200">
+              <p className="text-xs text-red-600 font-medium">⚠ {validationError}</p>
+            </div>
+          )}
+
           {/* Navigation */}
           <div className="border-t border-gray-200 bg-white px-4 py-3 flex justify-between items-center">
             <button
-              onClick={() => setCurrentGroupIdx((i) => Math.max(0, i - 1))}
+              onClick={() => { setValidationError(null); setCurrentGroupIdx((i) => Math.max(0, i - 1)); }}
               disabled={isFirst}
               className="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-40"
             >
@@ -388,7 +460,7 @@ function InterviewContent() {
             <div className="text-xs text-gray-400">Tap dots above to jump</div>
             {isLast ? (
               <button
-                onClick={handleFinish}
+                onClick={handleTryFinish}
                 disabled={saving}
                 className="px-5 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium disabled:bg-green-400"
               >
@@ -396,7 +468,7 @@ function InterviewContent() {
               </button>
             ) : (
               <button
-                onClick={() => setCurrentGroupIdx((i) => Math.min(groups.length - 1, i + 1))}
+                onClick={handleTryNext}
                 className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm font-medium"
               >
                 Next Group →

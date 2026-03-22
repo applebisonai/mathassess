@@ -39,7 +39,7 @@ INSERT INTO assessments (id, name, short_name, grade_range, models) VALUES
   ('schedule-2c', 'Schedule 2C: Early Arithmetical Strategies',   '2C', 'K–2', ARRAY['SEAL']),
   ('av-pv',       'Add+VantageMR: Place Value',                   'PV',  '2–4', ARRAY['CPV']),
   ('schedule-3a', 'Schedule 3A: Number Words and Numerals',       '3A', 'K–3', ARRAY['NID', 'FNWS', 'BNWS']),
-  ('schedule-3b', 'Schedule 3B: Multiplication and Division',     '3B', '2–5', ARRAY['MAS'])
+  ('schedule-3b', 'Schedule 3B: Structuring Numbers to 20', '3B', 'K–3', ARRAY['SN20'])
 ON CONFLICT (id) DO NOTHING;
 
 -- ============================================================

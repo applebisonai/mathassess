@@ -17,15 +17,15 @@ type Responses = Record<string, Record<string, string>>;
 // ── Color maps ────────────────────────────────────────────────────────────────
 
 const COLOR_HEADER: Record<string, string> = {
-  orange: "bg-orange-600 text-white",
+  indigo: "bg-indigo-600 text-white",
 };
 
 const COLOR_SUBGROUP: Record<string, string> = {
-  orange: "border-orange-200 bg-orange-50/30",
+  indigo: "border-indigo-200 bg-indigo-50/30",
 };
 
 const COLOR_SUBHEAD: Record<string, string> = {
-  orange: "bg-orange-100/60 text-orange-900",
+  indigo: "bg-indigo-100/60 text-indigo-900",
 };
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -54,65 +54,66 @@ function calculateResults(responses: Responses) {
   const tg4 = schedule3B.taskGroups.find((g) => g.id === "tg4")!;
   const tg5 = schedule3B.taskGroups.find((g) => g.id === "tg5")!;
 
-  // TG1: Visible groups — if ≥ 3/5 correct → masLevel ≥ 1
-  const tg1Correct = tg1.items.filter((item) => isCorrect(responses, item.id)).length;
-  let tg1Level = tg1Correct >= 3 ? 1 : 0;
+  // TG1: Spatial patterns
+  const tg1Level3Items = tg1.items.filter((item) => item.targetLevel === 3);
+  const tg1Level4Items = tg1.items.filter((item) => item.targetLevel === 4);
+  const tg1Level5Items = tg1.items.filter((item) => item.targetLevel === 5);
+  const tg1L3Correct = tg1Level3Items.filter((item) => isCorrect(responses, item.id)).length;
+  const tg1L4Correct = tg1Level4Items.filter((item) => isCorrect(responses, item.id)).length;
+  const tg1L5Correct = tg1Level5Items.filter((item) => isCorrect(responses, item.id)).length;
 
-  // TG2: Screened groups
-  const tg2Stage2Items = tg2.items.filter((item) => item.number === "Stage 2");
-  const tg2Stage3Items = tg2.items.filter((item) => item.number === "Stage 3");
-  const tg2Stage2Correct = tg2Stage2Items.filter((item) => isCorrect(responses, item.id)).length;
-  const tg2Stage3Correct = tg2Stage3Items.filter((item) => isCorrect(responses, item.id)).length;
-  let tg2Level = 0;
-  if (tg2Stage2Correct > 0) tg2Level = 2;
-  if (tg2Stage3Correct >= 3) tg2Level = 3;
+  // TG2: Partitions
+  const tg2Level4Items = tg2.items.filter((item) => item.targetLevel === 4);
+  const tg2Level5Items = tg2.items.filter((item) => item.targetLevel === 5);
+  const tg2L4Correct = tg2Level4Items.filter((item) => isCorrect(responses, item.id)).length;
+  const tg2L5Correct = tg2Level5Items.filter((item) => isCorrect(responses, item.id)).length;
 
-  // TG3: Skip counting
-  const tg3Stage3Items = tg3.items.filter((item) => item.targetLevel === 3);
-  const tg3Stage4Items = tg3.items.filter((item) => item.targetLevel === 4);
-  const tg3Stage3Correct = tg3Stage3Items.filter((item) => isCorrect(responses, item.id)).length;
-  const tg3Stage4Correct = tg3Stage4Items.filter((item) => isCorrect(responses, item.id)).length;
-  let tg3Level = 0;
-  if (tg3Stage3Correct >= 2) tg3Level = 3;
-  if (tg3Stage4Correct >= 2) tg3Level = 4;
+  // TG3: Doubles
+  const tg3Level4Items = tg3.items.filter((item) => item.targetLevel === 4);
+  const tg3Level5Items = tg3.items.filter((item) => item.targetLevel === 5);
+  const tg3Level6Items = tg3.items.filter((item) => item.targetLevel === 6);
+  const tg3L4Correct = tg3Level4Items.filter((item) => isCorrect(responses, item.id)).length;
+  const tg3L5Correct = tg3Level5Items.filter((item) => isCorrect(responses, item.id)).length;
+  const tg3L6Correct = tg3Level6Items.filter((item) => isCorrect(responses, item.id)).length;
 
-  // TG4: Multiplication
-  const tg4Stage3Items = tg4.items.filter((item) => item.number === "Stage 3");
-  const tg4Stage4Items = tg4.items.filter((item) => item.number === "Stage 4");
-  const tg4Stage5Items = tg4.items.filter((item) => item.number === "Stage 5");
-  const tg4Stage3Correct = tg4Stage3Items.filter((item) => isCorrect(responses, item.id)).length;
-  const tg4Stage4Correct = tg4Stage4Items.filter((item) => isCorrect(responses, item.id)).length;
-  const tg4Stage5Correct = tg4Stage5Items.filter((item) => isCorrect(responses, item.id)).length;
-  let tg4Level = 0;
-  if (tg4Stage3Correct >= 2) tg4Level = 3;
-  if (tg4Stage4Correct >= 2) tg4Level = 4;
-  if (tg4Stage5Correct >= 2) tg4Level = 5;
+  // TG4: Addition
+  const tg4Level5Items = tg4.items.filter((item) => item.targetLevel === 5);
+  const tg4Level6Items = tg4.items.filter((item) => item.targetLevel === 6);
+  const tg4Level7Items = tg4.items.filter((item) => item.targetLevel === 7);
+  const tg4L5Correct = tg4Level5Items.filter((item) => isCorrect(responses, item.id)).length;
+  const tg4L6Correct = tg4Level6Items.filter((item) => isCorrect(responses, item.id)).length;
+  const tg4L7Correct = tg4Level7Items.filter((item) => isCorrect(responses, item.id)).length;
 
-  // TG5: Division
-  const tg5Stage4Items = tg5.items.filter((item) => item.number === "Stage 4");
-  const tg5Stage5Items = tg5.items.filter((item) => item.number === "Stage 5");
-  const tg5Stage4Correct = tg5Stage4Items.filter((item) => isCorrect(responses, item.id)).length;
-  const tg5Stage5Correct = tg5Stage5Items.filter((item) => isCorrect(responses, item.id)).length;
-  let tg5Level = 0;
-  if (tg5Stage4Correct >= 2) tg5Level = 4;
-  if (tg5Stage5Correct >= 2) tg5Level = 5;
+  // TG5: Subtraction
+  const tg5Level6Items = tg5.items.filter((item) => item.targetLevel === 6);
+  const tg5Level7Items = tg5.items.filter((item) => item.targetLevel === 7);
+  const tg5L6Correct = tg5Level6Items.filter((item) => isCorrect(responses, item.id)).length;
+  const tg5L7Correct = tg5Level7Items.filter((item) => isCorrect(responses, item.id)).length;
 
-  // Final MAS level = max of all
-  const masLevel = Math.max(tg1Level, tg2Level, tg3Level, tg4Level, tg5Level);
+  // Calculate SN20 level based on ≥50% correct at each level
+  let sn20Level = 0;
+  if (tg1L3Correct >= 2 || tg2L4Correct >= 2 || tg3L4Correct >= 1) sn20Level = Math.max(sn20Level, 3);
+  if (tg1L4Correct >= 2 || tg2L4Correct >= 2) sn20Level = Math.max(sn20Level, 4);
+  if (tg1L5Correct >= 2 || tg2L5Correct >= 2 || tg3L5Correct >= 2 || tg4L5Correct >= 1) sn20Level = Math.max(sn20Level, 5);
+  if (tg3L6Correct >= 2 || tg4L6Correct >= 2 || tg5L6Correct >= 2) sn20Level = Math.max(sn20Level, 6);
+  if (tg4L7Correct >= 2 || tg5L7Correct >= 3) sn20Level = Math.max(sn20Level, 7);
 
   return {
-    masLevel,
+    sn20Level,
     scores: {
-      tg1: tg1Correct,
-      tg2_s2: tg2Stage2Correct,
-      tg2_s3: tg2Stage3Correct,
-      tg3_s3: tg3Stage3Correct,
-      tg3_s4: tg3Stage4Correct,
-      tg4_s3: tg4Stage3Correct,
-      tg4_s4: tg4Stage4Correct,
-      tg4_s5: tg4Stage5Correct,
-      tg5_s4: tg5Stage4Correct,
-      tg5_s5: tg5Stage5Correct,
+      tg1_l3: tg1L3Correct,
+      tg1_l4: tg1L4Correct,
+      tg1_l5: tg1L5Correct,
+      tg2_l4: tg2L4Correct,
+      tg2_l5: tg2L5Correct,
+      tg3_l4: tg3L4Correct,
+      tg3_l5: tg3L5Correct,
+      tg3_l6: tg3L6Correct,
+      tg4_l5: tg4L5Correct,
+      tg4_l6: tg4L6Correct,
+      tg4_l7: tg4L7Correct,
+      tg5_l6: tg5L6Correct,
+      tg5_l7: tg5L7Correct,
     },
   };
 }
@@ -249,7 +250,7 @@ function InterviewContent() {
 
     if (sessionData?.id) {
       const placements = [
-        { model_name: "MAS", suggested_level: calc.masLevel, confirmed_level: calc.masLevel },
+        { model_name: "SN20", suggested_level: calc.sn20Level, confirmed_level: calc.sn20Level },
       ].map((p) => ({
         session_id: sessionData.id,
         student_id: student.id,
@@ -266,39 +267,40 @@ function InterviewContent() {
 
   // ── Results screen ────────────────────────────────────────────────────────────
   if (done && student && results) {
-    const masInfo = schedule3B.masLevels[results.masLevel];
+    const sn20Info = schedule3B.sn20Levels[results.sn20Level];
 
     const scoreRows = [
-      { label: "TG1 — Equal Grouping (Visible)", value: `${results.scores.tg1}/5 correct` },
-      { label: "TG2 — Equal Grouping (Screened, Stage 2)", value: `${results.scores.tg2_s2}/2 correct` },
-      { label: "TG2 — Equal Grouping (Screened, Stage 3)", value: `${results.scores.tg2_s3}/4 correct` },
-      { label: "TG3 — Skip Counting (Stage 3)", value: `${results.scores.tg3_s3}/3 correct` },
-      { label: "TG3 — Skip Counting (Stage 4)", value: `${results.scores.tg3_s4}/3 correct` },
-      { label: "TG4 — Multiplication (Stage 3)", value: `${results.scores.tg4_s3}/3 correct` },
-      { label: "TG4 — Multiplication (Stage 4)", value: `${results.scores.tg4_s4}/3 correct` },
-      { label: "TG4 — Multiplication (Stage 5)", value: `${results.scores.tg4_s5}/3 correct` },
-      { label: "TG5 — Division (Stage 4)", value: `${results.scores.tg5_s4}/3 correct` },
-      { label: "TG5 — Division (Stage 5)", value: `${results.scores.tg5_s5}/3 correct` },
+      { label: "TG1 — Level 3 (Spatial)", value: `${results.scores.tg1_l3}/3` },
+      { label: "TG1 — Level 4 (Ten-wise)", value: `${results.scores.tg1_l4}/3` },
+      { label: "TG1 — Level 5 (Tens frame)", value: `${results.scores.tg1_l5}/3` },
+      { label: "TG2 — Level 4 (Complements)", value: `${results.scores.tg2_l4}/4` },
+      { label: "TG2 — Level 5 (Partitions)", value: `${results.scores.tg2_l5}/3` },
+      { label: "TG3 — Level 4 (Doubles)", value: `${results.scores.tg3_l4}/2` },
+      { label: "TG3 — Level 5 (Near-doubles)", value: `${results.scores.tg3_l5}/3` },
+      { label: "TG3 — Level 6 (Fluency)", value: `${results.scores.tg3_l6}/2` },
+      { label: "TG4 — Level 5 (Add parts)", value: `${results.scores.tg4_l5}/2` },
+      { label: "TG4 — Level 6 (Add crosses)", value: `${results.scores.tg4_l6}/3` },
+      { label: "TG4 — Level 7 (Add whole)", value: `${results.scores.tg4_l7}/3` },
+      { label: "TG5 — Level 6 (Sub parts)", value: `${results.scores.tg5_l6}/3` },
+      { label: "TG5 — Level 7 (Sub whole)", value: `${results.scores.tg5_l7}/4` },
     ];
 
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl border border-gray-200 p-6 w-full max-w-lg shadow-sm">
           <div className="mb-5">
-            <div className="text-xs font-bold text-orange-600 uppercase tracking-wide mb-1">Assessment Complete</div>
+            <div className="text-xs font-bold text-indigo-600 uppercase tracking-wide mb-1">Assessment Complete</div>
             <p className="text-gray-500 text-sm mt-1">
               Schedule 3B — {student.first_name} {student.last_name} (Grade {gradeLabel(student.grade_level)})
             </p>
           </div>
 
-          {/* MAS Placement */}
+          {/* SN20 Placement */}
           <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wide mb-3">Suggested Placement</h3>
-          <div className="mb-5">
-            <div className="rounded-2xl border-2 border-orange-300 bg-orange-50 p-4 flex flex-col items-center gap-1">
-              <div className="text-xs font-bold text-orange-600 uppercase tracking-wide">MAS</div>
-              <div className="text-4xl font-black text-orange-700">{results.masLevel}</div>
-              <div className="text-orange-700 text-xs text-center leading-snug">{masInfo?.name ?? ""}</div>
-            </div>
+          <div className="rounded-2xl border-2 border-indigo-300 bg-indigo-50 p-4 flex flex-col items-center gap-2 mb-5">
+            <div className="text-xs font-bold text-indigo-600 uppercase tracking-wide">SN20 Level</div>
+            <div className="text-4xl font-black text-indigo-700">{results.sn20Level}</div>
+            <div className="text-indigo-700 text-xs text-center leading-snug">{sn20Info?.name ?? ""}</div>
           </div>
 
           <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wide mb-3">Evidence Summary</h3>
@@ -306,7 +308,7 @@ function InterviewContent() {
             {scoreRows.map(({ label, value }) => (
               <div key={label} className="flex items-start justify-between py-1.5 border-b border-gray-100 gap-2">
                 <span className="text-gray-600 text-xs">{label}</span>
-                <span className="font-semibold text-xs shrink-0 text-orange-700">{value}</span>
+                <span className="font-semibold text-xs shrink-0 text-indigo-700">{value}</span>
               </div>
             ))}
           </div>
@@ -357,7 +359,7 @@ function InterviewContent() {
             {groups.map((_, i) => (
               <button key={i} onClick={() => setCurrentGroupIdx(i)}
                 className={`w-3 h-3 rounded-full transition-colors ${
-                  i === currentGroupIdx ? "bg-orange-600" : i < currentGroupIdx ? "bg-orange-300" : "bg-gray-200"
+                  i === currentGroupIdx ? "bg-indigo-600" : i < currentGroupIdx ? "bg-indigo-300" : "bg-gray-200"
                 }`}
               />
             ))}
@@ -391,13 +393,11 @@ function InterviewContent() {
             {/* Model levels */}
             <div className="bg-white border border-gray-200 rounded-xl p-3">
               <div className="mb-3 text-center">
-                <div className="text-sm font-bold text-gray-700">
-                  Multiplication and Division Assessment
-                </div>
-                <div className="text-xs text-gray-400 font-medium tracking-wide">MAS Levels</div>
+                <div className="text-sm font-bold text-gray-700">Structuring Numbers to 20</div>
+                <div className="text-xs text-gray-400 font-medium tracking-wide">SN20 Levels</div>
               </div>
               <div className="space-y-1.5 max-h-64 overflow-y-auto">
-                {schedule3B.masLevels.map(({ level, name }) => (
+                {schedule3B.sn20Levels.map(({ level, name }) => (
                   <div key={level} className="flex items-start gap-2 rounded-lg px-3 py-2 border bg-gray-50 border-gray-100">
                     <span className="text-xs font-bold text-gray-400 w-4 shrink-0 mt-0.5">{level}</span>
                     <span className="text-xs leading-snug text-gray-700">{name}</span>
@@ -422,7 +422,7 @@ function InterviewContent() {
           <div className="bg-gray-50 border-b border-gray-200 px-4 py-3">
             <div className="text-sm font-semibold text-gray-700">✏️ Teacher Scoring — {currentGroup.name}</div>
             {currentGroup.branchingNote && (
-              <div className="text-xs text-orange-700 bg-orange-50 border border-orange-200 rounded px-2 py-1.5 mt-2 font-medium">
+              <div className="text-xs text-indigo-700 bg-indigo-50 border border-indigo-200 rounded px-2 py-1.5 mt-2 font-medium">
                 ⚠️ {currentGroup.branchingNote}
               </div>
             )}
@@ -476,7 +476,7 @@ function InterviewContent() {
             ) : (
               <button
                 onClick={handleTryNext}
-                className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg text-sm font-medium"
+                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium"
               >
                 Next Group →
               </button>
@@ -622,7 +622,7 @@ function ItemRow({
             placeholder="Teacher observation…"
             value={getResponse(item.id, "notes")}
             onChange={(e) => setResponse(item.id, "notes", e.target.value)}
-            className="w-full border border-orange-200 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-orange-400 bg-orange-50/40"
+            className="w-full border border-indigo-200 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-indigo-400 bg-indigo-50/40"
           />
         </div>
       )}
@@ -677,7 +677,7 @@ function FluencyPicker({
           onClick={() => onChange(value === opt ? "" : opt)}
           className={`text-xs px-2 py-1 rounded-lg border font-medium transition-colors ${
             value === opt
-              ? "bg-orange-100 border-orange-400 text-orange-700"
+              ? "bg-indigo-100 border-indigo-400 text-indigo-700"
               : "border-gray-200 text-gray-500 hover:border-gray-300 hover:bg-gray-50"
           }`}
         >

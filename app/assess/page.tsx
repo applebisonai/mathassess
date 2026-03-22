@@ -16,7 +16,7 @@ const CATEGORIES = [
       { id: "schedule-2a", name: "Schedule 2A", description: "Forward/Backward Number Word Sequences & Numeral ID", gradeRange: "K–1", models: ["FNWS", "BNWS", "NID"], available: true },
       { id: "schedule-2b", name: "Schedule 2B", description: "Spatial Patterns, Finger Patterns & Structuring to 20", gradeRange: "K–2", models: ["SN20"], available: true },
       { id: "schedule-2c", name: "Schedule 2C", description: "Early Arithmetical Strategies — Addition & Subtraction", gradeRange: "K–2", models: ["SEAL"], available: true },
-      { id: "schedule-3a", name: "Schedule 3A", description: "Hundreds, Tens & Ones — Conceptual Place Value", gradeRange: "2–4", models: ["CPV"], available: false },
+      { id: "schedule-3a", name: "Schedule 3A", description: "Number Words and Numerals — NID, FNWS & BNWS", gradeRange: "K–3", models: ["NID", "FNWS", "BNWS"], available: true },
       { id: "schedule-3b", name: "Schedule 3B", description: "Addition & Subtraction to 100 — Jump and Split Strategies", gradeRange: "2–4", models: ["A&S100"], available: false },
       { id: "schedule-3c", name: "Schedule 3C", description: "Early Multiplication & Division — Grouping and Sharing", gradeRange: "2–5", models: ["M&D"], available: false },
       { id: "schedule-3d", name: "Schedule 3D", description: "Fractions — Equal Sharing, Part-Whole & Number Line", gradeRange: "3–5", models: ["FRN"], available: false },

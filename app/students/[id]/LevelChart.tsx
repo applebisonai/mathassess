@@ -1,4 +1,5 @@
 "use client";
+import { useState } from "react";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid,
   Tooltip, Legend, ResponsiveContainer,
@@ -94,6 +95,9 @@ export default function LevelChart({ title, subtitle, data, modelDefs }: LevelCh
   // Only show models that actually have data
   const activeModels = modelDefs.filter((m) => data.some((d) => d[m.key] !== undefined));
 
+  // Track data-point x so tooltip is anchored to the dot column, not the raw mouse x
+  const [snapX, setSnapX] = useState<number | null>(null);
+
   // Empty state — no assessments completed yet for this schedule
   if (activeModels.length === 0 || data.length === 0) {
     return (
@@ -168,6 +172,10 @@ export default function LevelChart({ title, subtitle, data, modelDefs }: LevelCh
           <LineChart
             data={data}
             margin={{ top: 4, right: 16, left: 0, bottom: 4 }}
+            onMouseMove={(state: any) => {
+              if (state?.activeCoordinate?.x != null) setSnapX(state.activeCoordinate.x);
+            }}
+            onMouseLeave={() => setSnapX(null)}
           >
             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
             <XAxis
@@ -190,6 +198,8 @@ export default function LevelChart({ title, subtitle, data, modelDefs }: LevelCh
                 <CustomTooltip {...props} modelDefs={activeModels} />
               )}
               cursor={<SnapCursor />}
+              position={snapX !== null ? { x: snapX + 14 } : undefined}
+              allowEscapeViewBox={{ x: true, y: false }}
             />
             <Legend
               wrapperStyle={{ fontSize: 12, paddingTop: 10 }}

@@ -35,6 +35,7 @@ export interface TaskGroup {
   materials?: string;
   items: AssessmentItem[];
   branchingNote?: string;
+  startHereSubLevel?: string;  // marks which sub-level group gets the START HERE badge
 }
 
 const FLUENCY_OPTIONS = ["Immediate", "Hesitant", "Counted up", "Not known"];
@@ -61,6 +62,7 @@ export const schedule3A = {
       instructions: "Show numeral card one at a time. Say: \"What number is this?\"",
       teacherScript: '"What number is this?"',
       materials: "Task cards — numeral cards",
+      startHereSubLevel: "Level 4",
       items: [
         // Level 3 — two-digit
         {
@@ -698,26 +700,26 @@ export const schedule3A = {
 
   ] as TaskGroup[],
 
-  // NID levels — Wright & Ellemor-Collins, 2018
+  // NID levels — Wright & Ellemor-Collins, 2018 (matches Schedule 3A header)
   nidLevels: [
-    { level: 0, name: "Level 0 — Emergent",         description: "Cannot identify any numerals" },
-    { level: 1, name: "Level 1 — Early",             description: "Identifies some single-digit numerals" },
-    { level: 2, name: "Level 2 — Single-digit",      description: "Identifies all single-digit numerals" },
-    { level: 3, name: "Level 3 — Two-digit",         description: "Identifies two-digit numerals" },
-    { level: 4, name: "Level 4 — Three-digit",       description: "Identifies three-digit numerals" },
-    { level: 5, name: "Level 5 — Four-digit",        description: "Identifies four-digit numerals" },
-    { level: 6, name: "Level 6 — Five-digit",        description: "Identifies five-digit numerals" },
+    { level: 0, name: "Emergent numeral identification",    description: "Cannot identify any numerals" },
+    { level: 1, name: "Numerals to 10 — Identify",         description: "Identifies single-digit numerals (1–10)" },
+    { level: 2, name: "Numerals to 20 — Identify",         description: "Identifies numerals to 20, including teens" },
+    { level: 3, name: "Numerals to 100 — Identify",        description: "Identifies two-digit numerals to 100" },
+    { level: 4, name: "Numerals to 1,000 — Identify & write",   description: "Identifies and writes three-digit numerals to 1,000" },
+    { level: 5, name: "Numerals to 10,000 — Identify & write",  description: "Identifies and writes four-digit numerals to 10,000" },
+    { level: 6, name: "Numerals to 100,000 — Identify & write", description: "Identifies and writes five-digit numerals to 100,000" },
   ],
 
-  // FNWS / BNWS levels — Wright & Ellemor-Collins, 2018
+  // FNWS / BNWS levels — Wright & Ellemor-Collins, 2018 (matches Schedule 3A header)
   nwsLevels: [
-    { level: 0, name: "Level 0 — Emergent",          description: "Cannot produce any FNWS or BNWS" },
-    { level: 1, name: "Level 1 — Initial FNWS",      description: "Produces FNWS up to 'ten' but not a BNWS" },
-    { level: 2, name: "Level 2 — Intermediate FNWS", description: "Produces FNWS up to 'thirty' but drops back in BNWS" },
-    { level: 3, name: "Level 3 — Facile FNWS",       description: "Produces FNWS and BNWS in range 1–30; can say number before/after" },
-    { level: 4, name: "Level 4 — Facile to 100",     description: "Produces FNWS and BNWS to 100; number before/after any 2-digit" },
-    { level: 5, name: "Level 5 — Facile to 1000",    description: "Produces FNWS and BNWS across hundreds; number before/after in range" },
-    { level: 6, name: "Level 6 — Facile to 10 000",  description: "Produces FNWS and BNWS across thousands; number before/after in range" },
-    { level: 7, name: "Level 7 — Facile beyond 10 000", description: "Produces FNWS and BNWS beyond 10 000; number before/after in range" },
+    { level: 0, name: "Emergent",                       description: "Cannot produce any FNWS or BNWS" },
+    { level: 1, name: "Initial — up to 'ten'",          description: "Produces FNWS or BNWS only up to 'ten'" },
+    { level: 2, name: "Intermediate — up to 'ten'",     description: "Produces FNWS or BNWS up to 'ten' with some hesitation" },
+    { level: 3, name: "Facile — up to 'ten'",           description: "Fluently produces FNWS and BNWS in range 1–10; can say number before/after" },
+    { level: 4, name: "Facile — up to 'thirty'",        description: "Fluently produces FNWS and BNWS to 'thirty'; number before/after any 2-digit" },
+    { level: 5, name: "Facile — up to 'one hundred'",   description: "Fluently produces FNWS and BNWS across tens; number before/after to 100" },
+    { level: 6, name: "Facile — up to 'one thousand'",  description: "Fluently produces FNWS and BNWS across hundreds; number before/after to 1,000" },
+    { level: 7, name: "Facile — up to 'ten thousand'",  description: "Fluently produces FNWS and BNWS across thousands; number before/after to 10,000" },
   ],
 };

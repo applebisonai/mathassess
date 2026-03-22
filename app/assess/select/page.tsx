@@ -63,11 +63,11 @@ const CATEGORIES = [
       {
         id: "schedule-3b",
         name: "Schedule 3B",
-        description: "Addition & Subtraction to 100 — Jump and Split Strategies",
-        gradeRange: "2–4",
-        models: ["A&S100"],
-        route: "",
-        available: false,
+        description: "Structuring Numbers to 20 — Spatial Patterns, Partitions & Formal Operations",
+        gradeRange: "K–3",
+        models: ["SN20"],
+        route: "/assess/interview/3b",
+        available: true,
       },
       {
         id: "schedule-3c",
@@ -453,6 +453,12 @@ function SelectContent() {
                     <>
                       <li>• Numeral task cards (two-digit, three-digit, four-digit, five-digit)</li>
                       <li>• Paper and marker pen for student (writing numerals task)</li>
+                    </>
+                  ) : selectedAssessmentId === "schedule-3b" ? (
+                    <>
+                      <li>• Dot cards (five-wise and ten-wise patterns)</li>
+                      <li>• Tens frames</li>
+                      <li>• Counters and screen card</li>
                     </>
                   ) : (
                     <>

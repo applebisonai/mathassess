@@ -23,7 +23,7 @@ export default function DeleteSessionButton({ sessionId }: { sessionId: string }
   if (confirming) {
     return (
       <div className="flex items-center gap-2">
-        <span className="text-xs text-gray-500">Delete this session?</span>
+        <span className="text-xs font-medium text-red-500">Are you sure? This cannot be undone.</span>
         <button
           onClick={handleDelete}
           disabled={deleting}

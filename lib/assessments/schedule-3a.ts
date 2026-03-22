@@ -310,6 +310,7 @@ export const schedule3A = {
       instructions: "Say: \"Count backwards from ___ to ___.\"",
       teacherScript: '"Count backwards from ___ to ___."',
       materials: "None",
+      startHereSubLevel: "3.3",
       items: [
         {
           id: "3.1", number: "3.1", prompt: "Count back: 15 → 10", displayText: "15 → 10",
@@ -383,6 +384,7 @@ export const schedule3A = {
       instructions: "Say: \"What number comes just before ___?\"",
       teacherScript: '"What number comes just before ___?"',
       materials: "None",
+      startHereSubLevel: "Level 4",
       items: [
         // Level 4
         {
@@ -499,6 +501,7 @@ export const schedule3A = {
       instructions: "Say: \"Count forwards from ___ to ___.\"",
       teacherScript: '"Count forwards from ___ to ___."',
       materials: "None",
+      startHereSubLevel: "5.3",
       items: [
         {
           id: "5.1", number: "5.1", prompt: "Count on: 8 → 17", displayText: "8 → 17",
@@ -580,6 +583,7 @@ export const schedule3A = {
       instructions: "Say: \"What number comes just after ___?\"",
       teacherScript: '"What number comes just after ___?"',
       materials: "None",
+      startHereSubLevel: "Level 5",
       items: [
         // Level 4
         {

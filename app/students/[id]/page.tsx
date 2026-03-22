@@ -12,6 +12,7 @@ import { schedule2B } from "@/lib/assessments/schedule-2b";
 import { schedule2C } from "@/lib/assessments/schedule-2c";
 import { scheduleAvPV } from "@/lib/assessments/schedule-av-pv";
 import { schedule3A } from "@/lib/assessments/schedule-3a";
+import { schedule3B } from "@/lib/assessments/schedule-3b";
 
 const gradeLabel = (g: number) =>
   g === 0 ? "Kindergarten" : `Grade ${g}`;
@@ -162,6 +163,23 @@ const ASSESSMENT_CONFIG: Record<string, {
       },
     ],
   },
+  "schedule-3b": {
+    label: "Schedule 3B — Multiplication and Division",
+    subtitle: "3B · MAS",
+    modelDefs: [
+      {
+        key: "MAS", color: "#ea580c", maxLevel: 5,
+        labels: {
+          0: "Emergent",
+          1: "Perceptual Counting",
+          2: "Figurative Counting",
+          3: "Initial Repeated Grouping",
+          4: "Composite Grouping",
+          5: "Facile Multiplicative",
+        },
+      },
+    ],
+  },
 };
 
 // All known model → level name mappings (for history cards)
@@ -193,6 +211,7 @@ function buildItemLookup(assessmentId: string): Record<string, { prompt: string;
     "schedule-2c": schedule2C as never,
     "av-pv":       scheduleAvPV as never,
     "schedule-3a": schedule3A as never,
+    "schedule-3b": schedule3B as never,
   };
   const schedule = schedules[assessmentId];
   if (!schedule) return {};

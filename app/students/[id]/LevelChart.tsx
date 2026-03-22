@@ -68,6 +68,22 @@ function CustomDot(props: any) {
   return <circle cx={cx} cy={cy} r={5} fill={fill} stroke="#fff" strokeWidth={2} />;
 }
 
+/**
+ * Cursor that snaps to the actual data-point x-position (from recharts `points` prop)
+ * rather than following the raw mouse x.  This keeps the vertical guide line
+ * exactly under the hovered dot so it visually matches the tooltip values.
+ */
+function SnapCursor({ points, height }: any) {
+  if (!points?.length) return null;
+  const x = points[0].x;
+  return (
+    <line
+      x1={x} y1={0} x2={x} y2={height}
+      stroke="#94a3b8" strokeWidth={1} strokeDasharray="4 4"
+    />
+  );
+}
+
 interface LevelChartProps {
   title: string;
   subtitle: string;
@@ -171,6 +187,7 @@ export default function LevelChart({ title, subtitle, data, modelDefs }: LevelCh
               content={(props) => (
                 <CustomTooltip {...props} modelDefs={activeModels} />
               )}
+              cursor={<SnapCursor />}
             />
             <Legend
               wrapperStyle={{ fontSize: 12, paddingTop: 10 }}
@@ -182,7 +199,7 @@ export default function LevelChart({ title, subtitle, data, modelDefs }: LevelCh
             {activeModels.map((m) => (
               <Line
                 key={m.key}
-                type="stepAfter"
+                type="monotone"
                 dataKey={m.key}
                 stroke={m.color}
                 strokeWidth={2.5}

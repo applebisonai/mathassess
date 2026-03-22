@@ -217,80 +217,80 @@ export const schedule3A = {
       items: [
         // Level 3
         {
-          id: "2.1", number: "Level 3", prompt: "Write: six (6)", displayText: "Six",
+          id: "2.1", number: "Level 3", prompt: "Write: six (6)", displayText: "6",
           targetLevel: 3,
           responseFields: [{ label: "Correct", type: "correct_incorrect" }],
         },
         {
-          id: "2.2", number: "Level 3", prompt: "Write: twelve (12)", displayText: "Twelve",
+          id: "2.2", number: "Level 3", prompt: "Write: twelve (12)", displayText: "12",
           targetLevel: 3,
           responseFields: [{ label: "Correct", type: "correct_incorrect" }],
         },
         {
-          id: "2.3", number: "Level 3", prompt: "Write: eighteen (18)", displayText: "Eighteen",
+          id: "2.3", number: "Level 3", prompt: "Write: eighteen (18)", displayText: "18",
           targetLevel: 3,
           responseFields: [{ label: "Correct", type: "correct_incorrect" }],
         },
         {
-          id: "2.4", number: "Level 3", prompt: "Write: ninety-two (92)", displayText: "Ninety-two",
+          id: "2.4", number: "Level 3", prompt: "Write: ninety-two (92)", displayText: "92",
           targetLevel: 3,
           responseFields: [{ label: "Correct", type: "correct_incorrect" }],
         },
         // Level 4
         {
-          id: "2.5", number: "Level 4", prompt: "Write: five hundred and seventeen (517)", displayText: "Five hundred and seventeen",
+          id: "2.5", number: "Level 4", prompt: "Write: five hundred and seventeen (517)", displayText: "517",
           targetLevel: 4,
           responseFields: [{ label: "Correct", type: "correct_incorrect" }],
         },
         {
-          id: "2.6", number: "Level 4", prompt: "Write: two hundred and seventy (270)", displayText: "Two hundred and seventy",
+          id: "2.6", number: "Level 4", prompt: "Write: two hundred and seventy (270)", displayText: "270",
           targetLevel: 4,
           responseFields: [{ label: "Correct", type: "correct_incorrect" }],
         },
         {
-          id: "2.7", number: "Level 4", prompt: "Write: three hundred and six (306)", displayText: "Three hundred and six",
+          id: "2.7", number: "Level 4", prompt: "Write: three hundred and six (306)", displayText: "306",
           targetLevel: 4,
           responseFields: [{ label: "Correct", type: "correct_incorrect" }],
         },
         // Level 5
         {
-          id: "2.8", number: "Level 5", prompt: "Write: one thousand (1000)", displayText: "One thousand",
+          id: "2.8", number: "Level 5", prompt: "Write: one thousand (1000)", displayText: "1,000",
           targetLevel: 5,
           responseFields: [{ label: "Correct", type: "correct_incorrect" }],
         },
         {
-          id: "2.9", number: "Level 5", prompt: "Write: six thousand and five (6005)", displayText: "Six thousand and five",
+          id: "2.9", number: "Level 5", prompt: "Write: six thousand and five (6005)", displayText: "6,005",
           targetLevel: 5,
           responseFields: [{ label: "Correct", type: "correct_incorrect" }],
         },
         {
-          id: "2.10", number: "Level 5", prompt: "Write: two thousand and twenty (2020)", displayText: "Two thousand and twenty",
+          id: "2.10", number: "Level 5", prompt: "Write: two thousand and twenty (2020)", displayText: "2,020",
           targetLevel: 5,
           responseFields: [{ label: "Correct", type: "correct_incorrect" }],
         },
         {
-          id: "2.11", number: "Level 5", prompt: "Write: four thousand nine hundred and forty (4940)", displayText: "Four thousand nine hundred and forty",
+          id: "2.11", number: "Level 5", prompt: "Write: four thousand nine hundred and forty (4940)", displayText: "4,940",
           targetLevel: 5,
           responseFields: [{ label: "Correct", type: "correct_incorrect" }],
         },
         // Level 6
         {
-          id: "2.12", number: "Level 6", prompt: "Write: ten thousand (10000)", displayText: "Ten thousand",
+          id: "2.12", number: "Level 6", prompt: "Write: ten thousand (10000)", displayText: "10,000",
           targetLevel: 6,
           responseFields: [{ label: "Correct", type: "correct_incorrect" }],
         },
         {
-          id: "2.13", number: "Level 6", prompt: "Write: fifteen thousand six hundred and twenty-five (15625)", displayText: "Fifteen thousand six hundred and twenty-five",
+          id: "2.13", number: "Level 6", prompt: "Write: fifteen thousand six hundred and twenty-five (15625)", displayText: "15,625",
           targetLevel: 6,
           responseFields: [{ label: "Correct", type: "correct_incorrect" }],
         },
         {
-          id: "2.14", number: "Level 6", prompt: "Write: thirty-four thousand seven hundred (34700)", displayText: "Thirty-four thousand seven hundred",
+          id: "2.14", number: "Level 6", prompt: "Write: thirty-four thousand seven hundred (34700)", displayText: "34,700",
           targetLevel: 6,
           responseFields: [{ label: "Correct", type: "correct_incorrect" }],
         },
         {
-          id: "2.15", number: "Level 6", prompt: "Write: fifty thousand and fifty (50050)", displayText: "Fifty thousand and fifty",
+          id: "2.15", number: "Level 6", prompt: "Write: fifty thousand and fifty (50050)", displayText: "50,050",
           targetLevel: 6,
           responseFields: [{ label: "Correct", type: "correct_incorrect" }],
         },

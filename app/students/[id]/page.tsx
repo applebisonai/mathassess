@@ -307,11 +307,12 @@ export default async function StudentProfilePage({
     const sessionsForAssess = sortedSessions.filter(
       (s) => s.assessment_id === assessId && (placementsBySession[s.id] ?? []).length > 0
     );
-    chartsByAssessment[assessId] = sessionsForAssess.map((s) => {
-      const d = new Date(s.date_administered);
+    chartsByAssessment[assessId] = sessionsForAssess.map((s, idx) => {
       const point: ChartPoint = {
-        date: d.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
-        fullDate: d.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }),
+        // Unique key per session so two sessions on the same calendar date
+        // don't collide on the x-axis.  LevelChart's tickFormatter strips the suffix.
+        date: `${s.date_administered}_${idx}`,
+        fullDate: s.date_administered,   // raw "YYYY-MM-DD"; LevelChart formats it
       };
       for (const p of placementsBySession[s.id] ?? []) {
         const level = p.confirmed_level ?? p.suggested_level;

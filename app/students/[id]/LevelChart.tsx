@@ -17,9 +17,17 @@ export interface ChartPoint {
   [model: string]: string | number | undefined;
 }
 
+/** Parse "YYYY-MM-DD" as a local date (no UTC shift). */
+function parseLocalDate(raw: string): string {
+  const [yr, mo, dy] = raw.split("-").map(Number);
+  const d = new Date(yr, mo - 1, dy);
+  return d.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+}
+
 function CustomTooltip({ active, payload, modelDefs }: any) {
   if (!active || !payload?.length) return null;
-  const fullDate = payload[0]?.payload?.fullDate;
+  const rawDate: string = payload[0]?.payload?.fullDate ?? "";
+  const fullDate = rawDate ? parseLocalDate(rawDate) : "";
 
   return (
     <div className="bg-white border border-gray-200 rounded-2xl shadow-xl p-3 text-xs min-w-[200px]">
@@ -175,6 +183,13 @@ export default function LevelChart({ title, subtitle, data, modelDefs }: LevelCh
               tick={{ fontSize: 11, fill: "#9ca3af" }}
               tickLine={false}
               axisLine={{ stroke: "#e5e7eb" }}
+              tickFormatter={(v: string) => {
+                // key format: "YYYY-MM-DD_idx" — strip suffix and parse as local date
+                const raw = v.split("_")[0];
+                const [yr, mo, dy] = raw.split("-").map(Number);
+                const d = new Date(yr, mo - 1, dy);
+                return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+              }}
             />
             <YAxis
               domain={[0, maxY]}

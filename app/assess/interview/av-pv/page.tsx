@@ -561,18 +561,23 @@ function InterviewContent() {
           </div>
 
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
-            {groupBySubLevel(currentGroup.items).map(([subLevel, items], idx) => (
-              <SubGroupSection
-                key={subLevel}
-                subLevel={subLevel}
-                items={items}
-                isFirst={idx === 0}
-                color={currentGroup.color}
-                responses={responses}
-                getResponse={getResponse}
-                setResponse={setResponse}
-              />
-            ))}
+            {groupBySubLevel(currentGroup.items).map(([subLevel, items]) => {
+              const isStartHere = !!currentGroup.startAtItem && subLevel === currentGroup.startAtItem;
+              const startNote = isStartHere ? (currentGroup.startNote ?? null) : null;
+              return (
+                <SubGroupSection
+                  key={subLevel}
+                  subLevel={subLevel}
+                  items={items}
+                  isFirst={isStartHere}
+                  startNote={startNote}
+                  color={currentGroup.color}
+                  responses={responses}
+                  getResponse={getResponse}
+                  setResponse={setResponse}
+                />
+              );
+            })}
           </div>
 
           {/* Navigation */}
@@ -611,11 +616,12 @@ function InterviewContent() {
 // ── Sub-group section ─────────────────────────────────────────────────────────
 
 function SubGroupSection({
-  subLevel, items, isFirst, color, responses, getResponse, setResponse,
+  subLevel, items, isFirst, startNote, color, responses, getResponse, setResponse,
 }: {
   subLevel: string;
   items: AssessmentItem[];
   isFirst: boolean;
+  startNote?: string | null;
   color: string;
   responses: Responses;
   getResponse: (id: string, field: string) => string;
@@ -626,8 +632,9 @@ function SubGroupSection({
   return (
     <div className={`rounded-xl border-2 overflow-hidden ${COLOR_SUBGROUP[color] ?? "border-gray-200 bg-gray-50/30"}`}>
       {isFirst && (
-        <div className="bg-green-500 text-white text-xs font-bold px-3 py-1.5 flex items-center gap-1.5">
+        <div className="bg-green-500 text-white text-xs font-bold px-3 py-1.5 flex items-center gap-1.5 flex-wrap">
           <span>▶</span> START HERE
+          {startNote && <span className="ml-2 font-normal text-green-100">— {startNote}</span>}
         </div>
       )}
 

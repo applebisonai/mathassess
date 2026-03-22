@@ -35,6 +35,8 @@ export interface TaskGroup {
   materials?: string;
   items: AssessmentItem[];
   branchingNote?: string;
+  startAtItem?: string;   // sub-level key where START HERE badge appears
+  startNote?: string;     // optional note shown on the START HERE banner
 }
 
 // Additive strategy options

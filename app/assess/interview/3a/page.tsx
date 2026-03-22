@@ -357,18 +357,23 @@ function InterviewContent() {
           </div>
 
           <div className="flex-1 overflow-y-auto p-4 space-y-3">
-            {groupBySubLevel(currentGroup.items).map(([subLevel, items]) => (
-              <SubGroupSection
-                key={subLevel}
-                subLevel={subLevel}
-                items={items}
-                color={currentGroup.color}
-                responses={responses}
-                getResponse={getResponse}
-                setResponse={setResponse}
-                startHere={subLevel === (currentGroup.startHereSubLevel ?? "")}
-              />
-            ))}
+            {groupBySubLevel(currentGroup.items).map(([subLevel, items]) => {
+              const isStartHere = !!currentGroup.startAtItem && subLevel === currentGroup.startAtItem;
+              const startNote = isStartHere ? (currentGroup.startNote ?? null) : null;
+              return (
+                <SubGroupSection
+                  key={subLevel}
+                  subLevel={subLevel}
+                  items={items}
+                  color={currentGroup.color}
+                  responses={responses}
+                  getResponse={getResponse}
+                  setResponse={setResponse}
+                  isFirst={isStartHere}
+                  startNote={startNote}
+                />
+              );
+            })}
           </div>
 
           {/* Navigation */}
@@ -407,7 +412,7 @@ function InterviewContent() {
 // ── Sub-group section ──────────────────────────────────────────────────────────
 
 function SubGroupSection({
-  subLevel, items, color, responses, getResponse, setResponse, startHere,
+  subLevel, items, color, responses, getResponse, setResponse, isFirst, startNote,
 }: {
   subLevel: string;
   items: AssessmentItem[];
@@ -415,20 +420,21 @@ function SubGroupSection({
   responses: Responses;
   getResponse: (id: string, field: string) => string;
   setResponse: (id: string, field: string, value: string) => void;
-  startHere?: boolean;
+  isFirst?: boolean;
+  startNote?: string | null;
 }) {
   const correctCount = items.filter((item) => responses[item.id]?.Correct === "correct").length;
   const scored = items.filter((item) => responses[item.id]?.Correct).length;
 
   return (
-    <div className={`rounded-xl border-2 overflow-hidden ${startHere ? "border-amber-400" : COLOR_SUBGROUP[color] ?? "border-gray-200 bg-gray-50/30"}`}>
-      {startHere && (
-        <div className="bg-amber-400 px-3 py-1.5 flex items-center gap-2">
-          <span className="text-amber-900 text-xs font-black uppercase tracking-wide">★ Start Here</span>
-          <span className="text-amber-800 text-xs">Begin assessment at this level</span>
+    <div className={`rounded-xl border-2 overflow-hidden ${COLOR_SUBGROUP[color] ?? "border-gray-200 bg-gray-50/30"}`}>
+      {isFirst && (
+        <div className="bg-green-500 text-white text-xs font-bold px-3 py-1.5 flex items-center gap-1.5 flex-wrap">
+          <span>▶</span> START HERE
+          {startNote && <span className="ml-2 font-normal text-green-100">— {startNote}</span>}
         </div>
       )}
-      <div className={`px-3 py-2 flex items-center justify-between ${startHere ? "bg-amber-50 text-amber-900" : COLOR_SUBHEAD[color] ?? "bg-gray-100 text-gray-900"}`}>
+      <div className={`px-3 py-2 flex items-center justify-between ${COLOR_SUBHEAD[color] ?? "bg-gray-100 text-gray-900"}`}>
         <span className="text-xs font-bold">{subLevel}</span>
         {scored > 0 && (
           <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${

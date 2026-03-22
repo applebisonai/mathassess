@@ -407,10 +407,8 @@ function InterviewContent() {
           </div>
 
           <div className="flex-1 overflow-y-auto p-4 space-y-3">
-            {groupBySubLevel(currentGroup.items).map(([subLevel, items], idx) => {
-              const isStartHere = currentGroup.startAtItem
-                ? subLevel === currentGroup.startAtItem
-                : idx === 0;
+            {groupBySubLevel(currentGroup.items).map(([subLevel, items]) => {
+              const isStartHere = !!currentGroup.startAtItem && subLevel === currentGroup.startAtItem;
               const startNote = isStartHere ? (currentGroup.startNote ?? null) : null;
               return (
                 <SubGroupSection

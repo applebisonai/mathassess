@@ -68,11 +68,13 @@ function calcGroupScore(items: AssessmentItem[], responses: Responses) {
 
 // ── CPV Scoring ───────────────────────────────────────────────────────────────
 // Level 0: Cannot produce counting sequences by tens
-// Level 1: Counts by 10s from multiples AND from non-multiples (TG1)
-// Level 2: Uses bundles effectively with Jump/Split strategies (TG2)
-// Level 3: Solves 2-digit +/− without materials (TG3: ≥2 of first 4)
-// Level 4: All 2-digit correct with efficient (non-counting) strategies
-// Level 5: Solves 3-digit tasks (TG3: ≥2 of last 4)
+// Level 1: Counts by 10s — TG1 at least 1 sequence correct
+// Level 2: Uses bundles/sticks correctly — TG2 ≥6 of 14 (or ≥4 of Seq1)
+//          Strategy (Jump/Split) is recorded as evidence, NOT a gate
+// Level 3: Solves 2-digit +/− without materials — TG3 ≥2 of first 4
+//          (Level 3 is reachable directly from Level 1 if TG3 evidence is clear)
+// Level 4: 2-digit correct with efficient strategies (Jump/Split/SJ), no counting by 1s
+// Level 5: Solves 3-digit tasks — TG3 ≥2 of last 4
 
 function calculateResults(responses: Responses) {
   const tg1Correct = ["1.1", "1.2", "1.3", "1.4"].filter(
@@ -87,12 +89,17 @@ function calculateResults(responses: Responses) {
     "2.3a":  4, "2.3b": 14, "2.3c": 44, "2.3d": 48,
     "2.3e": 61, "2.3f": 85,
   };
-  const tg2Correct = [...tg2Seq1, ...tg2Seq2].filter((id) => {
+  const tg2Seq1Correct = tg2Seq1.filter((id) => {
     const entered = parseInt(responses[id]?.["Student said"] ?? "");
     return !isNaN(entered) && entered === TG2_EXPECTED[id];
   }).length;
+  const tg2Correct = tg2Seq2.reduce((count, id) => {
+    const entered = parseInt(responses[id]?.["Student said"] ?? "");
+    return count + (!isNaN(entered) && entered === TG2_EXPECTED[id] ? 1 : 0);
+  }, tg2Seq1Correct);
   const tg2Total = tg2Seq1.length + tg2Seq2.length;
 
+  // Strategy is recorded for evidence but does NOT gate level advancement
   const tg2Strat1 = responses["2.2s"]?.Strategy ?? "";
   const tg2Strat2 = responses["2.3s"]?.Strategy ?? "";
   const tg2UsesJumpOrSplit =
@@ -113,11 +120,27 @@ function calculateResults(responses: Responses) {
   );
 
   let cpvLevel = 0;
+
+  // Level 1: TG1 — at least 1 sequence correct
   if (tg1Correct >= 1) cpvLevel = 1;
-  if (tg1Correct >= 3 && tg2Correct >= 8 && tg2UsesJumpOrSplit) cpvLevel = Math.max(cpvLevel, 2);
-  if (cpvLevel >= 2 && tg3Correct2 >= 2) cpvLevel = Math.max(cpvLevel, 3);
-  if (cpvLevel >= 3 && tg3Correct2 >= 4 && tg3EfficientCount >= 2 && !tg3CountingBy1s) cpvLevel = Math.max(cpvLevel, 4);
-  if (cpvLevel >= 3 && tg3Correct3 >= 2) cpvLevel = Math.max(cpvLevel, 5);
+
+  // Level 2: TG2 — bundles/sticks correctly handled (≥6/14 overall, or ≥4/8 in Seq1)
+  // Strategy is informational only — does NOT gate this level
+  if (tg1Correct >= 1 && (tg2Correct >= 6 || tg2Seq1Correct >= 4)) {
+    cpvLevel = Math.max(cpvLevel, 2);
+  }
+
+  // Level 3: TG3 — 2-digit without materials (≥2 of 4)
+  // Reachable from Level 1 directly if TG3 evidence is clear
+  if (tg3Correct2 >= 2) cpvLevel = Math.max(cpvLevel, 3);
+
+  // Level 4: Efficient strategies for 2-digit (Jump/Split/SJ), not counting by 1s
+  if (tg3Correct2 >= 3 && tg3EfficientCount >= 2 && !tg3CountingBy1s) {
+    cpvLevel = Math.max(cpvLevel, 4);
+  }
+
+  // Level 5: TG3 — 3-digit tasks (≥2 of 4)
+  if (tg3Correct3 >= 2) cpvLevel = Math.max(cpvLevel, 5);
 
   return {
     cpvLevel,
@@ -386,29 +409,40 @@ function InterviewContent() {
               </div>
             </div>
 
-            <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wide mb-3">Score Breakdown</h3>
+            <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wide mb-3">Evidence Summary</h3>
             <div className="space-y-1 text-sm mb-4">
               {scoreRows.map(({ label, score }) => score ? (
                 <div key={label} className="flex items-center justify-between py-1.5 border-b border-gray-100">
-                  <span className="text-gray-600">{label}</span>
-                  <span className={`font-semibold ${
+                  <span className="text-gray-600 text-xs">{label}</span>
+                  <span className={`font-semibold text-xs ${
                     score.correct / score.total >= 0.75 ? "text-green-600" :
                     score.correct / score.total >= 0.5  ? "text-yellow-600" : "text-red-500"
                   }`}>
-                    {score.correct} / {score.total} {score.correct / score.total >= 0.75 ? "✓" : ""}
+                    {score.correct} / {score.total}
+                    {score.correct / score.total >= 0.75 ? " ✓" : score.correct === 0 ? " ✗" : ""}
                   </span>
                 </div>
               ) : null)}
             </div>
 
-            {results.tg2UsesJumpOrSplit && (
+            {/* Strategy observed — informational only */}
+            <div className={`text-xs rounded-lg px-3 py-2 mb-4 ${
+              results.tg2UsesJumpOrSplit
+                ? "bg-teal-50 border border-teal-200 text-teal-700"
+                : "bg-gray-50 border border-gray-200 text-gray-500"
+            }`}>
+              {results.tg2UsesJumpOrSplit
+                ? "✓ Jump/Split strategy observed in TG2 (materials tasks)"
+                : "ℹ No Jump/Split strategy recorded for TG2 — note for instruction"}
+            </div>
+            {results.tg3EfficientCount >= 2 && (
               <div className="text-xs bg-teal-50 border border-teal-200 rounded-lg px-3 py-2 text-teal-700 mb-4">
-                ✓ Jump/Split strategy observed in TG2 (materials tasks)
+                ✓ Efficient strategies (Jump/Split) observed in TG3
               </div>
             )}
 
             <p className="text-xs text-gray-400 mb-4">
-              * Suggested placement based on scoring thresholds. Teacher judgment should confirm final level.
+              * Suggested placement based on performance evidence. Teacher judgment should confirm final level.
             </p>
 
             <div className="flex gap-3">

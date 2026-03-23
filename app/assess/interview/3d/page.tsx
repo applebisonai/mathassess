@@ -516,28 +516,68 @@ function ItemRow({
 }) {
   const [notesOpen, setNotesOpen] = useState(false);
 
+  // Split prompt into lines; detect whether this is an arrowed question list
+  const lines = item.prompt.split("\n");
+  const hasArrows = lines.some((l) => l.startsWith("→"));
+
   return (
     <div className="px-3 py-3 space-y-2">
-      {/* Display text + notes toggle */}
+      {/* Header row: display text (numeral card) + notes toggle */}
       <div className="flex items-start justify-between gap-2">
-        <div className="flex-1 space-y-1">
-          {item.displayText && (
-            <div className="text-lg font-bold text-gray-900 font-mono">{item.displayText}</div>
-          )}
-          {/* Multi-line prompt (for higher decade tasks) */}
-          <div className="text-xs text-gray-600 whitespace-pre-line leading-relaxed">{item.prompt}</div>
-          {item.notes && (
-            <div className="text-xs text-blue-600 italic">{item.notes}</div>
-          )}
-        </div>
+        {item.displayText && (
+          <div className="text-2xl font-black text-gray-900 font-mono leading-none">{item.displayText}</div>
+        )}
         <button
           onClick={() => setNotesOpen((v) => !v)}
-          className={`text-base shrink-0 transition-opacity mt-0.5 ${notesOpen ? "opacity-100" : "opacity-40 hover:opacity-70"}`}
+          className={`text-base shrink-0 transition-opacity ml-auto ${notesOpen ? "opacity-100" : "opacity-40 hover:opacity-70"}`}
           title="Add note"
         >📝</button>
       </div>
 
-      {/* Response fields */}
+      {/* Prompt — arrowed lines get an input box after each question */}
+      <div className="space-y-1.5">
+        {hasArrows ? (
+          lines.map((line, i) => {
+            if (line.startsWith("Show card:")) {
+              // "Show card: 58" → subtle label
+              return (
+                <div key={i} className="text-xs text-gray-400 font-medium tracking-wide">
+                  {line}
+                </div>
+              );
+            }
+            if (line.startsWith("→")) {
+              const questionText = line.slice(1).trim(); // strip "→ "
+              const responseKey = `q:${i}:${questionText}`;
+              return (
+                <div key={i} className="flex items-center gap-2 flex-wrap">
+                  <span className="text-xs text-gray-700 font-medium">{line}</span>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    placeholder="___"
+                    value={getResponse(item.id, responseKey)}
+                    onChange={(e) => setResponse(item.id, responseKey, e.target.value)}
+                    className="w-20 border-2 border-orange-300 rounded-lg px-2 py-1 text-sm font-bold text-center text-orange-800 bg-orange-50 focus:outline-none focus:border-orange-500 placeholder-orange-200"
+                  />
+                </div>
+              );
+            }
+            // Any other line
+            return (
+              <div key={i} className="text-xs text-gray-600">{line}</div>
+            );
+          })
+        ) : (
+          /* Non-arrowed items (TG1–5): plain prompt + displayText already shown above */
+          <div className="text-xs text-gray-600 whitespace-pre-line leading-relaxed">{item.prompt}</div>
+        )}
+        {item.notes && (
+          <div className="text-xs text-blue-600 italic">{item.notes}</div>
+        )}
+      </div>
+
+      {/* Response fields (Correct / Strategy) */}
       <div className="flex flex-wrap gap-3 mt-1">
         {item.responseFields.map((field) => (
           <ResponseFieldWidget
@@ -574,22 +614,6 @@ function ResponseFieldWidget({
   value: string;
   onChange: (v: string) => void;
 }) {
-  if (field.type === "number_input") {
-    return (
-      <div className="flex items-center gap-2">
-        <span className="text-xs text-gray-500 font-medium whitespace-nowrap">{field.label}:</span>
-        <input
-          type="text"
-          inputMode="numeric"
-          placeholder="___"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className="w-20 border-2 border-orange-300 rounded-lg px-2 py-1 text-sm font-bold text-center text-orange-800 bg-orange-50 focus:outline-none focus:border-orange-500 placeholder-orange-200"
-        />
-      </div>
-    );
-  }
-
   if (field.type === "correct_incorrect") {
     return (
       <div className="flex items-center gap-2">

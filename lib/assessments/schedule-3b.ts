@@ -557,15 +557,16 @@ export const schedule3B = {
 
   ] as TaskGroup[],
 
-  // Full SN20 model — Wright & Ellemor-Collins, 2018
+  // Full SN20 model — Wright & Ellemor-Collins, 2018 (exact PDF wording)
+  // Note: For levels 1–7, student has to use facile strategies, not counting by ones.
   sn20Levels: [
-    { level: 0, name: "Emergent",                                              description: "Cannot make finger patterns for numbers 6–10 without counting" },
-    { level: 1, name: "Finger patterns for 6–10",                              description: "Can show finger patterns for 6–10 including alternative ways" },
-    { level: 2, name: "Small doubles and small partitions of 10",              description: "Facile with small doubles (2&2 to 5&5) and small partitions of 10 (9+1, 7+3)" },
-    { level: 3, name: "Five-plus facts and partitions of 5",                   description: "Facile with five-plus facts, partitions of 5, and big partitions of 10" },
-    { level: 4, name: "Facile structuring: numbers 1–10",                      description: "Facile with all partitions 1–9 and Range 2 addition (whole ≤ 10)" },
-    { level: 5, name: "Facile ten-plus, big doubles, Range 3 addition",        description: "Facile with ten-plus facts, teen+10, big doubles, and Range 3 addition (parts ≤ 10)" },
-    { level: 6, name: "Range 3 subtraction (parts ≤ 10)",                     description: "Facile with Range 3 subtraction where parts do not exceed 10" },
-    { level: 7, name: "Range 4: addition & subtraction (whole ≤ 20)",         description: "Facile with partitions 11–20 and Range 4 addition & subtraction (whole ≤ 20)" },
+    { level: 0, name: "Emergent spatial patterns and finger patterns",         description: "Cannot identify spatial patterns or make finger patterns without counting" },
+    { level: 1, name: "Finger patterns 1–5 and spatial patterns 1–6",         description: "Shows finger patterns 1–5 and recognises spatial patterns 1–6 without counting" },
+    { level: 2, name: "Small doubles and small partitions of 10",              description: "Facile with small doubles (2&2 to 5&5) and small partitions of 10" },
+    { level: 3, name: "Five-plus and partitions of 5",                        description: "Facile with five-plus facts and partitions of 5" },
+    { level: 4, name: "Facile structuring numbers 1 to 10",                   description: "Facile with all partitions 1–9 and formal addition with whole ≤ 10" },
+    { level: 5, name: "Formal addition (parts ≤ 10)",                         description: "Facile with formal addition tasks where parts do not exceed 10" },
+    { level: 6, name: "Formal addition & subtraction (parts ≤ 10)",           description: "Facile with formal addition and subtraction where parts do not exceed 10" },
+    { level: 7, name: "Formal addition & subtraction (whole ≤ 20)",           description: "Facile with formal addition and subtraction where whole does not exceed 20" },
   ],
 };

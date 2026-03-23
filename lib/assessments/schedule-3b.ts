@@ -158,23 +158,23 @@ export const schedule3B = {
       items: [
         // 3.1 Small partitions — Level 2 (large number given, small complement needed)
         {
-          id: "3.1a", number: "3.1 — Small Partitions", targetLevel: 2,
+          id: "3.1a", number: "Partitions of 10", targetLevel: 2,
           prompt: "What goes with 9 to make 10?", displayText: "9 + ? = 10",
           responseFields: [{ label: "Correct", type: "correct_incorrect" }, STRATEGY_FIELD],
         },
         {
-          id: "3.1b", number: "3.1 — Small Partitions", targetLevel: 2,
+          id: "3.1b", number: "Partitions of 10", targetLevel: 2,
           prompt: "What goes with 7 to make 10?", displayText: "7 + ? = 10",
           responseFields: [{ label: "Correct", type: "correct_incorrect" }, STRATEGY_FIELD],
         },
         // 3.2 Big partitions — Level 3 (small number given, larger complement needed)
         {
-          id: "3.2a", number: "3.2 — Big Partitions", targetLevel: 3,
+          id: "3.2a", number: "Partitions of 10", targetLevel: 3,
           prompt: "What goes with 2 to make 10?", displayText: "2 + ? = 10",
           responseFields: [{ label: "Correct", type: "correct_incorrect" }, STRATEGY_FIELD],
         },
         {
-          id: "3.2b", number: "3.2 — Big Partitions", targetLevel: 3,
+          id: "3.2b", number: "Partitions of 10", targetLevel: 3,
           prompt: "What goes with 4 to make 10?", displayText: "4 + ? = 10",
           responseFields: [{ label: "Correct", type: "correct_incorrect" }, STRATEGY_FIELD],
         },

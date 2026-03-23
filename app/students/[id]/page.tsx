@@ -14,6 +14,7 @@ import { scheduleAvPV } from "@/lib/assessments/schedule-av-pv";
 import { schedule3A } from "@/lib/assessments/schedule-3a";
 import { schedule3B } from "@/lib/assessments/schedule-3b";
 import { schedule3C } from "@/lib/assessments/schedule-3c";
+import { schedule3D } from "@/lib/assessments/schedule-3d";
 
 const gradeLabel = (g: number) =>
   g === 0 ? "Kindergarten" : `Grade ${g}`;
@@ -199,6 +200,24 @@ const ASSESSMENT_CONFIG: Record<string, {
       },
     ],
   },
+  "schedule-3d": {
+    label: "Schedule 3D — Addition & Subtraction to 100",
+    subtitle: "3D · A&S",
+    modelDefs: [
+      {
+        key: "A&S", color: "#ea580c", maxLevel: 6,
+        labels: {
+          0: "Emergent addition & subtraction to 100",
+          1: "Add-up-from / subtract-down-to a decuple",
+          2: "Add-up-to / subtract-down-from a decuple — small (1–5)",
+          3: "Add-up-to / subtract-down-from a decuple — large (6–9)",
+          4: "Add/subtract across a decuple",
+          5: "2-digit addition with regrouping",
+          6: "2-digit addition & subtraction with regrouping",
+        },
+      },
+    ],
+  },
 };
 
 // All known model → level name mappings (for history cards)
@@ -232,6 +251,7 @@ function buildItemLookup(assessmentId: string): Record<string, { prompt: string;
     "schedule-3a": schedule3A as never,
     "schedule-3b": schedule3B as never,
     "schedule-3c": schedule3C as never,
+    "schedule-3d": schedule3D as never,
   };
   const schedule = schedules[assessmentId];
   if (!schedule) return {};
@@ -366,7 +386,7 @@ export default async function StudentProfilePage({
   const allModels = Object.keys(currentLevels);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-slate-200">
       <Nav teacherName={teacherName} />
       <main className="max-w-4xl mx-auto px-4 py-8">
 

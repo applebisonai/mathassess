@@ -83,11 +83,12 @@ const CATEGORIES = [
       {
         id: "schedule-3d",
         name: "Schedule 3D",
-        description: "Fractions — Equal Sharing, Part-Whole & Number Line",
-        gradeRange: "3–5",
-        models: ["FRN"],
-        route: "",
-        available: false,
+        description: "Addition & Subtraction to 100 — Formal & Higher Decade",
+        gradeRange: "2–5",
+        models: ["A&S"],
+        route: "/assess/interview/3d",
+        available: true,
+        materials: ["10 Task Cards", "10 Numeral Cards", "Decuple Line"],
       },
       {
         id: "schedule-3e",
@@ -313,7 +314,7 @@ function SelectContent() {
   const canStart = selectedStudent && assessment?.available;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-slate-200">
       <Nav teacherName="" />
       <main className="max-w-2xl mx-auto px-4 py-8">
         <div className="mb-6">

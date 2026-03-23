@@ -19,7 +19,7 @@ const CATEGORIES = [
       { id: "schedule-3a", name: "Schedule 3A", description: "Number Words and Numerals — NID, FNWS & BNWS", gradeRange: "K–3", models: ["NID", "FNWS", "BNWS"], available: true },
       { id: "schedule-3b", name: "Schedule 3B", description: "Structuring Numbers to 20 — SN20", gradeRange: "K–3", models: ["SN20"], available: true },
       { id: "schedule-3c", name: "Schedule 3C", description: "Conceptual Place Value — Incrementing & Decrementing by 10s and 100s", gradeRange: "1–3", models: ["CPV"], available: true },
-      { id: "schedule-3d", name: "Schedule 3D", description: "Fractions — Equal Sharing, Part-Whole & Number Line", gradeRange: "3–5", models: ["FRN"], available: false },
+      { id: "schedule-3d", name: "Schedule 3D", description: "Addition & Subtraction to 100 — Formal & Higher Decade", gradeRange: "2–5", models: ["A&S"], available: true },
       { id: "schedule-3e", name: "Schedule 3E", description: "Decimals & Percentages — Tenths, Hundredths & Equivalence", gradeRange: "4–5", models: ["DEC"], available: false },
       { id: "schedule-3f", name: "Schedule 3F", description: "Multiplication & Division Facts — Strategies & Automaticity", gradeRange: "3–5", models: ["MDF"], available: false },
     ],
@@ -103,7 +103,7 @@ export default function AssessCatalogPage() {
   const [expanded, setExpanded] = useState<string | null>("lfin");
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-slate-200">
       <Nav teacherName="" />
       <main className="max-w-3xl mx-auto px-4 py-8">
         <div className="mb-6 flex items-center justify-between">

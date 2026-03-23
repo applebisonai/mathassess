@@ -47,75 +47,72 @@ function isCorrect(responses: Responses, itemId: string): boolean {
   return responses[itemId]?.Correct === "correct";
 }
 
+function countCorrect(responses: Responses, items: AssessmentItem[]): number {
+  return items.filter((item) => isCorrect(responses, item.id)).length;
+}
+
 function calculateResults(responses: Responses) {
-  const tg1 = schedule3B.taskGroups.find((g) => g.id === "tg1")!;
-  const tg2 = schedule3B.taskGroups.find((g) => g.id === "tg2")!;
-  const tg3 = schedule3B.taskGroups.find((g) => g.id === "tg3")!;
-  const tg4 = schedule3B.taskGroups.find((g) => g.id === "tg4")!;
-  const tg5 = schedule3B.taskGroups.find((g) => g.id === "tg5")!;
+  const tg = (id: string) => schedule3B.taskGroups.find((g) => g.id === id)!;
 
-  // TG1: Spatial patterns
-  const tg1Level3Items = tg1.items.filter((item) => item.targetLevel === 3);
-  const tg1Level4Items = tg1.items.filter((item) => item.targetLevel === 4);
-  const tg1Level5Items = tg1.items.filter((item) => item.targetLevel === 5);
-  const tg1L3Correct = tg1Level3Items.filter((item) => isCorrect(responses, item.id)).length;
-  const tg1L4Correct = tg1Level4Items.filter((item) => isCorrect(responses, item.id)).length;
-  const tg1L5Correct = tg1Level5Items.filter((item) => isCorrect(responses, item.id)).length;
+  const tg1  = tg("tg1");
+  const tg2  = tg("tg2");
+  const tg3  = tg("tg3");
+  const tg4  = tg("tg4");
+  const tg5  = tg("tg5");
+  const tg6  = tg("tg6");
+  const tg7  = tg("tg7");
+  const tg8  = tg("tg8");
+  const tg9  = tg("tg9");
+  const tg10 = tg("tg10");
+  const tg11 = tg("tg11");
+  const tg12 = tg("tg12");
+  const tg13 = tg("tg13");
 
-  // TG2: Partitions
-  const tg2Level4Items = tg2.items.filter((item) => item.targetLevel === 4);
-  const tg2Level5Items = tg2.items.filter((item) => item.targetLevel === 5);
-  const tg2L4Correct = tg2Level4Items.filter((item) => isCorrect(responses, item.id)).length;
-  const tg2L5Correct = tg2Level5Items.filter((item) => isCorrect(responses, item.id)).length;
+  const tg3_L2 = tg3.items.filter((i) => i.targetLevel === 2);
+  const tg3_L3 = tg3.items.filter((i) => i.targetLevel === 3);
 
-  // TG3: Doubles
-  const tg3Level4Items = tg3.items.filter((item) => item.targetLevel === 4);
-  const tg3Level5Items = tg3.items.filter((item) => item.targetLevel === 5);
-  const tg3Level6Items = tg3.items.filter((item) => item.targetLevel === 6);
-  const tg3L4Correct = tg3Level4Items.filter((item) => isCorrect(responses, item.id)).length;
-  const tg3L5Correct = tg3Level5Items.filter((item) => isCorrect(responses, item.id)).length;
-  const tg3L6Correct = tg3Level6Items.filter((item) => isCorrect(responses, item.id)).length;
-
-  // TG4: Addition
-  const tg4Level5Items = tg4.items.filter((item) => item.targetLevel === 5);
-  const tg4Level6Items = tg4.items.filter((item) => item.targetLevel === 6);
-  const tg4Level7Items = tg4.items.filter((item) => item.targetLevel === 7);
-  const tg4L5Correct = tg4Level5Items.filter((item) => isCorrect(responses, item.id)).length;
-  const tg4L6Correct = tg4Level6Items.filter((item) => isCorrect(responses, item.id)).length;
-  const tg4L7Correct = tg4Level7Items.filter((item) => isCorrect(responses, item.id)).length;
-
-  // TG5: Subtraction
-  const tg5Level6Items = tg5.items.filter((item) => item.targetLevel === 6);
-  const tg5Level7Items = tg5.items.filter((item) => item.targetLevel === 7);
-  const tg5L6Correct = tg5Level6Items.filter((item) => isCorrect(responses, item.id)).length;
-  const tg5L7Correct = tg5Level7Items.filter((item) => isCorrect(responses, item.id)).length;
-
-  // Calculate SN20 level based on ≥50% correct at each level
-  let sn20Level = 0;
-  if (tg1L3Correct >= 2 || tg2L4Correct >= 2 || tg3L4Correct >= 1) sn20Level = Math.max(sn20Level, 3);
-  if (tg1L4Correct >= 2 || tg2L4Correct >= 2) sn20Level = Math.max(sn20Level, 4);
-  if (tg1L5Correct >= 2 || tg2L5Correct >= 2 || tg3L5Correct >= 2 || tg4L5Correct >= 1) sn20Level = Math.max(sn20Level, 5);
-  if (tg3L6Correct >= 2 || tg4L6Correct >= 2 || tg5L6Correct >= 2) sn20Level = Math.max(sn20Level, 6);
-  if (tg4L7Correct >= 2 || tg5L7Correct >= 3) sn20Level = Math.max(sn20Level, 7);
-
-  return {
-    sn20Level,
-    scores: {
-      tg1_l3: tg1L3Correct,
-      tg1_l4: tg1L4Correct,
-      tg1_l5: tg1L5Correct,
-      tg2_l4: tg2L4Correct,
-      tg2_l5: tg2L5Correct,
-      tg3_l4: tg3L4Correct,
-      tg3_l5: tg3L5Correct,
-      tg3_l6: tg3L6Correct,
-      tg4_l5: tg4L5Correct,
-      tg4_l6: tg4L6Correct,
-      tg4_l7: tg4L7Correct,
-      tg5_l6: tg5L6Correct,
-      tg5_l7: tg5L7Correct,
-    },
+  const scores = {
+    tg1:    countCorrect(responses, tg1.items),   // 6 items — Level 1
+    tg2:    countCorrect(responses, tg2.items),   // 4 items — Level 2
+    tg3_1:  countCorrect(responses, tg3_L2),      // 2 items — Level 2
+    tg3_2:  countCorrect(responses, tg3_L3),      // 2 items — Level 3
+    tg4:    countCorrect(responses, tg4.items),   // 3 items — Level 3
+    tg5:    countCorrect(responses, tg5.items),   // 6 items — Level 3
+    tg6:    countCorrect(responses, tg6.items),   // 2 items — Level 4
+    tg7:    countCorrect(responses, tg7.items),   // 2 items — Level 7
+    tg8:    countCorrect(responses, tg8.items),   // 8 items — Level 5
+    tg9:    countCorrect(responses, tg9.items),   // 5 items — Level 5
+    tg10:   countCorrect(responses, tg10.items),  // 3 items — Level 4
+    tg11:   countCorrect(responses, tg11.items),  // 3 items — Level 5
+    tg12:   countCorrect(responses, tg12.items),  // 3 items — Level 6
+    tg13:   countCorrect(responses, tg13.items),  // 4 items — Level 7
   };
+
+  // SN20 level: highest level with majority-correct evidence
+  let sn20Level = 0;
+
+  // Level 1 — TG1: ≥3/6 finger patterns correct
+  if (scores.tg1 >= 3) sn20Level = Math.max(sn20Level, 1);
+
+  // Level 2 — TG2 (≥2/4) OR TG3 small partitions (≥1/2)
+  if (scores.tg2 >= 2 || scores.tg3_1 >= 1) sn20Level = Math.max(sn20Level, 2);
+
+  // Level 3 — TG3 big partitions (≥1/2) OR TG4 (≥2/3) OR TG5 (≥3/6)
+  if (scores.tg3_2 >= 1 || scores.tg4 >= 2 || scores.tg5 >= 3) sn20Level = Math.max(sn20Level, 3);
+
+  // Level 4 — TG6 partitions 1-9 (≥1/2) OR TG10 Range 2 addition (≥2/3)
+  if (scores.tg6 >= 1 || scores.tg10 >= 2) sn20Level = Math.max(sn20Level, 4);
+
+  // Level 5 — TG8 ten-plus (≥4/8) OR TG9 big doubles (≥3/5) OR TG11 Range 3 add (≥2/3)
+  if (scores.tg8 >= 4 || scores.tg9 >= 3 || scores.tg11 >= 2) sn20Level = Math.max(sn20Level, 5);
+
+  // Level 6 — TG12 Range 3 subtraction (≥2/3)
+  if (scores.tg12 >= 2) sn20Level = Math.max(sn20Level, 6);
+
+  // Level 7 — TG7 partitions 11-20 (≥1/2) OR TG13 Range 4 (≥2/4)
+  if (scores.tg7 >= 1 || scores.tg13 >= 2) sn20Level = Math.max(sn20Level, 7);
+
+  return { sn20Level, scores };
 }
 
 // ── Main interview component ───────────────────────────────────────────────────
@@ -147,7 +144,7 @@ function InterviewContent() {
       .eq("id", studentId)
       .single()
       .then(({ data }) => { if (data) setStudent(data); });
-  }, [studentId]);
+  }, [studentId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Auto-fill items above START HERE as correct/efficient when entering a group
   useEffect(() => {
@@ -249,16 +246,14 @@ function InterviewContent() {
       .single();
 
     if (sessionData?.id) {
-      const placements = [
-        { model_name: "SN20", suggested_level: calc.sn20Level, confirmed_level: calc.sn20Level },
-      ].map((p) => ({
+      await supabase.from("construct_placements").insert({
         session_id: sessionData.id,
         student_id: student.id,
         date_placed: today,
-        ...p,
-      }));
-
-      await supabase.from("construct_placements").insert(placements);
+        model_name: "SN20",
+        suggested_level: calc.sn20Level,
+        confirmed_level: calc.sn20Level,
+      });
     }
 
     setSaving(false);
@@ -268,21 +263,23 @@ function InterviewContent() {
   // ── Results screen ────────────────────────────────────────────────────────────
   if (done && student && results) {
     const sn20Info = schedule3B.sn20Levels[results.sn20Level];
+    const s = results.scores;
 
     const scoreRows = [
-      { label: "TG1 — Level 3 (Spatial)", value: `${results.scores.tg1_l3}/3` },
-      { label: "TG1 — Level 4 (Ten-wise)", value: `${results.scores.tg1_l4}/3` },
-      { label: "TG1 — Level 5 (Tens frame)", value: `${results.scores.tg1_l5}/3` },
-      { label: "TG2 — Level 4 (Complements)", value: `${results.scores.tg2_l4}/4` },
-      { label: "TG2 — Level 5 (Partitions)", value: `${results.scores.tg2_l5}/3` },
-      { label: "TG3 — Level 4 (Doubles)", value: `${results.scores.tg3_l4}/2` },
-      { label: "TG3 — Level 5 (Near-doubles)", value: `${results.scores.tg3_l5}/3` },
-      { label: "TG3 — Level 6 (Fluency)", value: `${results.scores.tg3_l6}/2` },
-      { label: "TG4 — Level 5 (Add parts)", value: `${results.scores.tg4_l5}/2` },
-      { label: "TG4 — Level 6 (Add crosses)", value: `${results.scores.tg4_l6}/3` },
-      { label: "TG4 — Level 7 (Add whole)", value: `${results.scores.tg4_l7}/3` },
-      { label: "TG5 — Level 6 (Sub parts)", value: `${results.scores.tg5_l6}/3` },
-      { label: "TG5 — Level 7 (Sub whole)", value: `${results.scores.tg5_l7}/4` },
+      { label: "TG1 — Finger Patterns (6–10)",          value: `${s.tg1}/6`,  level: 1 },
+      { label: "TG2 — Small Doubles",                   value: `${s.tg2}/4`,  level: 2 },
+      { label: "TG3.1 — Small Partitions of 10",        value: `${s.tg3_1}/2`, level: 2 },
+      { label: "TG3.2 — Big Partitions of 10",          value: `${s.tg3_2}/2`, level: 3 },
+      { label: "TG4 — Partitions of 5",                 value: `${s.tg4}/3`,  level: 3 },
+      { label: "TG5 — Five-plus Facts",                 value: `${s.tg5}/6`,  level: 3 },
+      { label: "TG6 — Partitions 1–9",                  value: `${s.tg6}/2`,  level: 4 },
+      { label: "TG7 — Partitions 11–20",                value: `${s.tg7}/2`,  level: 7 },
+      { label: "TG8 — Ten-plus & Teen+10",              value: `${s.tg8}/8`,  level: 5 },
+      { label: "TG9 — Big Doubles",                     value: `${s.tg9}/5`,  level: 5 },
+      { label: "TG10 — Range 2 Addition (Whole ≤ 10)",  value: `${s.tg10}/3`, level: 4 },
+      { label: "TG11 — Range 3 Addition (Parts ≤ 10)",  value: `${s.tg11}/3`, level: 5 },
+      { label: "TG12 — Range 3 Subtraction (Parts ≤ 10)", value: `${s.tg12}/3`, level: 6 },
+      { label: "TG13 — Range 4 (Whole ≤ 20)",          value: `${s.tg13}/4`, level: 7 },
     ];
 
     return (
@@ -305,10 +302,11 @@ function InterviewContent() {
 
           <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wide mb-3">Evidence Summary</h3>
           <div className="space-y-1 text-sm mb-6">
-            {scoreRows.map(({ label, value }) => (
-              <div key={label} className="flex items-start justify-between py-1.5 border-b border-gray-100 gap-2">
-                <span className="text-gray-600 text-xs">{label}</span>
-                <span className="font-semibold text-xs shrink-0 text-indigo-700">{value}</span>
+            {scoreRows.map(({ label, value, level }) => (
+              <div key={label} className="flex items-center justify-between py-1.5 border-b border-gray-100 gap-2">
+                <span className="text-gray-600 text-xs flex-1">{label}</span>
+                <span className="text-xs text-gray-400 shrink-0">L{level}</span>
+                <span className="font-semibold text-xs shrink-0 text-indigo-700 w-10 text-right">{value}</span>
               </div>
             ))}
           </div>
@@ -414,6 +412,13 @@ function InterviewContent() {
                 <div className="text-xs text-gray-400 mt-2">📦 {currentGroup.materials}</div>
               )}
             </div>
+
+            {/* Counting reminder */}
+            <div className="bg-indigo-50 rounded-xl border border-indigo-200 p-3">
+              <div className="text-xs text-indigo-700 leading-snug">
+                <span className="font-semibold">If student counts:</span> Ask "Can you do it without counting?" If they can only count, stop the task group.
+              </div>
+            </div>
           </div>
         </div>
 
@@ -422,8 +427,8 @@ function InterviewContent() {
           <div className="bg-gray-50 border-b border-gray-200 px-4 py-3">
             <div className="text-sm font-semibold text-gray-700">✏️ Teacher Scoring — {currentGroup.name}</div>
             {currentGroup.branchingNote && (
-              <div className="text-xs text-indigo-700 bg-indigo-50 border border-indigo-200 rounded px-2 py-1.5 mt-2 font-medium">
-                ⚠️ {currentGroup.branchingNote}
+              <div className="text-xs text-orange-700 bg-orange-50 border border-orange-200 rounded px-2 py-1.5 mt-2 font-medium">
+                {currentGroup.branchingNote}
               </div>
             )}
           </div>

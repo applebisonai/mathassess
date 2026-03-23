@@ -456,9 +456,8 @@ function SelectContent() {
                     </>
                   ) : selectedAssessmentId === "schedule-3b" ? (
                     <>
-                      <li>• Dot cards (five-wise and ten-wise patterns)</li>
-                      <li>• Tens frames</li>
-                      <li>• Counters and screen card</li>
+                      <li>• Task Cards</li>
+                      <li>• Addition and Subtraction Cards (for formal section, TG10–13)</li>
                     </>
                   ) : (
                     <>

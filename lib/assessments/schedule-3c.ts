@@ -39,6 +39,8 @@ export interface TaskGroup {
   startNote?: string;
   allowEarlyExit?: boolean;
   earlyExitNote?: string;
+  skipToId?: string;
+  skipLabel?: string;
 }
 
 const STRATEGY_FIELD: ResponseField = {
@@ -98,6 +100,8 @@ export const schedule3C = {
       teacherScript: '"If I add this bundle under the cover, how many sticks will that be?"',
       materials: "10-stick bundles, Cover",
       branchingNote: "IF STUDENT IS NOT SUCCESSFUL ON TASK 2 → SKIP TASKS 3 and 4",
+      skipToId: "tg5",
+      skipLabel: "Skip TG3 & TG4 →",
       items: [
         { id: "2a", number: "Incrementing by 10s (OFF decuple)", prompt: "4 sticks + 1 bundle → how many sticks?", displayText: "14", targetLevel: 1, responseFields: [{ label: "Correct", type: "correct_incorrect" }] },
         { id: "2b", number: "Incrementing by 10s (OFF decuple)", prompt: "Add 1 more bundle → how many sticks?", displayText: "24", targetLevel: 1, responseFields: [{ label: "Correct", type: "correct_incorrect" }] },

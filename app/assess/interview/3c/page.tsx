@@ -120,6 +120,15 @@ function InterviewContent() {
   const isFirst = currentGroupIdx === 0;
   const isLast = currentGroupIdx === groups.length - 1;
 
+  function handleSkip() {
+    if (!currentGroup.skipToId) return;
+    const targetIdx = groups.findIndex((g) => g.id === currentGroup.skipToId);
+    if (targetIdx !== -1) {
+      setValidationError(null);
+      setCurrentGroupIdx(targetIdx);
+    }
+  }
+
   useEffect(() => {
     if (!studentId) return;
     supabase
@@ -416,6 +425,14 @@ function InterviewContent() {
             </button>
             <div className="text-xs text-gray-400">Tap dots above to jump</div>
             <div className="flex gap-2">
+              {currentGroup.skipToId && (
+                <button
+                  onClick={handleSkip}
+                  className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-sm font-medium"
+                >
+                  {currentGroup.skipLabel ?? "Skip →"}
+                </button>
+              )}
               {currentGroup.allowEarlyExit && (
                 <button
                   onClick={handleTryFinish}

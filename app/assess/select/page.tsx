@@ -120,12 +120,13 @@ const CATEGORIES = [
     assessments: [
       {
         id: "av-nwn",
-        name: "Number Words & Numerals",
-        description: "Course 1 — FNWS, NWA, Numeral ID, BNWS, NWB, Numeral Sequences",
-        gradeRange: "K–2",
-        models: ["FNWS", "BNWS", "NID"],
-        route: "",
-        available: false,
+        name: "Add+VantageMR: Number Words and Numerals",
+        shortName: "NWN",
+        gradeRange: "K–3",
+        description: "FNWS, BNWS & Numeral ID",
+        color: "purple",
+        route: "/assess/interview/av-nwn",
+        available: true,
       },
       {
         id: "av-struct",

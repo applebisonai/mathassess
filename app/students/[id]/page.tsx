@@ -11,6 +11,7 @@ import { schedule2A } from "@/lib/assessments/schedule-2a";
 import { schedule2B } from "@/lib/assessments/schedule-2b";
 import { schedule2C } from "@/lib/assessments/schedule-2c";
 import { scheduleAvPV } from "@/lib/assessments/schedule-av-pv";
+import { scheduleAvNWN } from "@/lib/assessments/schedule-av-nwn";
 import { schedule3A } from "@/lib/assessments/schedule-3a";
 import { schedule3B } from "@/lib/assessments/schedule-3b";
 import { schedule3C } from "@/lib/assessments/schedule-3c";
@@ -26,6 +27,49 @@ const ASSESSMENT_CONFIG: Record<string, {
   subtitle: string;
   modelDefs: ModelDef[];
 }> = {
+  "av-nwn": {
+    label: "Add+VantageMR: Number Words and Numerals",
+    subtitle: "NWN · FNWS · BNWS · NID",
+    modelDefs: [
+      {
+        key: "FNWS", color: "#15803d", maxLevel: 5,
+        labels: {
+          0: "Emergent FNWS",
+          1: "Initial FNWS to 'ten'",
+          2: "Intermediate FNWS to 'ten'",
+          3: "Facile FNWS to 'ten'",
+          4: "Facile FNWS to 'thirty'",
+          5: "Facile FNWS to 'one hundred'",
+          6: "Facile FNWS up to 'one thousand'",
+          7: "Facile FNWS up to 'ten thousand'",
+        },
+      },
+      {
+        key: "BNWS", color: "#4ade80", maxLevel: 5,
+        labels: {
+          0: "Emergent BNWS",
+          1: "Initial BNWS to 'ten'",
+          2: "Intermediate BNWS to 'ten'",
+          3: "Facile BNWS to 'ten'",
+          4: "Facile BNWS to 'thirty'",
+          5: "Facile BNWS to 'one hundred'",
+          6: "Facile BNWS up to 'one thousand'",
+          7: "Facile BNWS up to 'ten thousand'",
+        },
+      },
+      {
+        key: "NID", color: "#22c55e", maxLevel: 5,
+        labels: {
+          0: "Emergent numeral identification",
+          1: "Numerals to 10 — Identify",
+          2: "Numerals to 20 — Identify",
+          3: "Numerals to 100 — Identify",
+          4: "Numerals to 1,000 — Identify & write",
+          5: "Numerals to 1,000,000 — Identify",
+        },
+      },
+    ],
+  },
   "schedule-2a": {
     label: "Schedule 2A — Early Number Words and Numerals",
     subtitle: "2A · NID · FNWS · BNWS",
@@ -248,6 +292,7 @@ function buildItemLookup(assessmentId: string): Record<string, { prompt: string;
     "schedule-2b": schedule2B as never,
     "schedule-2c": schedule2C as never,
     "av-pv":       scheduleAvPV as never,
+    "av-nwn":      scheduleAvNWN as never,
     "schedule-3a": schedule3A as never,
     "schedule-3b": schedule3B as never,
     "schedule-3c": schedule3C as never,

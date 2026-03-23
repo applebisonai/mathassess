@@ -275,15 +275,23 @@ export const schedule3B = {
       materials: "Task Cards",
       items: [
         {
-          id: "6a", number: "6.1 — Partitions of 6", targetLevel: 4,
-          prompt: "Can you tell me two numbers that add up to 6? Can you tell me another two numbers?",
-          displayText: "6",
+          id: "6a", number: "Partitions 1–9", targetLevel: 4,
+          prompt: "Can you tell me two numbers that add up to 6?", displayText: "6",
           responseFields: [{ label: "Correct", type: "correct_incorrect" }, STRATEGY_FIELD],
         },
         {
-          id: "6b", number: "6.2 — Partitions of 9", targetLevel: 4,
-          prompt: "Can you tell me two numbers that add up to 9? Can you tell me another two numbers?",
-          displayText: "9",
+          id: "6b", number: "Partitions 1–9", targetLevel: 4,
+          prompt: "Can you tell me another two numbers that add up to 6?", displayText: "6 (another)",
+          responseFields: [{ label: "Correct", type: "correct_incorrect" }, STRATEGY_FIELD],
+        },
+        {
+          id: "6c", number: "Partitions 1–9", targetLevel: 4,
+          prompt: "Can you tell me two numbers that add up to 9?", displayText: "9",
+          responseFields: [{ label: "Correct", type: "correct_incorrect" }, STRATEGY_FIELD],
+        },
+        {
+          id: "6d", number: "Partitions 1–9", targetLevel: 4,
+          prompt: "Can you tell me another two numbers that add up to 9?", displayText: "9 (another)",
           responseFields: [{ label: "Correct", type: "correct_incorrect" }, STRATEGY_FIELD],
         },
       ],
@@ -305,14 +313,22 @@ export const schedule3B = {
       items: [
         {
           id: "7a", number: "Partitions 11–20", targetLevel: 7,
-          prompt: "Can you tell me two numbers that add up to 12? Another two?",
-          displayText: "12",
+          prompt: "Can you tell me two numbers that add up to 12?", displayText: "12",
           responseFields: [{ label: "Correct", type: "correct_incorrect" }, STRATEGY_FIELD],
         },
         {
           id: "7b", number: "Partitions 11–20", targetLevel: 7,
-          prompt: "Can you tell me two numbers that add up to 19? Another two?",
-          displayText: "19",
+          prompt: "Can you tell me another two numbers that add up to 12?", displayText: "12 (another)",
+          responseFields: [{ label: "Correct", type: "correct_incorrect" }, STRATEGY_FIELD],
+        },
+        {
+          id: "7c", number: "Partitions 11–20", targetLevel: 7,
+          prompt: "Can you tell me two numbers that add up to 19?", displayText: "19",
+          responseFields: [{ label: "Correct", type: "correct_incorrect" }, STRATEGY_FIELD],
+        },
+        {
+          id: "7d", number: "Partitions 11–20", targetLevel: 7,
+          prompt: "Can you tell me another two numbers that add up to 19?", displayText: "19 (another)",
           responseFields: [{ label: "Correct", type: "correct_incorrect" }, STRATEGY_FIELD],
         },
       ],

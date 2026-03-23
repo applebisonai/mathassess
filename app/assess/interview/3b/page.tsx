@@ -78,8 +78,8 @@ function calculateResults(responses: Responses) {
     tg3_2:  countCorrect(responses, tg3_L3),      // 2 items — Level 3
     tg4:    countCorrect(responses, tg4.items),   // 3 items — Level 3
     tg5:    countCorrect(responses, tg5.items),   // 6 items — Level 3
-    tg6:    countCorrect(responses, tg6.items),   // 2 items — Level 4
-    tg7:    countCorrect(responses, tg7.items),   // 2 items — Level 7
+    tg6:    countCorrect(responses, tg6.items),   // 4 items — Level 4
+    tg7:    countCorrect(responses, tg7.items),   // 4 items — Level 7
     tg8:    countCorrect(responses, tg8.items),   // 8 items — Level 5
     tg9:    countCorrect(responses, tg9.items),   // 5 items — Level 5
     tg10:   countCorrect(responses, tg10.items),  // 3 items — Level 4
@@ -100,8 +100,8 @@ function calculateResults(responses: Responses) {
   // Level 3 — TG3 big partitions (≥1/2) OR TG4 (≥2/3) OR TG5 (≥3/6)
   if (scores.tg3_2 >= 1 || scores.tg4 >= 2 || scores.tg5 >= 3) sn20Level = Math.max(sn20Level, 3);
 
-  // Level 4 — TG6 partitions 1-9 (≥1/2) OR TG10 Range 2 addition (≥2/3)
-  if (scores.tg6 >= 1 || scores.tg10 >= 2) sn20Level = Math.max(sn20Level, 4);
+  // Level 4 — TG6 partitions 1-9 (≥2/4) OR TG10 Range 2 addition (≥2/3)
+  if (scores.tg6 >= 2 || scores.tg10 >= 2) sn20Level = Math.max(sn20Level, 4);
 
   // Level 5 — TG8 ten-plus (≥4/8) OR TG9 big doubles (≥3/5) OR TG11 Range 3 add (≥2/3)
   if (scores.tg8 >= 4 || scores.tg9 >= 3 || scores.tg11 >= 2) sn20Level = Math.max(sn20Level, 5);
@@ -109,8 +109,8 @@ function calculateResults(responses: Responses) {
   // Level 6 — TG12 Range 3 subtraction (≥2/3)
   if (scores.tg12 >= 2) sn20Level = Math.max(sn20Level, 6);
 
-  // Level 7 — TG7 partitions 11-20 (≥1/2) OR TG13 Range 4 (≥2/4)
-  if (scores.tg7 >= 1 || scores.tg13 >= 2) sn20Level = Math.max(sn20Level, 7);
+  // Level 7 — TG7 partitions 11-20 (≥2/4) OR TG13 Range 4 (≥2/4)
+  if (scores.tg7 >= 2 || scores.tg13 >= 2) sn20Level = Math.max(sn20Level, 7);
 
   return { sn20Level, scores };
 }
@@ -272,8 +272,8 @@ function InterviewContent() {
       { label: "TG3.2 — Big Partitions of 10",          value: `${s.tg3_2}/2`, level: 3 },
       { label: "TG4 — Partitions of 5",                 value: `${s.tg4}/3`,  level: 3 },
       { label: "TG5 — Five-plus Facts",                 value: `${s.tg5}/6`,  level: 3 },
-      { label: "TG6 — Partitions 1–9",                  value: `${s.tg6}/2`,  level: 4 },
-      { label: "TG7 — Partitions 11–20",                value: `${s.tg7}/2`,  level: 7 },
+      { label: "TG6 — Partitions 1–9",                  value: `${s.tg6}/4`,  level: 4 },
+      { label: "TG7 — Partitions 11–20",                value: `${s.tg7}/4`,  level: 7 },
       { label: "TG8 — Ten-plus & Teen+10",              value: `${s.tg8}/8`,  level: 5 },
       { label: "TG9 — Big Doubles",                     value: `${s.tg9}/5`,  level: 5 },
       { label: "TG10 — Range 2 Addition (Whole ≤ 10)",  value: `${s.tg10}/3`, level: 4 },

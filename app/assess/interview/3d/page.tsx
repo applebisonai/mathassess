@@ -142,10 +142,22 @@ function InterviewContent() {
       ...prev,
       [itemId]: { ...(prev[itemId] ?? {}), [field]: value },
     }));
-    setValidationError(null);
+    if (validationError) setValidationError(null);
+  }
+
+  function getRequiredButUnanswered(group: typeof currentGroup): AssessmentItem[] {
+    return group.items.filter((item) =>
+      item.responseFields.some((f) => f.type === "correct_incorrect" && !responses[item.id]?.[f.label])
+    );
   }
 
   async function handleTryFinish() {
+    const missing = getRequiredButUnanswered(currentGroup);
+    if (missing.length > 0) {
+      setValidationError(`Please answer all ${missing.length} required item${missing.length > 1 ? "s" : ""} before submitting.`);
+      return;
+    }
+    setValidationError(null);
     setSaving(true);
     const calc = calculateResults(responses);
     setResults(calc);
@@ -180,6 +192,11 @@ function InterviewContent() {
   }
 
   function handleTryNext() {
+    const missing = getRequiredButUnanswered(currentGroup);
+    if (missing.length > 0) {
+      setValidationError(`Please answer all ${missing.length} required item${missing.length > 1 ? "s" : ""} before continuing.`);
+      return;
+    }
     setValidationError(null);
     setCurrentGroupIdx((i) => Math.min(groups.length - 1, i + 1));
   }
@@ -497,17 +514,28 @@ function ItemRow({
   getResponse: (id: string, field: string) => string;
   setResponse: (id: string, field: string, value: string) => void;
 }) {
+  const [notesOpen, setNotesOpen] = useState(false);
+
   return (
     <div className="px-3 py-3 space-y-2">
-      {/* Display text / equation */}
-      {item.displayText && (
-        <div className="text-lg font-bold text-gray-900 font-mono">{item.displayText}</div>
-      )}
-      {/* Multi-line prompt (for higher decade tasks) */}
-      <div className="text-xs text-gray-600 whitespace-pre-line leading-relaxed">{item.prompt}</div>
-      {item.notes && (
-        <div className="text-xs text-blue-600 italic">{item.notes}</div>
-      )}
+      {/* Display text + notes toggle */}
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex-1 space-y-1">
+          {item.displayText && (
+            <div className="text-lg font-bold text-gray-900 font-mono">{item.displayText}</div>
+          )}
+          {/* Multi-line prompt (for higher decade tasks) */}
+          <div className="text-xs text-gray-600 whitespace-pre-line leading-relaxed">{item.prompt}</div>
+          {item.notes && (
+            <div className="text-xs text-blue-600 italic">{item.notes}</div>
+          )}
+        </div>
+        <button
+          onClick={() => setNotesOpen((v) => !v)}
+          className={`text-base shrink-0 transition-opacity mt-0.5 ${notesOpen ? "opacity-100" : "opacity-40 hover:opacity-70"}`}
+          title="Add note"
+        >📝</button>
+      </div>
 
       {/* Response fields */}
       <div className="flex flex-wrap gap-3 mt-1">
@@ -520,6 +548,19 @@ function ItemRow({
           />
         ))}
       </div>
+
+      {/* Notes input */}
+      {notesOpen && (
+        <div className="mt-1">
+          <input
+            type="text"
+            placeholder="Teacher observation…"
+            value={getResponse(item.id, "notes")}
+            onChange={(e) => setResponse(item.id, "notes", e.target.value)}
+            className="w-full border border-orange-200 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-orange-400 bg-orange-50/40"
+          />
+        </div>
+      )}
     </div>
   );
 }

@@ -1,6 +1,6 @@
 // Schedule 3B: Structuring Numbers to 20
 // LFIN Assessment Schedule — Wright & Ellemor-Collins, 2018
-// Materials: Task Cards
+// Materials: Task Cards; Addition and Subtraction Cards (formal section)
 // Model: Structuring Numbers 1 to 20 (SN20) levels 0–7
 //
 // Teacher note: In each task group, if student uses counting, ask "Can you do it
@@ -54,7 +54,7 @@ export const schedule3B = {
   name: "Schedule 3B: Structuring Numbers to 20",
   shortName: "3B",
   gradeRange: "K–3",
-  materials: ["Task Cards"],
+  materials: ["Task Cards", "Addition and Subtraction Cards"],
   models: ["SN20"],
   taskGroups: [
 
@@ -431,9 +431,9 @@ export const schedule3B = {
       shortName: "Range 2 Addition",
       model: "SN20",
       color: "indigo",
-      instructions: "Show task card. Ask student for the answer.",
-      teacherScript: '"What is ___?" (show task card)',
-      materials: "Task Cards (addition cards)",
+      instructions: 'Show the card. Say "Read this please… What is the answer?" Enquire about strategy. If student counts, ask "Can you do it without counting?"',
+      teacherScript: '"Read this please… What is the answer?" (show addition card; enquire about strategy)',
+      materials: "Addition and Subtraction Cards",
       branchingNote: "⚠ If student only used counting-by-ones in Task Groups 1–9 → END ASSESSMENT HERE",
       items: [
         {
@@ -464,9 +464,9 @@ export const schedule3B = {
       shortName: "Range 3 Addition",
       model: "SN20",
       color: "indigo",
-      instructions: "Show task card. Ask student for the answer.",
-      teacherScript: '"What is ___?" (show task card)',
-      materials: "Task Cards (addition cards)",
+      instructions: 'Show the card. Say "Read this please… What is the answer?" Enquire about strategy. If student counts, ask "Can you do it without counting?"',
+      teacherScript: '"Read this please… What is the answer?" (show addition card; enquire about strategy)',
+      materials: "Addition and Subtraction Cards",
       items: [
         {
           id: "11a", number: "Range 3 Addition", targetLevel: 5,
@@ -496,9 +496,9 @@ export const schedule3B = {
       shortName: "Range 3 Subtraction",
       model: "SN20",
       color: "indigo",
-      instructions: "Show task card. Ask student for the answer.",
-      teacherScript: '"What is ___?" (show task card)',
-      materials: "Task Cards (subtraction cards)",
+      instructions: 'Show the card. Say "Read this please… What is the answer?" Enquire about strategy. If student counts, ask "Can you do it without counting?"',
+      teacherScript: '"Read this please… What is the answer?" (show subtraction card; enquire about strategy)',
+      materials: "Addition and Subtraction Cards",
       items: [
         {
           id: "12a", number: "Range 3 Subtraction", targetLevel: 6,
@@ -528,9 +528,9 @@ export const schedule3B = {
       shortName: "Range 4",
       model: "SN20",
       color: "indigo",
-      instructions: "Show task card. Ask student for the answer.",
-      teacherScript: '"What is ___?" (show task card)',
-      materials: "Task Cards (addition and subtraction cards)",
+      instructions: 'Show the card. Say "Read this please… What is the answer?" Enquire about strategy. If student counts, ask "Can you do it without counting?"',
+      teacherScript: '"Read this please… What is the answer?" (show addition/subtraction card; enquire about strategy)',
+      materials: "Addition and Subtraction Cards",
       items: [
         {
           id: "13a", number: "Range 4", targetLevel: 7,

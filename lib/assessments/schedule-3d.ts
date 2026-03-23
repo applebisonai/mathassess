@@ -76,7 +76,7 @@ export const schedule3D = {
       items: [
         {
           id: "1a",
-          number: "Add/Subtract a Decuple",
+          number: "1.1",
           prompt: "61 + 30",
           displayText: "61 + 30",
           targetLevel: 1,
@@ -87,7 +87,7 @@ export const schedule3D = {
         },
         {
           id: "1b",
-          number: "Add/Subtract a Decuple",
+          number: "1.2",
           prompt: "87 − 50",
           displayText: "87 − 50",
           targetLevel: 1,
@@ -113,7 +113,7 @@ export const schedule3D = {
       items: [
         {
           id: "2a",
-          number: "2-Digit Without Regrouping",
+          number: "2.1",
           prompt: "36 + 22",
           displayText: "36 + 22",
           targetLevel: 2,
@@ -124,7 +124,7 @@ export const schedule3D = {
         },
         {
           id: "2b",
-          number: "2-Digit Without Regrouping",
+          number: "2.2",
           prompt: "65 − 13",
           displayText: "65 − 13",
           targetLevel: 2,
@@ -152,7 +152,7 @@ export const schedule3D = {
       items: [
         {
           id: "3a",
-          number: "2-Digit Addition with Regrouping",
+          number: "3.1",
           prompt: "58 + 24",
           displayText: "58 + 24",
           targetLevel: 5,
@@ -163,7 +163,7 @@ export const schedule3D = {
         },
         {
           id: "3b",
-          number: "2-Digit Addition with Regrouping",
+          number: "3.2",
           prompt: "43 + 19",
           displayText: "43 + 19",
           targetLevel: 5,
@@ -189,7 +189,7 @@ export const schedule3D = {
       items: [
         {
           id: "4a",
-          number: "2-Digit Subtraction with Regrouping",
+          number: "4.1",
           prompt: "51 − 25",
           displayText: "51 − 25",
           targetLevel: 6,
@@ -200,7 +200,7 @@ export const schedule3D = {
         },
         {
           id: "4b",
-          number: "2-Digit Subtraction with Regrouping",
+          number: "4.2",
           prompt: "82 − 39",
           displayText: "82 − 39",
           targetLevel: 6,
@@ -226,7 +226,7 @@ export const schedule3D = {
       items: [
         {
           id: "5a",
-          number: "3-Digit with Regrouping",
+          number: "5.1",
           prompt: "386 + 240",
           displayText: "386 + 240",
           targetLevel: 6,
@@ -237,7 +237,7 @@ export const schedule3D = {
         },
         {
           id: "5b",
-          number: "3-Digit with Regrouping",
+          number: "5.2",
           prompt: "705 − 698",
           displayText: "705 − 698",
           targetLevel: 6,
@@ -272,7 +272,7 @@ export const schedule3D = {
       items: [
         {
           id: "6a",
-          number: "Decuple After/Before",
+          number: "6.1",
           prompt: "Show card: 58\n→ What's that number?\n→ What is the decuple after 58?\n→ What is the decuple before 58?",
           displayText: "58",
           targetLevel: 1,
@@ -282,7 +282,7 @@ export const schedule3D = {
         },
         {
           id: "6b",
-          number: "Decuple After/Before",
+          number: "6.2",
           prompt: "Show card: 40\n→ What's that number?\n→ What is the decuple after 40?\n→ What is the decuple before 40?",
           displayText: "40",
           targetLevel: 1,
@@ -307,7 +307,7 @@ export const schedule3D = {
       items: [
         {
           id: "7a",
-          number: "Add-Up / Subtract-Down to Decuple",
+          number: "7.1",
           prompt: "Show card: 20\n→ What's that number?\n→ What's 3 more than 20?",
           displayText: "20",
           targetLevel: 1,
@@ -317,7 +317,7 @@ export const schedule3D = {
         },
         {
           id: "7b",
-          number: "Add-Up / Subtract-Down to Decuple",
+          number: "7.2",
           prompt: "Show card: 36\n→ What's that number?\n→ What is the decuple before 36?\n→ How far is it back to 30?",
           displayText: "36",
           targetLevel: 1,
@@ -342,7 +342,7 @@ export const schedule3D = {
       items: [
         {
           id: "8a",
-          number: "To/From Decuple (Small 1–5)",
+          number: "8.1",
           prompt: "Show card: 46\n→ What's that number?\n→ What is the decuple after 46?\n→ How far is it up to 50?",
           displayText: "46",
           targetLevel: 2,
@@ -352,7 +352,7 @@ export const schedule3D = {
         },
         {
           id: "8b",
-          number: "To/From Decuple (Small 1–5)",
+          number: "8.2",
           prompt: "Show card: 60\n→ What's that number?\n→ What is 2 less than 60?",
           displayText: "60",
           targetLevel: 2,
@@ -377,7 +377,7 @@ export const schedule3D = {
       items: [
         {
           id: "9a",
-          number: "To/From Decuple (Large 6–9)",
+          number: "9.1",
           prompt: "Show card: 53\n→ What's that number?\n→ What is the decuple after 53?\n→ How far is it up to 60?",
           displayText: "53",
           targetLevel: 3,
@@ -387,7 +387,7 @@ export const schedule3D = {
         },
         {
           id: "9b",
-          number: "To/From Decuple (Large 6–9)",
+          number: "9.2",
           prompt: "Show card: 80\n→ What's that number?\n→ What is 8 less than 80?",
           displayText: "80",
           targetLevel: 3,
@@ -412,7 +412,7 @@ export const schedule3D = {
       items: [
         {
           id: "10a",
-          number: "Across a Decuple",
+          number: "10.1",
           prompt: "Show card: 37\n→ What's that number?\n→ What is 6 more than 37?",
           displayText: "37",
           targetLevel: 4,
@@ -422,7 +422,7 @@ export const schedule3D = {
         },
         {
           id: "10b",
-          number: "Across a Decuple",
+          number: "10.2",
           prompt: "Show card: 63\n→ What's that number?\n→ What is 8 less than 63?",
           displayText: "63",
           targetLevel: 4,

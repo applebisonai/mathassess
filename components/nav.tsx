@@ -6,10 +6,24 @@ import { createClient } from "@/lib/supabase/client";
 import { SomatLogo } from "./somat-logo";
 
 const navItems = [
-  { href: "/dashboard", label: "Dashboard", icon: "⊞" },
-  { href: "/students", label: "My Students", icon: "👥" },
-  { href: "/assess", label: "Assessment Categories", icon: "📋" },
+  { href: "/dashboard", label: "Dashboard" },
+  { href: "/students", label: "Students" },
+  { href: "/assess", label: "Assessments" },
 ];
+
+function Initials({ name }: { name: string }) {
+  const initials = name.slice(0, 2).toUpperCase();
+  const colors = [
+    "bg-blue-500", "bg-indigo-500", "bg-violet-500",
+    "bg-teal-500", "bg-emerald-500", "bg-orange-500",
+  ];
+  const color = colors[name.charCodeAt(0) % colors.length];
+  return (
+    <div className={`w-8 h-8 rounded-full ${color} flex items-center justify-center text-white text-xs font-bold shrink-0`}>
+      {initials}
+    </div>
+  );
+}
 
 export default function Nav({ teacherName }: { teacherName: string }) {
   const pathname = usePathname();
@@ -23,40 +37,43 @@ export default function Nav({ teacherName }: { teacherName: string }) {
   }
 
   return (
-    <nav className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
+    <nav className="bg-white border-b border-gray-200 shadow-sm px-6 py-0 flex items-center justify-between h-14 sticky top-0 z-40">
       {/* Logo */}
-      <Link href="/dashboard" className="flex items-center gap-2">
-        <SomatLogo size={34} />
-        <span className="font-bold text-gray-900 text-sm">SOMAT</span>
+      <Link href="/dashboard" className="flex items-center gap-2.5 shrink-0">
+        <SomatLogo size={30} />
+        <span className="font-extrabold text-gray-900 text-base tracking-tight">SOMAT</span>
       </Link>
 
       {/* Nav Links */}
       <div className="flex items-center gap-1">
         {navItems.map((item) => {
-          const active = pathname.startsWith(item.href);
+          const active = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
           return (
             <Link
               key={item.href}
               href={item.href}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+              className={`relative px-4 py-1 text-sm font-medium transition-colors rounded-md ${
                 active
-                  ? "bg-blue-50 text-blue-700"
-                  : "text-gray-600 hover:bg-gray-50"
+                  ? "text-blue-700 bg-blue-50"
+                  : "text-gray-500 hover:text-gray-900 hover:bg-gray-50"
               }`}
             >
-              <span className="mr-1.5">{item.icon}</span>
               {item.label}
+              {active && (
+                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600 rounded-full" />
+              )}
             </Link>
           );
         })}
       </div>
 
-      {/* Teacher Name + Sign Out */}
-      <div className="flex items-center gap-3 text-sm">
-        <span className="text-gray-600">{teacherName}</span>
+      {/* Teacher + Sign Out */}
+      <div className="flex items-center gap-3 shrink-0">
+        <Initials name={teacherName} />
+        <span className="text-sm font-medium text-gray-700 hidden sm:block">{teacherName}</span>
         <button
           onClick={handleSignOut}
-          className="text-gray-400 hover:text-gray-600 text-xs border border-gray-200 rounded px-2 py-1"
+          className="text-xs text-gray-400 hover:text-gray-700 border border-gray-200 rounded-md px-2.5 py-1 transition-colors hover:border-gray-300"
         >
           Sign out
         </button>

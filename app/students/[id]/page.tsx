@@ -13,6 +13,7 @@ import { schedule2C } from "@/lib/assessments/schedule-2c";
 import { scheduleAvPV } from "@/lib/assessments/schedule-av-pv";
 import { schedule3A } from "@/lib/assessments/schedule-3a";
 import { schedule3B } from "@/lib/assessments/schedule-3b";
+import { schedule3C } from "@/lib/assessments/schedule-3c";
 
 const gradeLabel = (g: number) =>
   g === 0 ? "Kindergarten" : `Grade ${g}`;
@@ -182,6 +183,22 @@ const ASSESSMENT_CONFIG: Record<string, {
       },
     ],
   },
+  "schedule-3c": {
+    label: "Schedule 3C — Conceptual Place Value",
+    subtitle: "3C · CPV",
+    modelDefs: [
+      {
+        key: "CPV", color: "#0f766e", maxLevel: 4,
+        labels: {
+          0: "Emergent incrementing & decrementing by 10",
+          1: "Incrementing & decrementing by 10, with materials, to 100",
+          2: "Incrementing & decrementing flexibly by 10s and 1s, with materials, to 100",
+          3: "Incrementing & decrementing by 10, without materials, to 100",
+          4: "Incrementing & decrementing by 10, without materials, to 1000",
+        },
+      },
+    ],
+  },
 };
 
 // All known model → level name mappings (for history cards)
@@ -214,6 +231,7 @@ function buildItemLookup(assessmentId: string): Record<string, { prompt: string;
     "av-pv":       scheduleAvPV as never,
     "schedule-3a": schedule3A as never,
     "schedule-3b": schedule3B as never,
+    "schedule-3c": schedule3C as never,
   };
   const schedule = schedules[assessmentId];
   if (!schedule) return {};

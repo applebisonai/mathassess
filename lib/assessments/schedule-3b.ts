@@ -275,13 +275,13 @@ export const schedule3B = {
       materials: "Task Cards",
       items: [
         {
-          id: "6a", number: "Partitions 1–9", targetLevel: 4,
+          id: "6a", number: "6.1 — Partitions of 6", targetLevel: 4,
           prompt: "Can you tell me two numbers that add up to 6? Can you tell me another two numbers?",
           displayText: "6",
           responseFields: [{ label: "Correct", type: "correct_incorrect" }, STRATEGY_FIELD],
         },
         {
-          id: "6b", number: "Partitions 1–9", targetLevel: 4,
+          id: "6b", number: "6.2 — Partitions of 9", targetLevel: 4,
           prompt: "Can you tell me two numbers that add up to 9? Can you tell me another two numbers?",
           displayText: "9",
           responseFields: [{ label: "Correct", type: "correct_incorrect" }, STRATEGY_FIELD],

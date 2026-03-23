@@ -42,6 +42,8 @@ export interface TaskGroup {
   startAtItem?: string;
   startNote?: string;
   flashCard?: boolean;
+  allowEarlyExit?: boolean;
+  earlyExitNote?: string;
 }
 
 export const schedule2B = {
@@ -117,7 +119,8 @@ export const schedule2B = {
       color: "amber",
       instructions: 'Pose each doubles fact orally. If student counts, ask: "Can you do it without counting?"',
       teacherScript: '"What is ___ and ___?" (e.g., "What is 2 and 2?")',
-      branchingNote: "If student is not facile to this point → END ASSESSMENT HERE.",
+      allowEarlyExit: true,
+      earlyExitNote: "If student is not facile to this point → END ASSESSMENT HERE",
       items: [
         { id: "3.1a", number: "3.1", prompt: "2 and 2", displayText: "2 & 2", targetLevel: 2, responseFields: [{ label: "Response", type: "correct_incorrect" }] },
         { id: "3.1b", number: "3.1", prompt: "5 and 5", displayText: "5 & 5", targetLevel: 2, responseFields: [{ label: "Response", type: "correct_incorrect" }] },

@@ -41,6 +41,8 @@ export interface TaskGroup {
   branchingNote?: string;
   startAtItem?: string;
   startNote?: string;
+  allowEarlyExit?: boolean;
+  earlyExitNote?: string;
 }
 
 const STRATEGY_FIELD: ResponseField = {
@@ -348,7 +350,6 @@ export const schedule3B = {
       teacherScript: '"What is ___?" (show task card)',
       materials: "Task Cards",
       items: [
-        // 8.1 — Ten-plus facts
         {
           id: "8.1a", number: "8.1 — Ten-plus Facts", targetLevel: 5,
           prompt: "What is 10 + 4?", displayText: "10 + 4",
@@ -379,7 +380,6 @@ export const schedule3B = {
           prompt: "What is 1 + 10?", displayText: "1 + 10",
           responseFields: [{ label: "Correct", type: "correct_incorrect" }, STRATEGY_FIELD],
         },
-        // 8.2 — Teen plus 10
         {
           id: "8.2a", number: "8.2 — Teen plus 10", targetLevel: 5,
           prompt: "What is 16 + 10?", displayText: "16 + 10",
@@ -406,6 +406,8 @@ export const schedule3B = {
       instructions: "Show task card. Ask student for the total.",
       teacherScript: '"What is ___ and ___?" (show task card)',
       materials: "Task Cards",
+      allowEarlyExit: true,
+      earlyExitNote: "If student only uses counting-by-ones in Task Groups 1–9 → END ASSESSMENT HERE",
       items: [
         {
           id: "9a", number: "Big Doubles", targetLevel: 5,
@@ -450,7 +452,6 @@ export const schedule3B = {
       instructions: 'Show the card. Say "Read this please… What is the answer?" Enquire about strategy. If student counts, ask "Can you do it without counting?"',
       teacherScript: '"Read this please… What is the answer?" (show addition card; enquire about strategy)',
       materials: "Addition and Subtraction Cards",
-      branchingNote: "⚠ If student only used counting-by-ones in Task Groups 1–9 → END ASSESSMENT HERE",
       items: [
         {
           id: "10a", number: "Range 2 Addition", targetLevel: 4,

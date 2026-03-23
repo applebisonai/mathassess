@@ -427,6 +427,13 @@ function InterviewContent() {
             </div>
           )}
 
+          {/* Early-exit note */}
+          {currentGroup.allowEarlyExit && (
+            <div className="px-4 py-2 bg-orange-50 border-t border-orange-200">
+              <p className="text-xs text-orange-700 font-medium">⚠ {currentGroup.earlyExitNote}</p>
+            </div>
+          )}
+
           {/* Navigation */}
           <div className="border-t border-gray-200 bg-white px-4 py-3 flex justify-between items-center">
             <button
@@ -437,22 +444,33 @@ function InterviewContent() {
               ← Previous
             </button>
             <div className="text-xs text-gray-400">Tap dots above to jump</div>
-            {isLast ? (
-              <button
-                onClick={handleTryFinish}
-                disabled={saving}
-                className="px-5 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium disabled:bg-green-400"
-              >
-                {saving ? "Saving…" : "✓ Finish & Score"}
-              </button>
-            ) : (
-              <button
-                onClick={handleTryNext}
-                className="px-4 py-2 bg-pink-500 hover:bg-pink-600 text-white rounded-lg text-sm font-medium"
-              >
-                Next Group →
-              </button>
-            )}
+            <div className="flex gap-2">
+              {currentGroup.allowEarlyExit && (
+                <button
+                  onClick={handleTryFinish}
+                  disabled={saving}
+                  className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-sm font-medium disabled:opacity-50"
+                >
+                  {saving ? "Saving…" : "End Assessment Here"}
+                </button>
+              )}
+              {isLast ? (
+                <button
+                  onClick={handleTryFinish}
+                  disabled={saving}
+                  className="px-5 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium disabled:bg-green-400"
+                >
+                  {saving ? "Saving…" : "✓ Finish & Score"}
+                </button>
+              ) : (
+                <button
+                  onClick={handleTryNext}
+                  className="px-4 py-2 bg-pink-500 hover:bg-pink-600 text-white rounded-lg text-sm font-medium"
+                >
+                  Next Group →
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>

@@ -37,6 +37,8 @@ export interface TaskGroup {
   branchingNote?: string;
   startAtItem?: string;   // sub-level key where START HERE badge appears
   startNote?: string;     // optional note shown on the START HERE banner
+  allowEarlyExit?: boolean;
+  earlyExitNote?: string;
 }
 
 // Additive strategy options
@@ -170,7 +172,8 @@ export const schedule2C = {
       instructions: "Put out a pile of about 30 counters (one colour). Say: \"Get me 13 counters from this pile of counters please.\"",
       teacherScript: '"Get me 13 counters from this pile of counters please."',
       materials: "Counters – one colour (~30)",
-      branchingNote: "STOP HERE — for students not yet counting-on.",
+      allowEarlyExit: true,
+      earlyExitNote: "STOP HERE — for students not yet counting-on",
       items: [
         {
           id: "4.1", number: "4.1", prompt: "Get me 13 counters from the pile.", displayText: "Get me 13",
@@ -197,7 +200,8 @@ export const schedule2C = {
       instructions: "Screen a group of counters, remove some. Say: \"There are ___ counters under here. I'm taking ___ counters away. How many counters are left?\"",
       teacherScript: '"There are ___ counters under here. I\'m taking ___ counters away. How many counters are left?"',
       materials: "Counters – one colour, one screen",
-      branchingNote: "IF UNSUCCESSFUL with 5.1 and 5.2 → STOP HERE.",
+      allowEarlyExit: true,
+      earlyExitNote: "IF UNSUCCESSFUL with 5.1 and 5.2 → STOP HERE",
       items: [
         {
           id: "5.1", number: "5.1", prompt: "[7] remove 2 — how many left?", displayText: "7 − 2",

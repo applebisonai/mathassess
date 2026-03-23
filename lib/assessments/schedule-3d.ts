@@ -5,7 +5,8 @@
 
 export type ResponseFieldType =
   | "correct_incorrect"
-  | "strategy_select";
+  | "strategy_select"
+  | "number_input";
 
 export interface AssessmentItem {
   id: string;
@@ -277,6 +278,7 @@ export const schedule3D = {
           displayText: "58",
           targetLevel: 1,
           responseFields: [
+            { label: "Student says", type: "number_input" },
             { label: "Correct", type: "correct_incorrect" },
           ],
         },
@@ -287,6 +289,7 @@ export const schedule3D = {
           displayText: "40",
           targetLevel: 1,
           responseFields: [
+            { label: "Student says", type: "number_input" },
             { label: "Correct", type: "correct_incorrect" },
           ],
         },
@@ -312,6 +315,7 @@ export const schedule3D = {
           displayText: "20",
           targetLevel: 1,
           responseFields: [
+            { label: "Student says", type: "number_input" },
             { label: "Correct", type: "correct_incorrect" },
           ],
         },
@@ -322,6 +326,7 @@ export const schedule3D = {
           displayText: "36",
           targetLevel: 1,
           responseFields: [
+            { label: "Student says", type: "number_input" },
             { label: "Correct", type: "correct_incorrect" },
           ],
         },
@@ -347,6 +352,7 @@ export const schedule3D = {
           displayText: "46",
           targetLevel: 2,
           responseFields: [
+            { label: "Student says", type: "number_input" },
             { label: "Correct", type: "correct_incorrect" },
           ],
         },
@@ -357,6 +363,7 @@ export const schedule3D = {
           displayText: "60",
           targetLevel: 2,
           responseFields: [
+            { label: "Student says", type: "number_input" },
             { label: "Correct", type: "correct_incorrect" },
           ],
         },
@@ -382,6 +389,7 @@ export const schedule3D = {
           displayText: "53",
           targetLevel: 3,
           responseFields: [
+            { label: "Student says", type: "number_input" },
             { label: "Correct", type: "correct_incorrect" },
           ],
         },
@@ -392,6 +400,7 @@ export const schedule3D = {
           displayText: "80",
           targetLevel: 3,
           responseFields: [
+            { label: "Student says", type: "number_input" },
             { label: "Correct", type: "correct_incorrect" },
           ],
         },
@@ -417,6 +426,7 @@ export const schedule3D = {
           displayText: "37",
           targetLevel: 4,
           responseFields: [
+            { label: "Student says", type: "number_input" },
             { label: "Correct", type: "correct_incorrect" },
           ],
         },
@@ -427,6 +437,7 @@ export const schedule3D = {
           displayText: "63",
           targetLevel: 4,
           responseFields: [
+            { label: "Student says", type: "number_input" },
             { label: "Correct", type: "correct_incorrect" },
           ],
         },

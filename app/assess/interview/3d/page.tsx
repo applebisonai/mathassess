@@ -574,6 +574,22 @@ function ResponseFieldWidget({
   value: string;
   onChange: (v: string) => void;
 }) {
+  if (field.type === "number_input") {
+    return (
+      <div className="flex items-center gap-2">
+        <span className="text-xs text-gray-500 font-medium whitespace-nowrap">{field.label}:</span>
+        <input
+          type="text"
+          inputMode="numeric"
+          placeholder="___"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="w-20 border-2 border-orange-300 rounded-lg px-2 py-1 text-sm font-bold text-center text-orange-800 bg-orange-50 focus:outline-none focus:border-orange-500 placeholder-orange-200"
+        />
+      </div>
+    );
+  }
+
   if (field.type === "correct_incorrect") {
     return (
       <div className="flex items-center gap-2">

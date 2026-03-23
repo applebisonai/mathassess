@@ -18,7 +18,7 @@ const CATEGORIES = [
       { id: "schedule-2c", name: "Schedule 2C", description: "Early Arithmetical Strategies — Addition & Subtraction", gradeRange: "K–2", models: ["SEAL"], available: true },
       { id: "schedule-3a", name: "Schedule 3A", description: "Number Words and Numerals — NID, FNWS & BNWS", gradeRange: "K–3", models: ["NID", "FNWS", "BNWS"], available: true },
       { id: "schedule-3b", name: "Schedule 3B", description: "Structuring Numbers to 20 — SN20", gradeRange: "K–3", models: ["SN20"], available: true },
-      { id: "schedule-3c", name: "Schedule 3C", description: "Early Multiplication & Division — Grouping and Sharing", gradeRange: "2–5", models: ["M&D"], available: false },
+      { id: "schedule-3c", name: "Schedule 3C", description: "Conceptual Place Value — Incrementing & Decrementing by 10s and 100s", gradeRange: "1–3", models: ["CPV"], available: true },
       { id: "schedule-3d", name: "Schedule 3D", description: "Fractions — Equal Sharing, Part-Whole & Number Line", gradeRange: "3–5", models: ["FRN"], available: false },
       { id: "schedule-3e", name: "Schedule 3E", description: "Decimals & Percentages — Tenths, Hundredths & Equivalence", gradeRange: "4–5", models: ["DEC"], available: false },
       { id: "schedule-3f", name: "Schedule 3F", description: "Multiplication & Division Facts — Strategies & Automaticity", gradeRange: "3–5", models: ["MDF"], available: false },

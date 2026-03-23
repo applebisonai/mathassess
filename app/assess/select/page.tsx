@@ -68,6 +68,7 @@ const CATEGORIES = [
         models: ["SN20"],
         route: "/assess/interview/3b",
         available: true,
+        materials: ["Task Cards", "Addition and Subtraction Cards"],
       },
       {
         id: "schedule-3c",
@@ -454,10 +455,11 @@ function SelectContent() {
                       <li>• Numeral task cards (two-digit, three-digit, four-digit, five-digit)</li>
                       <li>• Paper and marker pen for student (writing numerals task)</li>
                     </>
-                  ) : selectedAssessmentId === "schedule-3b" ? (
+                  ) : assessment.materials?.length ? (
                     <>
-                      <li>• Task Cards</li>
-                      <li>• Addition and Subtraction Cards (for formal section, TG10–13)</li>
+                      {assessment.materials.map((m: string) => (
+                        <li key={m}>• {m}</li>
+                      ))}
                     </>
                   ) : (
                     <>

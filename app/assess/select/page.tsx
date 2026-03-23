@@ -73,11 +73,12 @@ const CATEGORIES = [
       {
         id: "schedule-3c",
         name: "Schedule 3C",
-        description: "Early Multiplication & Division — Grouping and Sharing",
-        gradeRange: "2–5",
-        models: ["M&D"],
-        route: "",
-        available: false,
+        description: "Conceptual Place Value — Incrementing & Decrementing by 10s and 100s",
+        gradeRange: "1–3",
+        models: ["CPV"],
+        route: "/assess/interview/3c",
+        available: true,
+        materials: ["Task Cards", "15 × 10-stick bundles", "13 × 100-dot squares", "Cover"],
       },
       {
         id: "schedule-3d",

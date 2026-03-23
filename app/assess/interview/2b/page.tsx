@@ -514,7 +514,8 @@ function InterviewContent() {
                 >
                   Next Group →
                 </button>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </div>

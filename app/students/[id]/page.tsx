@@ -12,6 +12,7 @@ import { schedule2B } from "@/lib/assessments/schedule-2b";
 import { schedule2C } from "@/lib/assessments/schedule-2c";
 import { scheduleAvPV } from "@/lib/assessments/schedule-av-pv";
 import { scheduleAvNWN } from "@/lib/assessments/schedule-av-nwn";
+import { scheduleAvSN } from "@/lib/assessments/schedule-av-sn";
 import { schedule3A } from "@/lib/assessments/schedule-3a";
 import { schedule3B } from "@/lib/assessments/schedule-3b";
 import { schedule3C } from "@/lib/assessments/schedule-3c";
@@ -27,6 +28,23 @@ const ASSESSMENT_CONFIG: Record<string, {
   subtitle: string;
   modelDefs: ModelDef[];
 }> = {
+  "av-sn": {
+    label: "Add+VantageMR: Structuring Numbers",
+    subtitle: "SN · Spatial · Finger · Partitions · Doubles",
+    modelDefs: [
+      {
+        key: "SN", color: "#ea580c", maxLevel: 5,
+        labels: {
+          0: "Emergent",
+          1: "Perceptual Patterns",
+          2: "Figurative Patterns",
+          3: "Initial Structuring",
+          4: "Intermediate Structuring",
+          5: "Facile Structuring",
+        },
+      },
+    ],
+  },
   "av-nwn": {
     label: "Add+VantageMR: Number Words and Numerals",
     subtitle: "NWN · FNWS · BNWS · NID",
@@ -293,6 +311,7 @@ function buildItemLookup(assessmentId: string): Record<string, { prompt: string;
     "schedule-2c": schedule2C as never,
     "av-pv":       scheduleAvPV as never,
     "av-nwn":      scheduleAvNWN as never,
+    "av-sn":       scheduleAvSN as never,
     "schedule-3a": schedule3A as never,
     "schedule-3b": schedule3B as never,
     "schedule-3c": schedule3C as never,
@@ -483,10 +502,12 @@ export default async function StudentProfilePage({
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mb-8">
             {allModels.map((model) => {
               const entry = currentLevels[model];
-              const levelName = ALL_MODEL_LEVELS[model]?.[entry.level] ?? `Level ${entry.level}`;
+              const assessCfg = ASSESSMENT_CONFIG[entry.assessmentId];
+              const assessModelDef = assessCfg?.modelDefs.find((m) => m.key === model);
+              const levelName = assessModelDef?.labels[entry.level] ?? ALL_MODEL_LEVELS[model]?.[entry.level] ?? `Level ${entry.level}`;
               const color = ALL_MODEL_COLORS[model] ?? "#6b7280";
               const assessType =
-                entry.assessmentId === "av-pv" ? "Add+VantageMR" :
+                entry.assessmentId.startsWith("av-") ? "Add+VantageMR" :
                 entry.assessmentId.startsWith("schedule-") ? "LFIN" : "";
               return (
                 <div key={model} className="rounded-xl border-2 p-3 bg-white"

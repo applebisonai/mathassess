@@ -33,7 +33,7 @@ const CATEGORIES = [
     description: "US Math Recovery Council — Courses 1 & 2",
     assessments: [
       { id: "av-nwn", name: "Number Words and Numerals", description: "Course 1 — FNWS, BNWS & Numeral Identification — Levels 0–5", gradeRange: "K–3", models: ["FNWS", "BNWS", "NID"], available: true, route: "/assess/interview/av-nwn" },
-      { id: "av-struct", name: "Structuring Numbers", description: "Course 1 — Spatial patterns, finger patterns, combining & partitioning to 20", gradeRange: "K–2", models: ["SN"], available: false },
+      { id: "av-sn", name: "Structuring Numbers", description: "Course 1 — Spatial patterns, finger patterns, partitions of 5 & 10, doubles to 20 — Levels 0–5", gradeRange: "K–3", models: ["SN"], available: true, route: "/assess/interview/av-sn" },
       { id: "av-addsub", name: "Addition & Subtraction", description: "Course 1 — Screened collections, missing addend, bare numbers, relational thinking", gradeRange: "K–3", models: ["SEAL"], available: false },
       { id: "av-pv", name: "Place Value", description: "Course 2 — Tens & ones sequences, two-digit addition/subtraction with & without materials", gradeRange: "2–4", models: ["CPV"], available: true },
       { id: "av-multdiv", name: "Multiplication & Division", description: "Course 2 — Equal groups, arrays, relational thinking, proportional reasoning", gradeRange: "2–5", models: ["M&D"], available: false },

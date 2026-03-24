@@ -72,7 +72,7 @@ export default async function DashboardPage() {
   const SCHEDULE_LABELS: Record<string, string> = {
     "schedule-2a": "2A", "schedule-2b": "2B", "schedule-2c": "2C",
     "schedule-3a": "3A", "schedule-3b": "3B", "schedule-3c": "3C", "schedule-3d": "3D",
-    "av-pv": "PV", "av-nwn": "NWN",
+    "av-pv": "PV", "av-nwn": "NWN", "av-sn": "SN",
   };
 
   const dateLabel = new Date().toLocaleDateString("en-US", {

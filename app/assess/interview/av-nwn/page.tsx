@@ -218,6 +218,35 @@ function InterviewContent() {
       .then(({ data }) => { if (data) setStudent(data); });
   }, [studentId]);
 
+  // When navigating to a group that has a START HERE item, auto-mark all
+  // items in sub-groups before the START HERE sub-group as correct (if unanswered).
+  useEffect(() => {
+    const group = groups[currentGroupIdx];
+    if (!group.startAtItem) return;
+
+    const subLevels = groupBySubLevel(group.items);
+    const startSubIdx = subLevels.findIndex(([, items]) =>
+      items.some((i) => i.id === group.startAtItem)
+    );
+    if (startSubIdx <= 0) return;
+
+    setResponses((prev) => {
+      const next = { ...prev };
+      for (let s = 0; s < startSubIdx; s++) {
+        const [, items] = subLevels[s];
+        items.forEach((item) => {
+          item.responseFields.forEach((field) => {
+            if (field.type === "correct_incorrect" && !next[item.id]?.[field.label]) {
+              next[item.id] = { ...(next[item.id] ?? {}), [field.label]: "correct" };
+            }
+          });
+        });
+      }
+      return next;
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentGroupIdx]);
+
   function getRequiredButUnanswered(group: TaskGroup): AssessmentItem[] {
     const subLevels = groupBySubLevel(group.items);
     return subLevels

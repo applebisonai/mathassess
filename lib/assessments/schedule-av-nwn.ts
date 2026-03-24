@@ -256,6 +256,9 @@ export const scheduleAvNWN = {
       color: "purple",
       instructions: "For recognition: \"Which number is the ___?\" (place cards on table in random order)\nFor identification: \"What number is this?\" (show each card in turn)",
       teacherScript: "Recognition: \"Which number is the ___?\"\nIdentification: \"What number is this?\"",
+      branchingNote: "If student is not facile in Numeral ID 11–100, go back and administer Numeral ID 0–10 items first.",
+      startAtItem: "nid-19",
+      startNote: "START HERE — most students begin at Numeral ID 11–100",
       items: [
         // Numeral Recognition 0–10
         {

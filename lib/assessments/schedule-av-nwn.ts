@@ -566,6 +566,7 @@ export const scheduleAvNWN = {
           displayText: "10 (to 1)",
           targetLevel: 1,
           responseFields: [{ label: "Correct", type: "correct_incorrect" }],
+          countingSequence: [10,9,8,7,6,5,4,3,2,1],
         },
         {
           id: "tg4-b", number: "4.b",
@@ -573,6 +574,7 @@ export const scheduleAvNWN = {
           displayText: "17 (to 10)",
           targetLevel: 1,
           responseFields: [{ label: "Correct", type: "correct_incorrect" }],
+          countingSequence: [17,16,15,14,13,12,11,10],
         },
         {
           id: "tg4-c", number: "4.c",
@@ -580,6 +582,7 @@ export const scheduleAvNWN = {
           displayText: "38 (to 27)",
           targetLevel: 4,
           responseFields: [{ label: "Correct", type: "correct_incorrect" }],
+          countingSequence: [38,37,36,35,34,33,32,31,30,29,28,27],
         },
         {
           id: "tg4-d", number: "4.d",
@@ -587,6 +590,7 @@ export const scheduleAvNWN = {
           displayText: "72 (to 66)",
           targetLevel: 5,
           responseFields: [{ label: "Correct", type: "correct_incorrect" }],
+          countingSequence: [72,71,70,69,68,67,66],
         },
       ],
     },

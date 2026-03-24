@@ -746,6 +746,9 @@ export const scheduleAvNWN = {
       color: "purple",
       instructions: "Place the cards face up, one at a time, in random order. \"Tell me the numbers as I lay them down.\" Then: \"Put these in order.\" When finished, ask student to read the cards.",
       teacherScript: "\"Tell me the numbers as I lay them down.\" Then: \"Put these in order. Now read these numbers for me.\"",
+      branchingNote: "If student is not facile in Sequences 46–55, go back and administer Sequences 1–10 first.",
+      startAtItem: "tg6-2",
+      startNote: "START HERE — most students begin at Sequences 46–55",
       items: [
         {
           id: "tg6-1", number: "Numeral Sequences 1–10",

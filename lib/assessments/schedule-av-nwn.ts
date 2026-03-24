@@ -115,7 +115,7 @@ export const scheduleAvNWN = {
       color: "purple",
       instructions: "Say: \"Say the number that comes right after ___.\"\nIntroductory example: \"Say the number that comes right after two.\" Then ask each number in turn.",
       teacherScript: "\"Say the number that comes right after ___.\"\nIntroductory example: \"Say the number that comes right after two.\"",
-      branchingNote: "If student is not facile in NWA 11–30, go back and administer NWA 0–10 items first. If not facile in NWA 31–100, go back to NWA 11–30.",
+      branchingNote: "If student is not facile in NWA 11–30, go back and administer NWA 0–10 items first.",
       startAtItem: "nwa-14",
       startNote: "START HERE — most students begin at NWA 11–30",
       items: [

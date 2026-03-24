@@ -14,6 +14,7 @@ export interface AssessmentItem {
   responseFields: ResponseField[];
   targetLevel: number;
   notes?: string;
+  countingSequence?: number[];
 }
 
 export interface ResponseField {
@@ -73,6 +74,7 @@ export const scheduleAvNWN = {
           displayText: "1 (to 32)",
           targetLevel: 1,
           responseFields: [{ label: "Correct", type: "correct_incorrect" }],
+          countingSequence: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32],
         },
         {
           id: "tg1-b", number: "1.b",
@@ -80,6 +82,7 @@ export const scheduleAvNWN = {
           displayText: "38 (to 51)",
           targetLevel: 4,
           responseFields: [{ label: "Correct", type: "correct_incorrect" }],
+          countingSequence: [38,39,40,41,42,43,44,45,46,47,48,49,50,51],
         },
         {
           id: "tg1-c", number: "1.c",
@@ -87,6 +90,7 @@ export const scheduleAvNWN = {
           displayText: "76 (to 84)",
           targetLevel: 5,
           responseFields: [{ label: "Correct", type: "correct_incorrect" }],
+          countingSequence: [76,77,78,79,80,81,82,83,84],
         },
         {
           id: "tg1-d", number: "1.d",
@@ -94,6 +98,7 @@ export const scheduleAvNWN = {
           displayText: "93 (to 112)",
           targetLevel: 5,
           responseFields: [{ label: "Correct", type: "correct_incorrect" }],
+          countingSequence: [93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112],
         },
       ],
     },
@@ -110,7 +115,9 @@ export const scheduleAvNWN = {
       color: "purple",
       instructions: "Say: \"Say the number that comes right after ___.\"\nIntroductory example: \"Say the number that comes right after two.\" Then ask each number in turn.",
       teacherScript: "\"Say the number that comes right after ___.\"\nIntroductory example: \"Say the number that comes right after two.\"",
-      branchingNote: "Introductory example: \"Say the number that comes right after two.\" Then ask each number in turn.",
+      branchingNote: "If student is not facile in NWA 11–30, go back and administer NWA 0–10 items first. If not facile in NWA 31–100, go back to NWA 11–30.",
+      startAtItem: "nwa-14",
+      startNote: "START HERE — most students begin at NWA 11–30",
       items: [
         // NWA 0–10
         {
@@ -593,7 +600,9 @@ export const scheduleAvNWN = {
       color: "purple",
       instructions: "Say: \"Say the number that comes right before ___.\"\nIntroductory example: \"Say the number that comes right before two.\" Then ask each number in turn.",
       teacherScript: "\"Say the number that comes right before ___.\"\nIntroductory example: \"Say the number that comes right before two.\"",
-      branchingNote: "Introductory example: \"Say the number that comes right before two.\" Then ask each number in turn.",
+      branchingNote: "If student is not facile in NWB 11–30, go back and administer NWB 0–10 items first. If not facile in NWB 31–100, go back to NWB 11–30.",
+      startAtItem: "nwb-24",
+      startNote: "START HERE — most students begin at NWB 11–30",
       items: [
         // NWB 0–10
         {

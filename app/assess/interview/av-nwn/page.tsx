@@ -582,6 +582,8 @@ function InterviewContent() {
                   responses={responses}
                   getResponse={getResponse}
                   setResponse={setResponse}
+                  startAtItem={currentGroup.startAtItem}
+                  startNote={currentGroup.startNote}
                 />
               );
             })}
@@ -627,10 +629,71 @@ function InterviewContent() {
   );
 }
 
+// ── Slashable Sequence ────────────────────────────────────────────────────────
+// Clickable number buttons for counting sequences — tap a number to mark it wrong
+
+function SlashableSequence({
+  sequence,
+  itemId,
+  getResponse,
+  setResponse,
+}: {
+  sequence: number[];
+  itemId: string;
+  getResponse: (id: string, field: string) => string;
+  setResponse: (id: string, field: string, value: string) => void;
+}) {
+  const field = "_slashed";
+  const slashedStr = getResponse(itemId, field);
+  const slashed = new Set(slashedStr ? slashedStr.split(",").filter(Boolean).map(Number) : []);
+
+  function toggle(num: number) {
+    const next = new Set(slashed);
+    if (next.has(num)) next.delete(num);
+    else next.add(num);
+    setResponse(itemId, field, Array.from(next).sort((a, b) => a - b).join(","));
+  }
+
+  return (
+    <div className="mt-2 flex flex-wrap gap-1">
+      {sequence.map((num) => {
+        const isSlashed = slashed.has(num);
+        return (
+          <button
+            key={num}
+            onClick={() => toggle(num)}
+            title={isSlashed ? `${num} — marked wrong (tap to clear)` : `Tap to mark ${num} wrong`}
+            className={`relative w-9 h-8 rounded text-xs font-bold border transition-all select-none ${
+              isSlashed
+                ? "bg-red-100 border-red-400 text-red-600"
+                : "bg-white border-gray-300 text-gray-700 hover:border-purple-400 hover:bg-purple-50"
+            }`}
+          >
+            {isSlashed && (
+              <span
+                className="pointer-events-none absolute inset-0 flex items-center justify-center"
+                aria-hidden
+              >
+                <span className="absolute w-[110%] h-[2px] bg-red-500 rounded" style={{ transform: "rotate(-15deg)" }} />
+              </span>
+            )}
+            <span className={isSlashed ? "opacity-60" : ""}>{num}</span>
+          </button>
+        );
+      })}
+      {slashed.size > 0 && (
+        <div className="w-full mt-1 text-xs text-red-600 font-medium">
+          Errors: {Array.from(slashed).sort((a, b) => a - b).join(", ")}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Sub-group section ─────────────────────────────────────────────────────────
 
 function SubGroupSection({
-  subLevel, items, color, responses, getResponse, setResponse,
+  subLevel, items, color, responses, getResponse, setResponse, startAtItem, startNote,
 }: {
   subLevel: string;
   items: AssessmentItem[];
@@ -638,11 +701,20 @@ function SubGroupSection({
   responses: Responses;
   getResponse: (id: string, field: string) => string;
   setResponse: (id: string, field: string, value: string) => void;
+  startAtItem?: string;
+  startNote?: string;
 }) {
   const score = calcGroupScore(items, responses);
+  const isStartHere = startAtItem ? items.some((i) => i.id === startAtItem) : false;
 
   return (
-    <div className={`rounded-xl border-2 overflow-hidden ${COLOR_SUBGROUP[color] ?? "border-gray-200 bg-gray-50/30"}`}>
+    <div className={`rounded-xl border-2 overflow-hidden ${isStartHere ? "border-green-400" : COLOR_SUBGROUP[color] ?? "border-gray-200 bg-gray-50/30"}`}>
+      {isStartHere && (
+        <div className="bg-green-500 px-3 py-1.5 flex items-center gap-2">
+          <span className="text-white font-bold text-xs tracking-wide">▶ START HERE</span>
+          {startNote && <span className="text-green-100 text-xs">{startNote}</span>}
+        </div>
+      )}
       {score && (
         <div className={`px-3 py-1.5 flex items-center justify-end ${COLOR_SUBHEAD[color] ?? "bg-gray-100 text-gray-900"}`}>
           <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
@@ -743,6 +815,19 @@ function ItemRow({
           📝
         </button>
       </div>
+
+      {/* Counting sequence buttons (TG1) — tap numbers to mark errors */}
+      {item.countingSequence && item.countingSequence.length > 0 && (
+        <div className="mt-1">
+          <div className="text-xs text-gray-400 mb-1 font-medium">Tap a number to mark it wrong:</div>
+          <SlashableSequence
+            sequence={item.countingSequence}
+            itemId={item.id}
+            getResponse={getResponse}
+            setResponse={setResponse}
+          />
+        </div>
+      )}
 
       {/* Expandable teacher note */}
       {notesOpen && (

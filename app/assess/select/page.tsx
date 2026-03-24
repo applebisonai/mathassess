@@ -121,10 +121,9 @@ const CATEGORIES = [
       {
         id: "av-nwn",
         name: "Add+VantageMR: Number Words and Numerals",
-        shortName: "NWN",
         gradeRange: "K–3",
         description: "FNWS, BNWS & Numeral ID",
-        color: "purple",
+        models: ["FNWS", "BNWS", "NID"],
         route: "/assess/interview/av-nwn",
         available: true,
       },

@@ -666,13 +666,15 @@ function SlashableSequence({
   itemId,
   getResponse,
   setResponse,
+  fieldName = "_slashed",
 }: {
   sequence: number[];
   itemId: string;
   getResponse: (id: string, field: string) => string;
   setResponse: (id: string, field: string, value: string) => void;
+  fieldName?: string;
 }) {
-  const field = "_slashed";
+  const field = fieldName;
   const slashedStr = getResponse(itemId, field);
   const slashed = new Set(slashedStr ? slashedStr.split(",").filter(Boolean).map(Number) : []);
 
@@ -796,8 +798,88 @@ function ItemRow({
   getResponse: (id: string, field: string) => string;
   setResponse: (id: string, field: string, value: string) => void;
 }) {
-  const [notesOpen, setNotesOpen] = useState(false);
+  const [openNotes, setOpenNotes] = useState<Set<string>>(new Set());
 
+  function toggleNote(key: string) {
+    setOpenNotes((prev) => {
+      const n = new Set(prev);
+      n.has(key) ? n.delete(key) : n.add(key);
+      return n;
+    });
+  }
+
+  // ── TG6 layout: items with identifySequence get per-field notes + number buttons ──
+  if (item.identifySequence) {
+    return (
+      <div className="px-3 py-3 space-y-2">
+        {/* Header */}
+        <div className="flex items-start gap-2">
+          {item.displayText && (
+            <span className="text-xl font-black text-gray-700 shrink-0">{item.displayText}</span>
+          )}
+          <span className="text-sm text-gray-700 flex-1 pt-0.5">{item.prompt}</span>
+        </div>
+
+        {/* Per-field rows: Identify, Sequence, Read */}
+        {item.responseFields.map((field) => (
+          <div key={field.label} className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-gray-600 w-16 shrink-0">{field.label}</span>
+              <InlineCorrectIncorrect
+                value={getResponse(item.id, field.label)}
+                onChange={(v) => setResponse(item.id, field.label, v)}
+              />
+              <button
+                onClick={() => toggleNote(field.label)}
+                className="text-gray-300 hover:text-gray-500 text-xs ml-1"
+                title={`Add note for ${field.label}`}
+              >
+                📝
+              </button>
+            </div>
+
+            {/* Identify: clickable number buttons + All Correct */}
+            {field.label === "Identify" && (
+              <div className="pl-[4.5rem]">
+                <div className="text-xs text-gray-400 mb-1 font-medium">Tap to mark wrong:</div>
+                <SlashableSequence
+                  sequence={item.identifySequence!}
+                  itemId={item.id}
+                  fieldName="_identify_slashed"
+                  getResponse={getResponse}
+                  setResponse={setResponse}
+                />
+                <button
+                  onClick={() => setResponse(item.id, "_identify_slashed", "")}
+                  className="mt-1.5 text-xs font-semibold px-3 py-1 rounded-lg bg-green-500 hover:bg-green-600 text-white transition-colors"
+                >
+                  ✓ All Correct
+                </button>
+              </div>
+            )}
+
+            {/* Per-field comment */}
+            {openNotes.has(field.label) && (
+              <input
+                type="text"
+                placeholder={`${field.label} note…`}
+                value={getResponse(item.id, `${field.label}_note`)}
+                onChange={(e) => setResponse(item.id, `${field.label}_note`, e.target.value)}
+                className="w-full text-xs border border-gray-200 rounded px-2 py-1 text-gray-500 focus:outline-none focus:border-gray-400"
+                autoFocus
+              />
+            )}
+          </div>
+        ))}
+
+        {item.notes && (
+          <div className="text-xs text-purple-600 italic">{item.notes}</div>
+        )}
+      </div>
+    );
+  }
+
+  // ── Default layout ────────────────────────────────────────────────────────
   return (
     <div className="px-3 py-3">
       <div className="flex items-start gap-3 flex-wrap">
@@ -840,7 +922,7 @@ function ItemRow({
 
         {/* Notes toggle */}
         <button
-          onClick={() => setNotesOpen((o) => !o)}
+          onClick={() => toggleNote("notes")}
           className="text-gray-300 hover:text-gray-500 text-xs ml-1 pt-0.5"
           title="Add note"
         >
@@ -848,7 +930,7 @@ function ItemRow({
         </button>
       </div>
 
-      {/* Counting sequence buttons (TG1) — tap numbers to mark errors */}
+      {/* Counting sequence buttons (TG1/TG4) — tap numbers to mark errors */}
       {item.countingSequence && item.countingSequence.length > 0 && (
         <div className="mt-1">
           <div className="text-xs text-gray-400 mb-1 font-medium">Tap a number to mark it wrong:</div>
@@ -862,7 +944,7 @@ function ItemRow({
       )}
 
       {/* Expandable teacher note */}
-      {notesOpen && (
+      {openNotes.has("notes") && (
         <input
           type="text"
           placeholder="Teacher note…"

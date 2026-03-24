@@ -15,6 +15,7 @@ export interface AssessmentItem {
   targetLevel: number;
   notes?: string;
   countingSequence?: number[];
+  identifySequence?: number[];
 }
 
 export interface ResponseField {
@@ -764,6 +765,7 @@ export const scheduleAvNWN = {
             { label: "Sequence", type: "correct_incorrect" },
             { label: "Read", type: "correct_incorrect" },
           ],
+          identifySequence: [1,2,3,4,5,6,7,8,9,10],
         },
         {
           id: "tg6-2", number: "Numeral Sequences 46–55",
@@ -775,6 +777,7 @@ export const scheduleAvNWN = {
             { label: "Sequence", type: "correct_incorrect" },
             { label: "Read", type: "correct_incorrect" },
           ],
+          identifySequence: [46,47,48,49,50,51,52,53,54,55],
         },
       ],
     },

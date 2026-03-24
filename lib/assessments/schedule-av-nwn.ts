@@ -603,7 +603,7 @@ export const scheduleAvNWN = {
       color: "purple",
       instructions: "Say: \"Say the number that comes right before ___.\"\nIntroductory example: \"Say the number that comes right before two.\" Then ask each number in turn.",
       teacherScript: "\"Say the number that comes right before ___.\"\nIntroductory example: \"Say the number that comes right before two.\"",
-      branchingNote: "If student is not facile in NWB 11–30, go back and administer NWB 0–10 items first. If not facile in NWB 31–100, go back to NWB 11–30.",
+      branchingNote: "If student is not facile in NWB 11–30, go back and administer NWB 0–10 items first.",
       startAtItem: "nwb-24",
       startNote: "START HERE — most students begin at NWB 11–30",
       items: [

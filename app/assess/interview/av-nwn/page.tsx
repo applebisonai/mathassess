@@ -815,7 +815,10 @@ function ItemRow({
         {/* Response fields */}
         <div className="flex flex-col gap-1.5 shrink-0">
           {item.responseFields.map((field) => (
-            <span key={field.label} className="flex items-center gap-1">
+            <span key={field.label} className="flex items-center gap-1.5">
+              {field.label !== "Correct" && (
+                <span className="text-xs font-medium text-gray-500 w-14 text-right shrink-0">{field.label}</span>
+              )}
               {field.type === "correct_incorrect" && (
                 <InlineCorrectIncorrect
                   value={getResponse(item.id, field.label)}

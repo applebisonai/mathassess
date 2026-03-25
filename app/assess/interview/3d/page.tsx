@@ -43,11 +43,16 @@ function groupBySubLevel(items: AssessmentItem[]) {
 // ── Scoring ───────────────────────────────────────────────────────────────────
 
 function isCorrect(responses: Responses, itemId: string): boolean {
-  return responses[itemId]?.Correct === "correct";
+  const val = responses[itemId]?.Correct;
+  return val === "correct";
+}
+
+function isNotAttempted(responses: Responses, itemId: string): boolean {
+  return responses[itemId]?.Correct === "not_attempted";
 }
 
 function countCorrect(responses: Responses, items: AssessmentItem[]): number {
-  return items.filter((item) => isCorrect(responses, item.id)).length;
+  return items.filter((item) => !isNotAttempted(responses, item.id) && isCorrect(responses, item.id)).length;
 }
 
 function calculateResults(responses: Responses) {

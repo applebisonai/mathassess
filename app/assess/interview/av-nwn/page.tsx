@@ -62,22 +62,29 @@ function calcGroupScore(items: AssessmentItem[], responses: Responses) {
 // ── Scoring logic ──────────────────────────────────────────────────────────────
 
 function calculateResults(responses: Responses) {
+  // Helper to exclude not_attempted items
+  const isCorrect = (id: string) => {
+    const val = responses[id]?.Correct;
+    return val === "correct";
+  };
+  const isNotAttempted = (id: string) => responses[id]?.Correct === "not_attempted";
+
   // FNWS Level (0–5)
-  const tg1a = responses["tg1-a"]?.Correct === "correct";
-  const tg1b = responses["tg1-b"]?.Correct === "correct";
-  const tg1c = responses["tg1-c"]?.Correct === "correct";
-  const tg1d = responses["tg1-d"]?.Correct === "correct";
+  const tg1a = isCorrect("tg1-a");
+  const tg1b = isCorrect("tg1-b");
+  const tg1c = isCorrect("tg1-c");
+  const tg1d = isCorrect("tg1-d");
 
   const nwa0to10 = ["nwa-5","nwa-9","nwa-7","nwa-3","nwa-6"].filter(
-    (id) => responses[id]?.Correct === "correct"
+    (id) => isCorrect(id) && !isNotAttempted(id)
   ).length;
 
   const nwa11to30 = ["nwa-14","nwa-20","nwa-11","nwa-29","nwa-23","nwa-12","nwa-19"].filter(
-    (id) => responses[id]?.Correct === "correct"
+    (id) => isCorrect(id) && !isNotAttempted(id)
   ).length;
 
   const nwa31to100 = ["nwa-59","nwa-65","nwa-32","nwa-70","nwa-99"].filter(
-    (id) => responses[id]?.Correct === "correct"
+    (id) => isCorrect(id) && !isNotAttempted(id)
   ).length;
 
   let fnwsLevel = 0;
@@ -94,15 +101,15 @@ function calculateResults(responses: Responses) {
   const tg4d = responses["tg4-d"]?.Correct === "correct";
 
   const nwb0to10 = ["nwb-7","nwb-10","nwb-4","nwb-8","nwb-3"].filter(
-    (id) => responses[id]?.Correct === "correct"
+    (id) => isCorrect(id) && !isNotAttempted(id)
   ).length;
 
   const nwb11to30 = ["nwb-24","nwb-17","nwb-20","nwb-11","nwb-14","nwb-21","nwb-30"].filter(
-    (id) => responses[id]?.Correct === "correct"
+    (id) => isCorrect(id) && !isNotAttempted(id)
   ).length;
 
   const nwb31to100 = ["nwb-53","nwb-70","nwb-88","nwb-41","nwb-96"].filter(
-    (id) => responses[id]?.Correct === "correct"
+    (id) => isCorrect(id) && !isNotAttempted(id)
   ).length;
 
   let bnwsLevel = 0;
@@ -114,23 +121,23 @@ function calculateResults(responses: Responses) {
 
   // NID Level (0–5)
   const nr0to10 = ["nid-r6","nid-r8","nid-r2","nid-r9","nid-r7","nid-r5"].filter(
-    (id) => responses[id]?.Correct === "correct"
+    (id) => isCorrect(id) && !isNotAttempted(id)
   ).length;
 
   const nid0to10 = ["nid-4","nid-2","nid-9","nid-6","nid-0","nid-8","nid-10","nid-3","nid-1","nid-7","nid-5"].filter(
-    (id) => responses[id]?.Correct === "correct"
+    (id) => isCorrect(id) && !isNotAttempted(id)
   ).length;
 
   const nid11to100 = ["nid-19","nid-34","nid-15","nid-90","nid-41","nid-12","nid-17","nid-20","nid-66","nid-25"].filter(
-    (id) => responses[id]?.Correct === "correct"
+    (id) => isCorrect(id) && !isNotAttempted(id)
   ).length;
 
   const nid101to1000 = ["nid-168","nid-400","nid-117","nid-354","nid-205","nid-620"].filter(
-    (id) => responses[id]?.Correct === "correct"
+    (id) => isCorrect(id) && !isNotAttempted(id)
   ).length;
 
   const nid1001to1M = ["nid-7462","nid-5026","nid-46803","nid-90380","nid-247641","nid-700090"].filter(
-    (id) => responses[id]?.Correct === "correct"
+    (id) => isCorrect(id) && !isNotAttempted(id)
   ).length;
 
   let nidLevel = 0;

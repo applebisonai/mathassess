@@ -43,26 +43,29 @@ function calcGroupScore(items: AssessmentItem[], responses: Responses) {
 
 function calculateResults(responses: Responses) {
   const resp = (id: string) => responses[id]?.["Response"] === "correct";
+  // "not_attempted" items are excluded from scoring — they neither help nor hurt.
+  // "attempted" scores as NOT correct (conservative/lower level assumption).
+  const notAttempted = (id: string) => responses[id]?.["Response"] === "not_attempted";
 
   // Range 1: 2s and 10s
-  const r1Mult = ["f1-mult-2x6","f1-mult-5x10","f1-mult-8x2","f1-mult-10x7"].filter((id) => resp(id)).length;
-  const r1Div  = ["f1-div-90by10","f1-div-14by7","f1-div-18by2","f1-div-80by8"].filter((id) => resp(id)).length;
+  const r1Mult = ["f1-mult-2x6","f1-mult-5x10","f1-mult-8x2","f1-mult-10x7"].filter((id) => resp(id) && !notAttempted(id)).length;
+  const r1Div  = ["f1-div-90by10","f1-div-14by7","f1-div-18by2","f1-div-80by8"].filter((id) => resp(id) && !notAttempted(id)).length;
 
   // Range 2: Low × low
-  const r2Mult = ["f2-mult-3x4","f2-mult-5x3","f2-mult-3x3","f2-mult-4x5"].filter((id) => resp(id)).length;
-  const r2Div  = ["f2-div-15by5","f2-div-16by4","f2-div-25by5","f2-div-12by3"].filter((id) => resp(id)).length;
+  const r2Mult = ["f2-mult-3x4","f2-mult-5x3","f2-mult-3x3","f2-mult-4x5"].filter((id) => resp(id) && !notAttempted(id)).length;
+  const r2Div  = ["f2-div-15by5","f2-div-16by4","f2-div-25by5","f2-div-12by3"].filter((id) => resp(id) && !notAttempted(id)).length;
 
   // Range 3: Low × high
-  const r3Mult = ["f3-mult-6x3","f3-mult-4x7","f3-mult-3x9","f3-mult-5x7"].filter((id) => resp(id)).length;
-  const r3Div  = ["f3-div-21by3","f3-div-32by8","f3-div-30by6","f3-div-45by5"].filter((id) => resp(id)).length;
+  const r3Mult = ["f3-mult-6x3","f3-mult-4x7","f3-mult-3x9","f3-mult-5x7"].filter((id) => resp(id) && !notAttempted(id)).length;
+  const r3Div  = ["f3-div-21by3","f3-div-32by8","f3-div-30by6","f3-div-45by5"].filter((id) => resp(id) && !notAttempted(id)).length;
 
   // Range 4: High × high
-  const r4Mult = ["f4-mult-6x6","f4-mult-8x7","f4-mult-9x8","f4-mult-7x6"].filter((id) => resp(id)).length;
-  const r4Div  = ["f4-div-48by8","f4-div-63by9","f4-div-54by6","f4-div-49by7"].filter((id) => resp(id)).length;
+  const r4Mult = ["f4-mult-6x6","f4-mult-8x7","f4-mult-9x8","f4-mult-7x6"].filter((id) => resp(id) && !notAttempted(id)).length;
+  const r4Div  = ["f4-div-48by8","f4-div-63by9","f4-div-54by6","f4-div-49by7"].filter((id) => resp(id) && !notAttempted(id)).length;
 
   // Range 5: Factor > 10
-  const r5Mult = ["f5-mult-3x12","f5-mult-15x7"].filter((id) => resp(id)).length;
-  const r5Div  = ["f5-div-65by5","f5-div-96by4"].filter((id) => resp(id)).length;
+  const r5Mult = ["f5-mult-3x12","f5-mult-15x7"].filter((id) => resp(id) && !notAttempted(id)).length;
+  const r5Div  = ["f5-div-65by5","f5-div-96by4"].filter((id) => resp(id) && !notAttempted(id)).length;
 
   let mbfLevel = 0;
 

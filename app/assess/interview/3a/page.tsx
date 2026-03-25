@@ -46,13 +46,19 @@ function groupBySubLevel(items: AssessmentItem[]) {
 // ── Scoring helpers ───────────────────────────────────────────────────────────
 
 function isCorrect(responses: Responses, itemId: string): boolean {
-  return responses[itemId]?.Correct === "correct";
+  const val = responses[itemId]?.Correct;
+  return val === "correct";
+}
+
+function isNotAttempted(responses: Responses, itemId: string): boolean {
+  return responses[itemId]?.Correct === "not_attempted";
 }
 
 /** Highest target level at which the student scored ≥ 50% correct in a group */
 function highestPassedLevel(responses: Responses, items: AssessmentItem[]): number {
   const byLevel = new Map<number, { correct: number; total: number }>();
   items.forEach((item) => {
+    if (isNotAttempted(responses, item.id)) return; // Skip not_attempted items
     if (!byLevel.has(item.targetLevel)) byLevel.set(item.targetLevel, { correct: 0, total: 0 });
     const entry = byLevel.get(item.targetLevel)!;
     entry.total++;
@@ -69,7 +75,7 @@ function highestPassedLevel(responses: Responses, items: AssessmentItem[]): numb
 function highestSequenceLevel(responses: Responses, items: AssessmentItem[]): number {
   let highest = 0;
   items.forEach((item) => {
-    if (isCorrect(responses, item.id) && item.targetLevel > highest) {
+    if (!isNotAttempted(responses, item.id) && isCorrect(responses, item.id) && item.targetLevel > highest) {
       highest = item.targetLevel;
     }
   });

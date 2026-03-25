@@ -45,9 +45,12 @@ function calcGroupScore(items: AssessmentItem[], responses: Responses) {
 
 function calculateResults(responses: Responses) {
   const resp = (id: string) => responses[id]?.["Response"] === "correct";
+  // "not_attempted" items are excluded from scoring — they neither help nor hurt.
+  // "attempted" scores as NOT correct (conservative/lower level assumption).
+  const notAttempted = (id: string) => responses[id]?.["Response"] === "not_attempted";
 
   // TG1: Skip counting
-  const skipCount = ["md1-by2","md1-by5","md1-back5","md1-by3","md1-by4","md1-back2"].filter((id) => resp(id)).length;
+  const skipCount = ["md1-by2","md1-by5","md1-back5","md1-by3","md1-by4","md1-back2"].filter((id) => resp(id) && !notAttempted(id)).length;
 
   // TG2: Multiplication/Division with materials
   const formGroups        = resp("md2-forming-groups");
@@ -68,21 +71,21 @@ function calculateResults(responses: Responses) {
   let mdLevel = 0;
 
   // Level 1: Can form equal groups and count when visible
-  if (formGroups || arrayVisible) mdLevel = Math.max(mdLevel, 1);
+  if ((formGroups && !notAttempted("md2-forming-groups")) || (arrayVisible && !notAttempted("md2-array-visible"))) mdLevel = Math.max(mdLevel, 1);
 
   // Level 2: Can use arrays and figurative counting
-  if (arrayVisible && screenedColl) mdLevel = Math.max(mdLevel, 2);
+  if ((arrayVisible && !notAttempted("md2-array-visible")) && (screenedColl && !notAttempted("md2-screened-collections"))) mdLevel = Math.max(mdLevel, 2);
 
   // Level 3: Skip counts / uses repeated addition (4+ skip counting + screened tasks)
-  if (skipCount >= 4 && [screenedArray, notVisibleArray].filter(Boolean).length >= 1)
+  if (skipCount >= 4 && [(screenedArray && !notAttempted("md2-screened-array")), (notVisibleArray && !notAttempted("md2-not-visible-array"))].filter(Boolean).length >= 1)
     mdLevel = Math.max(mdLevel, 3);
 
   // Level 4: Abstract groups / verbal division
-  if ([verbalDiv1, verbalDiv2].filter(Boolean).length >= 1 && skipCount >= 4)
+  if ([(verbalDiv1 && !notAttempted("md2-verbal-div1")), (verbalDiv2 && !notAttempted("md2-verbal-div2"))].filter(Boolean).length >= 1 && skipCount >= 4)
     mdLevel = Math.max(mdLevel, 4);
 
   // Level 5: Relational thinking
-  const relational = [comm3x7, inverse8x7, dist25x3, known8x4, near15x3].filter(Boolean).length;
+  const relational = [(comm3x7 && !notAttempted("md3-comm-3x7")), (inverse8x7 && !notAttempted("md3-inverse-8x7")), (dist25x3 && !notAttempted("md3-dist-25x3")), (known8x4 && !notAttempted("md3-known-8x4")), (near15x3 && !notAttempted("md3-near-15x3"))].filter(Boolean).length;
   if (relational >= 3) mdLevel = Math.max(mdLevel, 5);
 
   return {

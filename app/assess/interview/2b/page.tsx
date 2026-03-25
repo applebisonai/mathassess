@@ -52,7 +52,12 @@ function calcGroupScore(items: AssessmentItem[], responses: Responses) {
     const f = i.responseFields.find((f) => f.type === "correct_incorrect");
     return f ? responses[i.id]?.[f.label] === "correct" : false;
   }).length;
-  return { correct, total: scoreable.length };
+  const attempted = scoreable.filter((i) => {
+    const f = i.responseFields.find((f) => f.type === "correct_incorrect");
+    const val = f ? responses[i.id]?.[f.label] : undefined;
+    return val !== undefined && val !== "not_attempted";
+  }).length;
+  return { correct, total: attempted || scoreable.length };
 }
 
 // ── SN20 Scoring ─────────────────────────────────────────────────────────────

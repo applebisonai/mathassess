@@ -56,7 +56,12 @@ function getStrategy(responses: Responses, itemId: string): string {
 }
 
 function isCorrect(responses: Responses, itemId: string): boolean {
-  return responses[itemId]?.Correct === "correct";
+  const val = responses[itemId]?.Correct;
+  return val === "correct";
+}
+
+function isNotAttempted(responses: Responses, itemId: string): boolean {
+  return responses[itemId]?.Correct === "not_attempted";
 }
 
 function calculateResults(responses: Responses) {
@@ -98,10 +103,10 @@ function calculateResults(responses: Responses) {
   // Level determination
   let sealLevel = 0;
 
-  if (tg1Any) sealLevel = 1;
+  if (tg1Any && !isNotAttempted(responses, "1.1") && !isNotAttempted(responses, "1.2") && !isNotAttempted(responses, "1.3")) sealLevel = 1;
   if (sealLevel >= 1 && (tg1HasFigurative || tg3Any)) sealLevel = Math.max(sealLevel, 2);
-  if (tg2CountingOn) sealLevel = Math.max(sealLevel, 3);
-  if (sealLevel >= 3 && (tg5_1Correct || tg5_2Correct) && tg5HasAdvanced) sealLevel = Math.max(sealLevel, 4);
+  if (tg2CountingOn && !isNotAttempted(responses, "2.1")) sealLevel = Math.max(sealLevel, 3);
+  if (sealLevel >= 3 && ((tg5_1Correct && !isNotAttempted(responses, "5.1")) || (tg5_2Correct && !isNotAttempted(responses, "5.2"))) && tg5HasAdvanced) sealLevel = Math.max(sealLevel, 4);
   if (nonCountingTotal >= 3 || (tg5NonCounting && tg6NonCounting) || (tg3NonCounting && tg5NonCounting)) sealLevel = Math.max(sealLevel, 5);
 
   return {

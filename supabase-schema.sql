@@ -150,6 +150,58 @@ CREATE TRIGGER sessions_updated_at
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
 -- ============================================================
+-- MULTI-TEACHER ACCESS: Remove teacher_id restrictions
+-- Allow all authenticated teachers to access all students
+-- ============================================================
+
+-- Drop the old per-teacher policies and replace with school-wide access
+DROP POLICY IF EXISTS "Teachers see own students" ON students;
+DROP POLICY IF EXISTS "Teachers see own sessions" ON assessment_sessions;
+DROP POLICY IF EXISTS "Teachers see own placements" ON construct_placements;
+
+CREATE POLICY "Authenticated users can view all students"
+  ON students FOR SELECT
+  TO authenticated
+  USING (true);
+
+CREATE POLICY "Authenticated users can insert students"
+  ON students FOR INSERT
+  TO authenticated
+  WITH CHECK (true);
+
+CREATE POLICY "Authenticated users can update students"
+  ON students FOR UPDATE
+  TO authenticated
+  USING (true);
+
+-- Assessment sessions: all authenticated teachers can view and insert
+CREATE POLICY "Authenticated users can view all sessions"
+  ON assessment_sessions FOR SELECT
+  TO authenticated
+  USING (true);
+
+CREATE POLICY "Authenticated users can insert sessions"
+  ON assessment_sessions FOR INSERT
+  TO authenticated
+  WITH CHECK (true);
+
+-- Construct placements: all authenticated teachers can view and insert
+CREATE POLICY "Authenticated users can view all placements"
+  ON construct_placements FOR SELECT
+  TO authenticated
+  USING (true);
+
+CREATE POLICY "Authenticated users can insert placements"
+  ON construct_placements FOR INSERT
+  TO authenticated
+  WITH CHECK (true);
+
+CREATE POLICY "Authenticated users can update placements"
+  ON construct_placements FOR UPDATE
+  TO authenticated
+  USING (true);
+
+-- ============================================================
 -- DONE! Your database is ready.
 -- Next step: Get your API keys from:
 -- Supabase Dashboard → Settings → API

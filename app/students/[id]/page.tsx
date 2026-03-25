@@ -7,6 +7,7 @@ import Link from "next/link";
 import LevelChart, { ChartPoint, ModelDef } from "./LevelChart";
 import SessionNotes from "./SessionNotes";
 import DeleteSessionButton from "./DeleteSessionButton";
+import PrintButton from "./PrintButton";
 import { schedule2A } from "@/lib/assessments/schedule-2a";
 import { schedule2B } from "@/lib/assessments/schedule-2b";
 import { schedule2C } from "@/lib/assessments/schedule-2c";
@@ -407,7 +408,10 @@ function buildItemLookup(assessmentId: string): Record<string, { prompt: string;
 type NoteEntry = { itemId: string; prompt: string; groupName: string; fields: { label: string; value: string }[] };
 
 const SKIP_RESPONSE_FIELDS = new Set(["Response"]);
-const SKIP_RESPONSE_VALUES = new Set(["correct", "incorrect"]);
+// "correct" and "incorrect" are normal binary responses — skip showing them as notes.
+// "attempted" is meaningful (student tried but wasn't fluent) — DO show it.
+// "not_attempted" is an admin note — skip showing it.
+const SKIP_RESPONSE_VALUES = new Set(["correct", "incorrect", "not_attempted"]);
 
 function extractSessionNotes(rawResponses: unknown, assessmentId: string): NoteEntry[] {
   if (!rawResponses || typeof rawResponses !== "object") return [];
@@ -454,7 +458,6 @@ export default async function StudentProfilePage({
     .from("students")
     .select("id, first_name, last_name, grade_level, created_at")
     .eq("id", params.id)
-    .eq("teacher_id", user.id)
     .single();
 
   if (!student) notFound();
@@ -545,12 +548,15 @@ export default async function StudentProfilePage({
               <p className="text-gray-500 text-sm mt-1">{gradeLabel(student.grade_level)}</p>
               <p className="text-gray-400 text-xs mt-1">Added {formatDate(student.created_at)}</p>
             </div>
-            <Link
-              href={`/assess/select?student=${student.id}`}
-              className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
-            >
-              + New Assessment
-            </Link>
+            <div className="flex items-center gap-2">
+              <PrintButton />
+              <Link
+                href={`/assess/select?student=${student.id}`}
+                className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+              >
+                + New Assessment
+              </Link>
+            </div>
           </div>
         </div>
 

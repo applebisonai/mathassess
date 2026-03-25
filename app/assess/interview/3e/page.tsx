@@ -43,6 +43,9 @@ function calcGroupScore(items: AssessmentItem[], responses: Responses) {
 
 function calculateResults(responses: Responses) {
   const resp = (id: string, label = "Response") => responses[id]?.[label] === "correct";
+  // "not_attempted" items are excluded from scoring — they neither help nor hurt.
+  // "attempted" scores as NOT correct (conservative/lower level assumption).
+  const notAttempted = (id: string, label = "Response") => responses[id]?.[label] === "not_attempted";
 
   // TG1: Forming equal groups
   const formGroups = resp("e1-form-4x5");
@@ -77,30 +80,30 @@ function calculateResults(responses: Responses) {
   const skip3s = resp("e7-skip-3s");
 
   // TG8: Basic facts ranges 1–2
-  const basicFacts1 = ["e8-fact-7x2","e8-fact-10x8","e8-fact-5x4","e8-fact-4x3"].filter((id) => resp(id)).length;
+  const basicFacts1 = ["e8-fact-7x2","e8-fact-10x8","e8-fact-5x4","e8-fact-4x3"].filter((id) => resp(id) && !notAttempted(id)).length;
 
   // TG9: Basic facts range 3
-  const basicFacts2 = ["e9-fact-3x8","e9-fact-9x4","e9-div-18by3","e9-div-40by5"].filter((id) => resp(id)).length;
+  const basicFacts2 = ["e9-fact-3x8","e9-fact-9x4","e9-div-18by3","e9-div-40by5"].filter((id) => resp(id) && !notAttempted(id)).length;
 
   // TG10: Multiplicative relations
-  const relations = ["e10-assoc-4x13","e10-inverse-12x9","e10-dist-10x15","e10-dist-5x14"].filter((id) => resp(id)).length;
+  const relations = ["e10-assoc-4x13","e10-inverse-12x9","e10-dist-10x15","e10-dist-5x14"].filter((id) => resp(id) && !notAttempted(id)).length;
 
   let emdLevel = 0;
 
   // Level 1: Can count items by ones in visible groups
-  if (formGroups || mult4x3AllUp) emdLevel = Math.max(emdLevel, 1);
+  if ((formGroups && !notAttempted("e1-form-4x5")) || (mult4x3AllUp && !notAttempted("e2-mult-all-up"))) emdLevel = Math.max(emdLevel, 1);
 
   // Level 2: Perceptual items, counted in multiples (skip counts visible items)
-  if (countTotal && (skip2s || skip5s) && (mult4x3Flash || introArray)) emdLevel = Math.max(emdLevel, 2);
+  if ((countTotal && !notAttempted("e1-count-total", "Total")) && ((skip2s && !notAttempted("e7-skip-2s")) || (skip5s && !notAttempted("e7-skip-5s"))) && ((mult4x3Flash && !notAttempted("e2-mult-flash")) || (introArray && !notAttempted("e4-intro-array")))) emdLevel = Math.max(emdLevel, 2);
 
   // Level 3: Figurative — screened arrays/groups with skip counting
-  if ((mult4x3Screened || arr5x3Screened) && (skip2s && skip5s && skip3s)) emdLevel = Math.max(emdLevel, 3);
+  if (((mult4x3Screened && !notAttempted("e2-mult-4x3")) || (arr5x3Screened && !notAttempted("e5-arr-5x3"))) && ((skip2s && !notAttempted("e7-skip-2s")) && (skip5s && !notAttempted("e7-skip-5s")) && (skip3s && !notAttempted("e7-skip-3s")))) emdLevel = Math.max(emdLevel, 3);
 
   // Level 4: Abstract groups
-  if ((div20by4 || div12by2 || div12by4) && basicFacts1 >= 3) emdLevel = Math.max(emdLevel, 4);
+  if (((div20by4 && !notAttempted("e3-div-20by4")) || (div12by2 && !notAttempted("e6-div-12by2")) || (div12by4 && !notAttempted("e6-div-12by4"))) && basicFacts1 >= 3) emdLevel = Math.max(emdLevel, 4);
 
   // Level 5: Facile repeated addition
-  if (basicFacts2 >= 3 && (mult8x3Ext || arr5x6Ext)) emdLevel = Math.max(emdLevel, 5);
+  if (basicFacts2 >= 3 && ((mult8x3Ext && !notAttempted("e2-mult-ext-8x3")) || (arr5x6Ext && !notAttempted("e5-arr-ext-5x6")))) emdLevel = Math.max(emdLevel, 5);
 
   // Level 6: Multiplicative strategies
   if (relations >= 3) emdLevel = Math.max(emdLevel, 6);

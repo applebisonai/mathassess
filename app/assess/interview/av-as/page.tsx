@@ -45,6 +45,9 @@ function calcGroupScore(items: AssessmentItem[], responses: Responses) {
 
 function calculateResults(responses: Responses) {
   const resp = (id: string) => responses[id]?.["Response"] === "correct";
+  // "not_attempted" items are excluded from scoring — they neither help nor hurt.
+  // "attempted" scores as NOT correct (conservative/lower level assumption).
+  const notAttempted = (id: string) => responses[id]?.["Response"] === "not_attempted";
 
   // TG1
   const countCollection  = resp("as1-count-13");
@@ -76,21 +79,21 @@ function calculateResults(responses: Responses) {
   let casLevel = 0;
 
   // Construct 1: Can count a visible collection
-  if (countCollection || unscreened) casLevel = Math.max(casLevel, 1);
+  if ((countCollection && !notAttempted("as1-count-13")) || (unscreened && !notAttempted("as1-unsc-8p7"))) casLevel = Math.max(casLevel, 1);
 
   // Construct 2: Can add partially screened (figurative — counts from 1)
-  if (partiallyScreened) casLevel = Math.max(casLevel, 2);
+  if (partiallyScreened && !notAttempted("as1-part-7p2")) casLevel = Math.max(casLevel, 2);
 
   // Construct 3: Counts-on for totally screened / basic subtraction
-  if ([ts4p2, ts6p3, removed7m3, removed16m4].filter(Boolean).length >= 2)
+  if ([ts4p2 && !notAttempted("as1-ts-4p2"), ts6p3 && !notAttempted("as1-ts-6p3"), removed7m3 && !notAttempted("as2-ri-7m3"), removed16m4 && !notAttempted("as2-ri-16m4")].filter(Boolean).length >= 2)
     casLevel = Math.max(casLevel, 3);
 
   // Construct 4: Missing addend / missing subtrahend
-  if (missingAddend || missingSubtrahend) casLevel = Math.max(casLevel, 4);
+  if ((missingAddend && !notAttempted("as1-ma-8pbox11")) || (missingSubtrahend && !notAttempted("as2-ms-9mbox7"))) casLevel = Math.max(casLevel, 4);
 
   // Construct 5: Facile — bare numbers + relational thinking
-  const bareCorrect       = [bare8p4, bare13p3, bare17m6, bare11m8].filter(Boolean).length;
-  const relationalCorrect = [comm4p12, link15p3, link18m3, rel21m4, rel21m17].filter(Boolean).length;
+  const bareCorrect       = [bare8p4 && !notAttempted("as3-add-8p4"), bare13p3 && !notAttempted("as3-add-13p3"), bare17m6 && !notAttempted("as3-sub-17m6"), bare11m8 && !notAttempted("as3-sub-11m8")].filter(Boolean).length;
+  const relationalCorrect = [comm4p12 && !notAttempted("as4-comm-4p12"), link15p3 && !notAttempted("as4-link-15p3"), link18m3 && !notAttempted("as4-link-18m3"), rel21m4 && !notAttempted("as4-rel-21m4"), rel21m17 && !notAttempted("as4-rel-21m17")].filter(Boolean).length;
   if (bareCorrect >= 3 && relationalCorrect >= 2) casLevel = Math.max(casLevel, 5);
 
   return {

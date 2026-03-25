@@ -46,23 +46,19 @@ export default async function DashboardPage() {
     supabase
       .from("students")
       .select("id, first_name, last_name, grade_level")
-      .eq("teacher_id", user.id)
       .eq("is_active", true)
       .order("last_name")
       .limit(8),
     supabase
       .from("assessment_sessions")
       .select("id", { count: "exact", head: true })
-      .eq("teacher_id", user.id)
       .gte("date_administered", weekAgoStr),
     supabase
       .from("assessment_sessions")
-      .select("id", { count: "exact", head: true })
-      .eq("teacher_id", user.id),
+      .select("id", { count: "exact", head: true }),
     supabase
       .from("assessment_sessions")
       .select("id, date_administered, assessment_id, students(first_name, last_name)")
-      .eq("teacher_id", user.id)
       .order("date_administered", { ascending: false })
       .limit(6),
   ]);
@@ -94,6 +90,12 @@ export default async function DashboardPage() {
           </div>
           <div className="flex gap-3">
             <Link
+              href="/dashboard/overview"
+              className="bg-white text-blue-700 hover:bg-blue-50 font-semibold text-sm px-5 py-2.5 rounded-xl shadow-sm transition-colors"
+            >
+              📊 Class Overview
+            </Link>
+            <Link
               href="/assess/select"
               className="bg-white text-blue-700 hover:bg-blue-50 font-semibold text-sm px-5 py-2.5 rounded-xl shadow-sm transition-colors"
             >
@@ -121,7 +123,7 @@ export default async function DashboardPage() {
             }
           />
           <StatCard
-            label="Assessments This Week"
+            label="Assessments This Week (School)"
             value={weeklyCount ?? 0}
             color="indigo"
             icon={
@@ -149,7 +151,7 @@ export default async function DashboardPage() {
           {/* Students quick-access */}
           <div className="col-span-3 bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
             <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-              <h2 className="font-semibold text-gray-900">My Students</h2>
+              <h2 className="font-semibold text-gray-900">All Students (School)</h2>
               <Link href="/students" className="text-xs text-blue-600 hover:text-blue-800 font-medium">
                 View all →
               </Link>

@@ -47,29 +47,33 @@ function calculateResults(responses: Responses) {
   // Helper: check if the first CI field of an item is "correct"
   const resp = (id: string) => responses[id]?.["Response"] === "correct";
   const altogether = (id: string) => responses[id]?.["Altogether"] === "correct";
+  // "not_attempted" items are excluded from scoring — they neither help nor hurt.
+  // "attempted" scores as NOT correct (conservative/lower level assumption).
+  const notAttempted = (id: string) => responses[id]?.["Response"] === "not_attempted";
+  const notAttemptedAltogether = (id: string) => responses[id]?.["Altogether"] === "not_attempted";
 
   // TG1: Spatial Patterns
-  const regularSpatial   = ["sn1-reg-4","sn1-reg-3","sn1-reg-6","sn1-reg-5"].filter(resp).length;
-  const irregularSpatial = ["sn1-irr-4","sn1-irr-6","sn1-irr-3","sn1-irr-5"].filter(resp).length;
+  const regularSpatial   = ["sn1-reg-4","sn1-reg-3","sn1-reg-6","sn1-reg-5"].filter((id) => resp(id) && !notAttempted(id)).length;
+  const irregularSpatial = ["sn1-irr-4","sn1-irr-6","sn1-irr-3","sn1-irr-5"].filter((id) => resp(id) && !notAttempted(id)).length;
 
   // TG2: Finger Patterns
-  const displayFingers = ["sn2-disp-4","sn2-disp-3","sn2-disp-9","sn2-disp-6","sn2-disp-8"].filter(resp).length;
-  const moreThanOneWay = ["sn2-mtow-5a","sn2-mtow-5b","sn2-mtow-7a","sn2-mtow-7b"].filter(resp).length;
+  const displayFingers = ["sn2-disp-4","sn2-disp-3","sn2-disp-9","sn2-disp-6","sn2-disp-8"].filter((id) => resp(id) && !notAttempted(id)).length;
+  const moreThanOneWay = ["sn2-mtow-5a","sn2-mtow-5b","sn2-mtow-7a","sn2-mtow-7b"].filter((id) => resp(id) && !notAttempted(id)).length;
 
   // TG3: WITH Materials
-  const partOf5  = ["sn3-p5-4","sn3-p5-2","sn3-p5-1","sn3-p5-3"].filter(resp).length;
-  const partOf10 = ["sn3-p10-8","sn3-p10-6","sn3-p10-3","sn3-p10-4"].filter(resp).length;
-  const combTo20 = ["sn3-c20-8p8","sn3-c20-7p6","sn3-c20-10p4","sn3-c20-5p2"].filter(altogether).length;
+  const partOf5  = ["sn3-p5-4","sn3-p5-2","sn3-p5-1","sn3-p5-3"].filter((id) => resp(id) && !notAttempted(id)).length;
+  const partOf10 = ["sn3-p10-8","sn3-p10-6","sn3-p10-3","sn3-p10-4"].filter((id) => resp(id) && !notAttempted(id)).length;
+  const combTo20 = ["sn3-c20-8p8","sn3-c20-7p6","sn3-c20-10p4","sn3-c20-5p2"].filter((id) => altogether(id) && !notAttemptedAltogether(id)).length;
 
   // TG4: NO Materials
-  const noMatTo5  = ["sn4-c5-3","sn4-c5-1"].filter(resp).length;
-  const noMatTo10 = ["sn4-c10-7","sn4-c10-4","sn4-c10-1"].filter(resp).length;
-  const noMatTo20 = ["sn4-c20-10of18","sn4-c20-7of20","sn4-c20-9of16"].filter(resp).length;
+  const noMatTo5  = ["sn4-c5-3","sn4-c5-1"].filter((id) => resp(id) && !notAttempted(id)).length;
+  const noMatTo10 = ["sn4-c10-7","sn4-c10-4","sn4-c10-1"].filter((id) => resp(id) && !notAttempted(id)).length;
+  const noMatTo20 = ["sn4-c20-10of18","sn4-c20-7of20","sn4-c20-9of16"].filter((id) => resp(id) && !notAttempted(id)).length;
 
   // TG5: Bare Numbers
-  const bareBasic = ["sn5-2p3"].filter(resp).length;
-  const bareTo10  = ["sn5-5p4","sn5-3p3","sn5-9m6","sn5-8m4"].filter(resp).length;
-  const bareTo20  = ["sn5-9p9","sn5-10p6","sn5-13m5","sn5-20m6"].filter(resp).length;
+  const bareBasic = ["sn5-2p3"].filter((id) => resp(id) && !notAttempted(id)).length;
+  const bareTo10  = ["sn5-5p4","sn5-3p3","sn5-9m6","sn5-8m4"].filter((id) => resp(id) && !notAttempted(id)).length;
+  const bareTo20  = ["sn5-9p9","sn5-10p6","sn5-13m5","sn5-20m6"].filter((id) => resp(id) && !notAttempted(id)).length;
 
   let snLevel = 0;
 

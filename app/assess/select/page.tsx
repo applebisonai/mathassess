@@ -47,7 +47,6 @@ function SelectContent() {
       const { data } = await supabase
         .from("students")
         .select("id, first_name, last_name, grade_level")
-        .eq("teacher_id", user.id)
         .eq("is_active", true)
         .order("last_name");
       if (data) setStudents(data);

@@ -79,8 +79,15 @@ function calcGroupScore(items: AssessmentItem[], responses: Responses) {
 // Level 5: Solves 3-digit tasks — TG3 ≥2 of last 4
 
 function calculateResults(responses: Responses) {
+  // Helper to exclude not_attempted items
+  const isCorrect = (id: string) => {
+    const val = responses[id]?.Response;
+    return val === "correct";
+  };
+  const isNotAttempted = (id: string) => responses[id]?.Response === "not_attempted";
+
   const tg1Correct = ["1.1", "1.2", "1.3", "1.4"].filter(
-    (id) => responses[id]?.Response === "correct"
+    (id) => isCorrect(id) && !isNotAttempted(id)
   ).length;
 
   const tg2Seq1 = ["2.2a","2.2b","2.2c","2.2d","2.2e","2.2f","2.2g","2.2h"];
@@ -110,8 +117,8 @@ function calculateResults(responses: Responses) {
 
   const tg3_2digit = ["3.1","3.2","3.3","3.4"];
   const tg3_3digit = ["3.5","3.6","3.7","3.8"];
-  const tg3Correct2 = tg3_2digit.filter((id) => responses[id]?.Response === "correct").length;
-  const tg3Correct3 = tg3_3digit.filter((id) => responses[id]?.Response === "correct").length;
+  const tg3Correct2 = tg3_2digit.filter((id) => isCorrect(id) && !isNotAttempted(id)).length;
+  const tg3Correct3 = tg3_3digit.filter((id) => isCorrect(id) && !isNotAttempted(id)).length;
 
   const tg3EfficientCount = tg3_2digit.filter((id) => {
     const s = responses[id]?.Strategy;

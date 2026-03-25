@@ -55,7 +55,11 @@ function calcScore(items: AssessmentItem[], responses: Responses) {
   const correct = scoreable.filter(
     (i) => responses[i.id]?.["Response"] === "correct"
   ).length;
-  return { correct, total: scoreable.length };
+  const attempted = scoreable.filter((i) => {
+    const val = responses[i.id]?.["Response"];
+    return val !== undefined && val !== "not_attempted";
+  }).length;
+  return { correct, total: attempted || scoreable.length };
 }
 
 // --- SCORING LOGIC ---

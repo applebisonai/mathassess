@@ -20,6 +20,21 @@ const GRADE_GROUPS: Record<number, string> = {
   4: "Grade 4", 5: "Grade 5",
 };
 
+const MODEL_COLORS: Record<string, string> = {
+  "NID": "#22c55e",
+  "FNWS": "#15803d",
+  "BNWS": "#4ade80",
+  "SEAL": "#f97316",
+  "SN20": "#ef4444",
+  "CPV": "#8b5cf6",
+  "A&S": "#0ea5e9",
+  "CAS": "#2563eb",
+  "SN": "#ea580c",
+  "M&D": "#d97706",
+  "EM&D": "#f59e0b",
+  "MBF": "#ec4899",
+};
+
 export default async function StudentsPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -28,10 +43,33 @@ export default async function StudentsPage() {
   const { data: students } = await supabase
     .from("students")
     .select("id, first_name, last_name, grade_level, created_at")
-    .eq("teacher_id", user.id)
     .eq("is_active", true)
     .order("grade_level")
     .order("last_name");
+
+  // Fetch all placements to get latest level per student
+  const { data: allPlacements } = await supabase
+    .from("construct_placements")
+    .select("student_id, model_name, confirmed_level, suggested_level, date_placed")
+    .order("date_placed", { ascending: false });
+
+  // Build a map of latest placement per student
+  const latestPlacementPerStudent: Record<string, { model_name: string; level: number; date: string }> = {};
+  const seenStudents: Set<string> = new Set();
+
+  for (const placement of allPlacements ?? []) {
+    if (!seenStudents.has(placement.student_id)) {
+      const level = placement.confirmed_level ?? placement.suggested_level;
+      if (level !== null && level !== undefined) {
+        latestPlacementPerStudent[placement.student_id] = {
+          model_name: placement.model_name,
+          level,
+          date: placement.date_placed,
+        };
+      }
+      seenStudents.add(placement.student_id);
+    }
+  }
 
   const teacherName = user.email?.split("@")[0] ?? "Teacher";
 
@@ -92,7 +130,7 @@ export default async function StudentsPage() {
                           <div className={`w-10 h-10 rounded-xl ${color} flex items-center justify-center text-white text-sm font-bold shrink-0`}>
                             {initials}
                           </div>
-                          <div className="min-w-0">
+                          <div className="min-w-0 flex-1">
                             <div className="text-sm font-semibold text-gray-900 truncate">
                               {s.first_name} {s.last_name}
                             </div>
@@ -101,6 +139,16 @@ export default async function StudentsPage() {
                             </div>
                           </div>
                         </div>
+
+                        {/* Latest level badge */}
+                        {latestPlacementPerStudent[s.id] && (
+                          <div
+                            className="px-2 py-1 rounded-lg text-xs font-semibold text-white text-center"
+                            style={{ backgroundColor: MODEL_COLORS[latestPlacementPerStudent[s.id].model_name] || "#6b7280" }}
+                          >
+                            {latestPlacementPerStudent[s.id].model_name}: {latestPlacementPerStudent[s.id].level}
+                          </div>
+                        )}
 
                         {/* Actions */}
                         <div className="flex gap-2">

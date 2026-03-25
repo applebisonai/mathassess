@@ -304,7 +304,14 @@ function InterviewContent() {
       setDone(true);
     } catch (err) {
       console.error("Failed to save assessment:", err);
-      const msg = err instanceof Error ? err.message : String(err);
+      let msg: string;
+      try {
+        const serialized = JSON.stringify(err, Object.getOwnPropertyNames(err as object));
+        const parsed = serialized ? JSON.parse(serialized) : null;
+        msg = parsed?.message ?? parsed?.details ?? serialized ?? String(err);
+      } catch {
+        msg = String(err);
+      }
       setSaveError(`Failed to save: ${msg}`);
     } finally {
       setSaving(false);

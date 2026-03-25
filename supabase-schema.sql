@@ -40,6 +40,7 @@ INSERT INTO assessments (id, name, short_name, grade_range, models) VALUES
   ('av-pv',       'Add+VantageMR: Place Value',                   'PV',  '2–4', ARRAY['CPV']),
   ('av-nwn',      'Add+VantageMR: Number Words and Numerals',     'NWN', 'K–3', ARRAY['FNWS', 'BNWS', 'NID']),
   ('av-sn',       'Add+VantageMR: Structuring Numbers',          'SN',  'K–3', ARRAY['SN']),
+  ('av-as',       'Add+VantageMR: Addition and Subtraction',    'A&S', 'K–3', ARRAY['CAS']),
   ('schedule-3a', 'Schedule 3A: Number Words and Numerals',       '3A', 'K–3', ARRAY['NID', 'FNWS', 'BNWS']),
   ('schedule-3b', 'Schedule 3B: Structuring Numbers to 20',          '3B', 'K–3', ARRAY['SN20']),
   ('schedule-3c', 'Schedule 3C: Conceptual Place Value',             '3C', '1–4', ARRAY['CPV']),

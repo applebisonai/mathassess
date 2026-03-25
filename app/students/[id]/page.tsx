@@ -13,6 +13,7 @@ import { schedule2C } from "@/lib/assessments/schedule-2c";
 import { scheduleAvPV } from "@/lib/assessments/schedule-av-pv";
 import { scheduleAvNWN } from "@/lib/assessments/schedule-av-nwn";
 import { scheduleAvSN } from "@/lib/assessments/schedule-av-sn";
+import { scheduleAvAS } from "@/lib/assessments/schedule-av-as";
 import { schedule3A } from "@/lib/assessments/schedule-3a";
 import { schedule3B } from "@/lib/assessments/schedule-3b";
 import { schedule3C } from "@/lib/assessments/schedule-3c";
@@ -41,6 +42,23 @@ const ASSESSMENT_CONFIG: Record<string, {
           3: "Initial Structuring",
           4: "Intermediate Structuring",
           5: "Facile Structuring",
+        },
+      },
+    ],
+  },
+  "av-as": {
+    label: "Add+VantageMR: Addition & Subtraction",
+    subtitle: "A&S · CAS · Counting Strategies",
+    modelDefs: [
+      {
+        key: "CAS", color: "#2563eb", maxLevel: 5,
+        labels: {
+          0: "Emergent Counting",
+          1: "Perceptual Counting",
+          2: "Figurative Counting",
+          3: "Initial Number Sequence",
+          4: "Intermediate Number Sequence",
+          5: "Facile Number Sequence",
         },
       },
     ],
@@ -312,6 +330,7 @@ function buildItemLookup(assessmentId: string): Record<string, { prompt: string;
     "av-pv":       scheduleAvPV as never,
     "av-nwn":      scheduleAvNWN as never,
     "av-sn":       scheduleAvSN as never,
+    "av-as":       scheduleAvAS as never,
     "schedule-3a": schedule3A as never,
     "schedule-3b": schedule3B as never,
     "schedule-3c": schedule3C as never,

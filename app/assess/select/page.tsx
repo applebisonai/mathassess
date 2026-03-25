@@ -137,13 +137,13 @@ const CATEGORIES = [
         available: true,
       },
       {
-        id: "av-addsub",
-        name: "Addition & Subtraction",
-        description: "Course 1 — Screened collections, missing addend, bare numbers, relational thinking",
+        id: "av-as",
+        name: "Add+VantageMR: Addition & Subtraction",
+        description: "Screened collections, missing addend, bare numbers, relational thinking",
         gradeRange: "K–3",
-        models: ["SEAL"],
-        route: "",
-        available: false,
+        models: ["CAS"],
+        route: "/assess/interview/av-as",
+        available: true,
       },
       {
         id: "av-pv",
@@ -444,6 +444,12 @@ function SelectContent() {
                       <li>• Task cards (number sentences for TG6)</li>
                       <li>• Counters — two colours (~30 of each)</li>
                       <li>• Two screens (small boards or folders)</li>
+                    </>
+                  ) : selectedAssessmentId === "av-as" ? (
+                    <>
+                      <li>• Counters (~20)</li>
+                      <li>• Two screens (small boards or folders)</li>
+                      <li>• Task cards (bare number problems)</li>
                     </>
                   ) : selectedAssessmentId === "av-pv" ? (
                     <>

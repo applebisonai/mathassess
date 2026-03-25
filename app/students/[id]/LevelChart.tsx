@@ -1,4 +1,5 @@
 "use client";
+import { useState } from "react";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid,
   Tooltip, Legend, ResponsiveContainer,
@@ -99,6 +100,8 @@ interface LevelChartProps {
 }
 
 export default function LevelChart({ title, subtitle, data, modelDefs }: LevelChartProps) {
+  const [collapsed, setCollapsed] = useState(false);
+
   // Only show models that actually have data
   const activeModels = modelDefs.filter((m) => data.some((d) => d[m.key] !== undefined));
 
@@ -106,25 +109,35 @@ export default function LevelChart({ title, subtitle, data, modelDefs }: LevelCh
   if (activeModels.length === 0 || data.length === 0) {
     return (
       <div className="bg-white rounded-2xl border border-gray-200 p-5 mb-5">
-        <div className="mb-4">
-          <div className="flex items-center gap-2 mb-0.5">
-            <div className="w-1 h-5 rounded-full bg-blue-500" />
-            <h2 className="text-sm font-bold text-gray-800">{title}</h2>
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <div className="flex items-center gap-2 mb-0.5">
+              <div className="w-1 h-5 rounded-full bg-blue-500" />
+              <h2 className="text-sm font-bold text-gray-800">{title}</h2>
+            </div>
+            <p className="text-xs text-gray-400 ml-3">{subtitle} · Progress Over Time</p>
           </div>
-          <p className="text-xs text-gray-400 ml-3">{subtitle} · Progress Over Time</p>
+          <button
+            onClick={() => setCollapsed((c) => !c)}
+            className="text-xs text-gray-400 hover:text-gray-600 px-2 py-1 rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            {collapsed ? "▼ Show" : "▲ Hide"}
+          </button>
         </div>
-        <div className="flex flex-col items-center justify-center py-8 text-center gap-3">
-          <div className="flex gap-2">
-            {modelDefs.map((m) => (
-              <div key={m.key} className="rounded-xl border-2 px-3 py-2 min-w-[64px] opacity-30"
-                style={{ borderColor: m.color }}>
-                <div className="text-xs font-bold uppercase tracking-wide" style={{ color: m.color }}>{m.key}</div>
-                <div className="text-xl font-black text-gray-300">—</div>
-              </div>
-            ))}
+        {!collapsed && (
+          <div className="flex flex-col items-center justify-center py-8 text-center gap-3">
+            <div className="flex gap-2">
+              {modelDefs.map((m) => (
+                <div key={m.key} className="rounded-xl border-2 px-3 py-2 min-w-[64px] opacity-30"
+                  style={{ borderColor: m.color }}>
+                  <div className="text-xs font-bold uppercase tracking-wide" style={{ color: m.color }}>{m.key}</div>
+                  <div className="text-xl font-black text-gray-300">—</div>
+                </div>
+              ))}
+            </div>
+            <p className="text-xs text-gray-400">No assessments completed yet. Complete this schedule to see results here.</p>
           </div>
-          <p className="text-xs text-gray-400">No assessments completed yet. Complete this schedule to see results here.</p>
-        </div>
+        )}
       </div>
     );
   }
@@ -134,15 +147,23 @@ export default function LevelChart({ title, subtitle, data, modelDefs }: LevelCh
   return (
     <div className="bg-white rounded-2xl border border-gray-200 p-5 mb-5">
       {/* Header */}
-      <div className="mb-4">
-        <div className="flex items-center gap-2 mb-0.5">
-          <div className="w-1 h-5 rounded-full bg-blue-500" />
-          <h2 className="text-sm font-bold text-gray-800">{title}</h2>
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <div className="flex items-center gap-2 mb-0.5">
+            <div className="w-1 h-5 rounded-full bg-blue-500" />
+            <h2 className="text-sm font-bold text-gray-800">{title}</h2>
+          </div>
+          <p className="text-xs text-gray-400 ml-3">{subtitle} · Progress Over Time</p>
         </div>
-        <p className="text-xs text-gray-400 ml-3">{subtitle} · Progress Over Time</p>
+        <button
+          onClick={() => setCollapsed((c) => !c)}
+          className="text-xs text-gray-400 hover:text-gray-600 px-2 py-1 rounded-lg hover:bg-gray-50 transition-colors"
+        >
+          {collapsed ? "▼ Show" : "▲ Hide"}
+        </button>
       </div>
 
-      {data.length === 1 ? (
+      {!collapsed && (data.length === 1 ? (
         <>
           <p className="text-xs text-gray-400 text-center py-2 mb-3">
             Complete more assessments to see a progress line.
@@ -228,7 +249,7 @@ export default function LevelChart({ title, subtitle, data, modelDefs }: LevelCh
             ))}
           </LineChart>
         </ResponsiveContainer>
-      )}
+      ))}
     </div>
   );
 }

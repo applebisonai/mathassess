@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import { useRouter, useSearchParams } from "next/navigation";
 import { schedule3C, TaskGroup, AssessmentItem } from "@/lib/assessments/schedule-3c";
 import InlineCorrectIncorrect from "@/components/InlineCorrectIncorrect";
+import TeacherOverride from "@/components/TeacherOverride";
 
 interface Student {
   id: string;
@@ -116,6 +117,8 @@ function InterviewContent() {
   const [results, setResults] = useState<ReturnType<typeof calculateResults> | null>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [savedSessionId, setSavedSessionId] = useState<string | null>(null);
+  const [isBorderline, setIsBorderline] = useState(false);
 
   const groups = schedule3C.taskGroups;
   const currentGroup = groups[currentGroupIdx];
@@ -188,6 +191,7 @@ function InterviewContent() {
     if (!student) return;
     setSaving(true);
     const calc = calculateResults(responses);
+    setIsBorderline(calc.cpvLevel > 0 && calc.cpvLevel < 4);
     setResults(calc);
 
     const { data: { user } } = await supabase.auth.getUser();
@@ -210,6 +214,7 @@ function InterviewContent() {
       .single();
 
       if (sessionData?.id) {
+      setSavedSessionId(sessionData.id);
       await supabase.from("construct_placements").insert({
         session_id: sessionData.id,
         student_id: student.id,
@@ -257,6 +262,16 @@ function InterviewContent() {
             </p>
           </div>
 
+          {isBorderline && (
+            <div className="rounded-xl bg-orange-50 border border-orange-200 p-3 mb-4 flex gap-2 items-start">
+              <span className="text-orange-500 text-sm">🔍</span>
+              <p className="text-xs text-orange-700 leading-snug">
+                <strong>Review before finalizing:</strong> Some task groups show borderline results.
+                Consider the full evidence below — your professional judgment may call for a different level.
+              </p>
+            </div>
+          )}
+
           {/* CPV Placement */}
           <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wide mb-3">Suggested Placement</h3>
           <div className="rounded-2xl border-2 border-teal-300 bg-teal-50 p-4 flex flex-col items-center gap-2 mb-5">
@@ -280,7 +295,19 @@ function InterviewContent() {
             * Suggested placement based on observed responses. Teacher judgment should confirm final level.
           </p>
 
-          <div className="flex gap-3">
+          {savedSessionId && (
+            <TeacherOverride
+              sessionId={savedSessionId}
+              modelName="CPV"
+              suggestedLevel={results.cpvLevel}
+              maxLevel={4}
+              levelLabels={Object.fromEntries(
+                Object.entries(schedule3C.cpvLevels).map(([k, v]) => [Number(k), v.name])
+              )}
+            />
+          )}
+
+          <div className="flex gap-3 mt-4">
             <button onClick={() => router.push("/assess/select")}
               className="flex-1 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-lg py-2.5 text-sm">
               Assess Another Student

@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import { useRouter, useSearchParams } from "next/navigation";
 import { schedule3D, TaskGroup, AssessmentItem } from "@/lib/assessments/schedule-3d";
 
+import TeacherOverride from "@/components/TeacherOverride";
 interface Student {
   id: string;
   first_name: string;
@@ -112,6 +113,8 @@ function InterviewContent() {
   const [results, setResults] = useState<ReturnType<typeof calculateResults> | null>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [savedSessionId, setSavedSessionId] = useState<string | null>(null);
+  const [isBorderline, setIsBorderline] = useState(false);
 
   const groups = schedule3D.taskGroups;
   const currentGroup = groups[currentGroupIdx];
@@ -166,6 +169,7 @@ function InterviewContent() {
     setSaving(true);
     const calc = calculateResults(responses);
     setResults(calc);
+    setIsBorderline(calc.asLevel > 0 && calc.asLevel < 6);
 
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -277,6 +281,28 @@ function InterviewContent() {
           <p className="text-xs text-gray-400 mb-4">
             * Suggested placement based on observed responses. Teacher judgment should confirm final level.
           </p>
+
+          {isBorderline && (
+            <div className="rounded-xl bg-orange-50 border border-orange-200 p-3 mb-4 flex gap-2 items-start">
+              <span className="text-orange-500 text-sm">🔍</span>
+              <p className="text-xs text-orange-700 leading-snug">
+                <strong>Review before finalizing:</strong> Some task groups show borderline results.
+                Consider the full evidence below — your professional judgment may call for a different level.
+              </p>
+            </div>
+          )}
+
+          {savedSessionId && (
+            <TeacherOverride
+              sessionId={savedSessionId}
+              modelName="A&S"
+              suggestedLevel={results.asLevel}
+              maxLevel={6}
+              levelLabels={Object.fromEntries(
+                Object.entries(schedule3D.asLevels).map(([k, v]) => [Number(k), v.name])
+              )}
+            />
+          )}
 
           <button
             onClick={() => router.push(`/students/${studentId}`)}

@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import { useRouter, useSearchParams } from "next/navigation";
 import { schedule3F, TaskGroup, AssessmentItem, ResponseField } from "@/lib/assessments/schedule-3f";
 import InlineCorrectIncorrect from "@/components/InlineCorrectIncorrect";
+import TeacherOverride from "@/components/TeacherOverride";
 
 interface Student {
   id: string;
@@ -44,24 +45,24 @@ function calculateResults(responses: Responses) {
   const resp = (id: string) => responses[id]?.["Response"] === "correct";
 
   // Range 1: 2s and 10s
-  const r1Mult = ["f1-mult-2x6","f1-mult-5x10","f1-mult-8x2","f1-mult-10x7"].filter(resp).length;
-  const r1Div  = ["f1-div-90by10","f1-div-14by7","f1-div-18by2","f1-div-80by8"].filter(resp).length;
+  const r1Mult = ["f1-mult-2x6","f1-mult-5x10","f1-mult-8x2","f1-mult-10x7"].filter((id) => resp(id)).length;
+  const r1Div  = ["f1-div-90by10","f1-div-14by7","f1-div-18by2","f1-div-80by8"].filter((id) => resp(id)).length;
 
   // Range 2: Low × low
-  const r2Mult = ["f2-mult-3x4","f2-mult-5x3","f2-mult-3x3","f2-mult-4x5"].filter(resp).length;
-  const r2Div  = ["f2-div-15by5","f2-div-16by4","f2-div-25by5","f2-div-12by3"].filter(resp).length;
+  const r2Mult = ["f2-mult-3x4","f2-mult-5x3","f2-mult-3x3","f2-mult-4x5"].filter((id) => resp(id)).length;
+  const r2Div  = ["f2-div-15by5","f2-div-16by4","f2-div-25by5","f2-div-12by3"].filter((id) => resp(id)).length;
 
   // Range 3: Low × high
-  const r3Mult = ["f3-mult-6x3","f3-mult-4x7","f3-mult-3x9","f3-mult-5x7"].filter(resp).length;
-  const r3Div  = ["f3-div-21by3","f3-div-32by8","f3-div-30by6","f3-div-45by5"].filter(resp).length;
+  const r3Mult = ["f3-mult-6x3","f3-mult-4x7","f3-mult-3x9","f3-mult-5x7"].filter((id) => resp(id)).length;
+  const r3Div  = ["f3-div-21by3","f3-div-32by8","f3-div-30by6","f3-div-45by5"].filter((id) => resp(id)).length;
 
   // Range 4: High × high
-  const r4Mult = ["f4-mult-6x6","f4-mult-8x7","f4-mult-9x8","f4-mult-7x6"].filter(resp).length;
-  const r4Div  = ["f4-div-48by8","f4-div-63by9","f4-div-54by6","f4-div-49by7"].filter(resp).length;
+  const r4Mult = ["f4-mult-6x6","f4-mult-8x7","f4-mult-9x8","f4-mult-7x6"].filter((id) => resp(id)).length;
+  const r4Div  = ["f4-div-48by8","f4-div-63by9","f4-div-54by6","f4-div-49by7"].filter((id) => resp(id)).length;
 
   // Range 5: Factor > 10
-  const r5Mult = ["f5-mult-3x12","f5-mult-15x7"].filter(resp).length;
-  const r5Div  = ["f5-div-65by5","f5-div-96by4"].filter(resp).length;
+  const r5Mult = ["f5-mult-3x12","f5-mult-15x7"].filter((id) => resp(id)).length;
+  const r5Div  = ["f5-div-65by5","f5-div-96by4"].filter((id) => resp(id)).length;
 
   let mbfLevel = 0;
 
@@ -113,6 +114,8 @@ function InterviewContent() {
   const [results, setResults]                 = useState<ReturnType<typeof calculateResults> | null>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
   const [saveError, setSaveError]             = useState<string | null>(null);
+  const [savedSessionId, setSavedSessionId] = useState<string | null>(null);
+  const [isBorderline, setIsBorderline] = useState(false);
 
   const groups       = schedule3F.taskGroups;
   const currentGroup = groups[currentGroupIdx];
@@ -205,6 +208,7 @@ function InterviewContent() {
     setSaving(true);
     const calc = calculateResults(responses);
     setResults(calc);
+    setIsBorderline(calc.mbfLevel > 0 && calc.mbfLevel < 5);
 
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { setSaving(false); return; }
@@ -228,6 +232,7 @@ function InterviewContent() {
       if (sessionError) throw sessionError;
 
       if (sessionData?.id) {
+      setSavedSessionId(sessionData.id);
         const { error: placementError } = await supabase.from("construct_placements").insert([{
           session_id:      sessionData.id,
           student_id:      student.id,
@@ -305,7 +310,30 @@ function InterviewContent() {
               * Level reflects the highest range where student demonstrates facile (non-counting) strategies for both multiplication and division. Teacher judgment should confirm.
             </p>
 
-            <div className="flex gap-3">
+            {isBorderline && (
+              <div className="rounded-xl bg-orange-50 border border-orange-200 p-3 mb-4 flex gap-2 items-start">
+                <span className="text-orange-500 text-sm">🔍</span>
+                <p className="text-xs text-orange-700 leading-snug">
+                  <strong>Review before finalizing:</strong> Some task groups show borderline results.
+                  Consider the full evidence below — your professional judgment may call for a different level.
+                </p>
+              </div>
+            )}
+
+            {savedSessionId && (
+              <TeacherOverride
+                sessionId={savedSessionId}
+                modelName="MBF"
+                suggestedLevel={results.mbfLevel}
+                maxLevel={5}
+                minLevel={1}
+                levelLabels={Object.fromEntries(
+                  Object.entries(schedule3F.mbfLevels).map(([k, v]) => [Number(k), v.name])
+                )}
+              />
+            )}
+
+            <div className="flex gap-3 mt-4">
               <button onClick={() => router.push("/assess/select")} className="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg py-2.5 text-sm">
                 Assess Another Student
               </button>

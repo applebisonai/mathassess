@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import { useRouter, useSearchParams } from "next/navigation";
 import { scheduleAvMD, TaskGroup, AssessmentItem, ResponseField } from "@/lib/assessments/schedule-av-md";
 import InlineCorrectIncorrect from "@/components/InlineCorrectIncorrect";
+import TeacherOverride from "@/components/TeacherOverride";
 
 interface Student {
   id: string;
@@ -46,7 +47,7 @@ function calculateResults(responses: Responses) {
   const resp = (id: string) => responses[id]?.["Response"] === "correct";
 
   // TG1: Skip counting
-  const skipCount = ["md1-by2","md1-by5","md1-back5","md1-by3","md1-by4","md1-back2"].filter(resp).length;
+  const skipCount = ["md1-by2","md1-by5","md1-back5","md1-by3","md1-by4","md1-back2"].filter((id) => resp(id)).length;
 
   // TG2: Multiplication/Division with materials
   const formGroups        = resp("md2-forming-groups");
@@ -112,6 +113,8 @@ function InterviewContent() {
   const [results, setResults]                 = useState<ReturnType<typeof calculateResults> | null>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
   const [saveError, setSaveError]             = useState<string | null>(null);
+  const [savedSessionId, setSavedSessionId] = useState<string | null>(null);
+  const [isBorderline, setIsBorderline] = useState(false);
 
   const groups       = scheduleAvMD.taskGroups;
   const currentGroup = groups[currentGroupIdx];
@@ -209,6 +212,7 @@ function InterviewContent() {
     setSaving(true);
     const calc = calculateResults(responses);
     setResults(calc);
+    setIsBorderline(calc.mdLevel > 0 && calc.mdLevel < 5);
 
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { setSaving(false); return; }
@@ -232,6 +236,7 @@ function InterviewContent() {
       if (sessionError) throw sessionError;
 
       if (sessionData?.id) {
+      setSavedSessionId(sessionData.id);
         const { error: placementError } = await supabase.from("construct_placements").insert([{
           session_id:      sessionData.id,
           student_id:      student.id,
@@ -304,7 +309,29 @@ function InterviewContent() {
               * Suggested placement based on performance evidence and strategies observed. Teacher judgment should confirm final level.
             </p>
 
-            <div className="flex gap-3">
+            {isBorderline && (
+            <div className="rounded-xl bg-orange-50 border border-orange-200 p-3 mb-4 flex gap-2 items-start">
+              <span className="text-orange-500 text-sm">🔍</span>
+              <p className="text-xs text-orange-700 leading-snug">
+                <strong>Review before finalizing:</strong> Some task groups show borderline results.
+                Consider the full evidence below — your professional judgment may call for a different level.
+              </p>
+            </div>
+          )}
+
+          {savedSessionId && (
+            <TeacherOverride
+              sessionId={savedSessionId}
+              modelName="M&D"
+              suggestedLevel={results.mdLevel}
+              maxLevel={5}
+              levelLabels={Object.fromEntries(
+                Object.entries(scheduleAvMD.mdLevels).map(([k, v]) => [Number(k), v.name])
+              )}
+            />
+          )}
+
+          <div className="flex gap-3 mt-4">
               <button onClick={() => router.push("/assess/select")} className="flex-1 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg py-2.5 text-sm">
                 Assess Another Student
               </button>

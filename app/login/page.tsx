@@ -18,10 +18,19 @@ export default function LoginPage() {
     setLoading(true);
     setError("");
 
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    let authError: string | null = null;
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) authError = error.message;
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+      authError = msg.includes("ECONNRESET") || msg.includes("fetch")
+        ? "Unable to reach the server. The database may be temporarily unavailable — please try again in a moment."
+        : "Connection error. Please check your internet connection and try again.";
+    }
 
-    if (error) {
-      setError(error.message);
+    if (authError) {
+      setError(authError);
       setLoading(false);
     } else {
       router.push("/dashboard");

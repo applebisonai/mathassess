@@ -22,6 +22,13 @@ export async function createClient() {
           }
         },
       },
+      // Disable keep-alive to prevent ECONNRESET on Vercel serverless.
+      // Vercel may reuse a TCP connection after Supabase has closed it;
+      // forcing a fresh connection per request avoids the reset error.
+      global: {
+        fetch: (url: RequestInfo | URL, options?: RequestInit) =>
+          fetch(url, { ...options, keepalive: false, cache: "no-store" }),
+      },
     }
   );
 }

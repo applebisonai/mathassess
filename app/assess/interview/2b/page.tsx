@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import { useRouter, useSearchParams } from "next/navigation";
 import { schedule2B, TaskGroup, AssessmentItem } from "@/lib/assessments/schedule-2b";
 import InlineCorrectIncorrect from "@/components/InlineCorrectIncorrect";
+import TeacherOverride from "@/components/TeacherOverride";
 
 interface Student {
   id: string;
@@ -147,6 +148,8 @@ function InterviewContent() {
   const [results, setResults] = useState<ReturnType<typeof calculateResults> | null>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [savedSessionId, setSavedSessionId] = useState<string | null>(null);
+  const [isBorderline, setIsBorderline] = useState(false);
 
   const groups = schedule2B.taskGroups;
   const currentGroup = groups[currentGroupIdx];
@@ -221,6 +224,9 @@ function InterviewContent() {
     const calc = calculateResults(responses);
     setResults(calc);
 
+    // Set borderline flag (suggested level between 1 and maxLevel-1)
+    setIsBorderline(calc.sn20Level > 0 && calc.sn20Level < 7);
+
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { setSaving(false); return; }
 
@@ -241,6 +247,7 @@ function InterviewContent() {
       .single();
 
       if (sessionData?.id) {
+      setSavedSessionId(sessionData.id);
       await supabase.from("construct_placements").insert([
         {
           session_id: sessionData.id,
@@ -286,6 +293,16 @@ function InterviewContent() {
               </p>
             </div>
 
+            {isBorderline && (
+              <div className="rounded-xl bg-orange-50 border border-orange-200 p-3 mb-4 flex gap-2 items-start">
+                <span className="text-orange-500 text-sm">🔍</span>
+                <p className="text-xs text-orange-700 leading-snug">
+                  <strong>Review before finalizing:</strong> Some task groups show borderline results.
+                  Consider the full evidence below — your professional judgment may call for a different level.
+                </p>
+              </div>
+            )}
+
             <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wide mb-3">Suggested SN20 Placement</h3>
             <div className="rounded-2xl border-2 border-amber-300 bg-amber-50 p-5 flex items-center gap-5 mb-6">
               <div className="text-center">
@@ -317,7 +334,19 @@ function InterviewContent() {
               * Suggested placement based on scoring thresholds. Teacher judgment should confirm final level.
             </p>
 
-            <div className="flex gap-3">
+            {savedSessionId && (
+              <TeacherOverride
+                sessionId={savedSessionId}
+                modelName="SN20"
+                suggestedLevel={results.sn20Level}
+                maxLevel={7}
+                levelLabels={Object.fromEntries(
+                  Object.entries(schedule2B.sn20Levels).map(([k, v]) => [Number(k), v.name])
+                )}
+              />
+            )}
+
+            <div className="flex gap-3 mt-4">
               <button onClick={() => router.push("/assess/select")}
                 className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg py-2.5 text-sm">
                 Assess Another Student

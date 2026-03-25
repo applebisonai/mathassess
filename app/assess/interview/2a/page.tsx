@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import { useRouter, useSearchParams } from "next/navigation";
 import { schedule2A, TaskGroup, AssessmentItem } from "@/lib/assessments/schedule-2a";
 import InlineCorrectIncorrect from "@/components/InlineCorrectIncorrect";
+import TeacherOverride from "@/components/TeacherOverride";
 
 interface Student {
   id: string;
@@ -128,6 +129,8 @@ function InterviewContent() {
   const [results, setResults] = useState<ReturnType<typeof calculateResults> | null>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [savedSessionId, setSavedSessionId] = useState<string | null>(null);
+  const [isBorderline, setIsBorderline] = useState(false);
 
   const groups = schedule2A.taskGroups;
   const currentGroup = groups[currentGroupIdx];
@@ -229,6 +232,9 @@ function InterviewContent() {
     const calc = calculateResults(responses);
     setResults(calc);
 
+    // Set borderline flag (suggested level between 1 and maxLevel-1)
+    setIsBorderline(calc.nidLevel > 0 && calc.nidLevel < 4);
+
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { setSaving(false); return; }
 
@@ -251,6 +257,7 @@ function InterviewContent() {
       if (sessionError) throw sessionError;
 
       if (sessionData?.id) {
+        setSavedSessionId(sessionData.id);
         const { error: placementError } = await supabase.from("construct_placements").insert([
           {
             session_id: sessionData.id,
@@ -307,6 +314,16 @@ function InterviewContent() {
               </p>
             </div>
 
+            {isBorderline && (
+              <div className="rounded-xl bg-orange-50 border border-orange-200 p-3 mb-4 flex gap-2 items-start">
+                <span className="text-orange-500 text-sm">🔍</span>
+                <p className="text-xs text-orange-700 leading-snug">
+                  <strong>Review before finalizing:</strong> Some task groups show borderline results.
+                  Consider the full evidence below — your professional judgment may call for a different level.
+                </p>
+              </div>
+            )}
+
             <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wide mb-3">Suggested LFIN Placement</h3>
             <div className="grid grid-cols-3 gap-3 mb-6">
               {[
@@ -349,7 +366,19 @@ function InterviewContent() {
               * Suggested placement is based on scoring thresholds. Teacher judgment should confirm final placement.
             </p>
 
-            <div className="flex gap-3">
+            {savedSessionId && (
+              <TeacherOverride
+                sessionId={savedSessionId}
+                modelName="NID"
+                suggestedLevel={results.nidLevel}
+                maxLevel={4}
+                levelLabels={Object.fromEntries(
+                  Object.entries(schedule2A.nidLevels).map(([k, v]) => [Number(k), v.name])
+                )}
+              />
+            )}
+
+            <div className="flex gap-3 mt-4">
               <button
                 onClick={() => router.push("/assess/select")}
                 className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg py-2.5 text-sm"

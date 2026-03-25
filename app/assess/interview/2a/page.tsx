@@ -181,7 +181,11 @@ function InterviewContent() {
       .slice(startIdx)
       .flatMap(([, items]) => items)
       .filter((item) =>
-        item.responseFields.some((f) => f.type === "correct_incorrect" && !responses[item.id]?.[f.label])
+        item.responseFields.some(
+          (f) =>
+            (f.type === "correct_incorrect" || f.type === "fluency_scale") &&
+            !responses[item.id]?.[f.label]
+        )
       );
   }
 

@@ -18,6 +18,9 @@ import { schedule3A } from "@/lib/assessments/schedule-3a";
 import { schedule3B } from "@/lib/assessments/schedule-3b";
 import { schedule3C } from "@/lib/assessments/schedule-3c";
 import { schedule3D } from "@/lib/assessments/schedule-3d";
+import { schedule3E } from "@/lib/assessments/schedule-3e";
+import { schedule3F } from "@/lib/assessments/schedule-3f";
+import { scheduleAvMD } from "@/lib/assessments/schedule-av-md";
 
 const gradeLabel = (g: number) =>
   g === 0 ? "Kindergarten" : `Grade ${g}`;
@@ -298,6 +301,57 @@ const ASSESSMENT_CONFIG: Record<string, {
       },
     ],
   },
+  "schedule-3e": {
+    label: "Schedule 3E — Early Multiplication & Division",
+    subtitle: "3E · EM&D",
+    modelDefs: [
+      {
+        key: "EM&D", color: "#059669", maxLevel: 6,
+        labels: {
+          0: "Emergent — No equal group awareness",
+          1: "Initial grouping — Forming equal groups with materials",
+          2: "Perceptual — Counting visible groups by ones",
+          3: "Figurative — Uses skip counting or repeated addition",
+          4: "Initial multiplicative — Multiplication with screened arrays",
+          5: "Facile multiplicative — Multiplicative relations & basic facts",
+          6: "Advanced — Extends to larger numbers and inverse relations",
+        },
+      },
+    ],
+  },
+  "schedule-3f": {
+    label: "Schedule 3F — Multiplicative Basic Facts",
+    subtitle: "3F · MBF · Ranges 1–5",
+    modelDefs: [
+      {
+        key: "MBF", color: "#7c3aed", maxLevel: 5,
+        labels: {
+          1: "Range 1 — 2s & 10s",
+          2: "Range 2 — Low × Low (2–5)",
+          3: "Range 3 — Low × High (2–5 × 6–9)",
+          4: "Range 4 — High × High (6–9)",
+          5: "Range 5 — Factor > 10",
+        },
+      },
+    ],
+  },
+  "av-md": {
+    label: "Add+VantageMR: Multiplication & Division",
+    subtitle: "M&D · Equal groups · Arrays · Relational thinking",
+    modelDefs: [
+      {
+        key: "M&D", color: "#16a34a", maxLevel: 5,
+        labels: {
+          0: "Emergent — No skip counting or grouping",
+          1: "Initial grouping — Counts all by ones",
+          2: "Perceptual grouping — Skip counts visible groups",
+          3: "Figurative grouping — Skip counts screened groups",
+          4: "Initial multiplicative — Multiplication with arrays",
+          5: "Facile multiplicative — Relational thinking strategies",
+        },
+      },
+    ],
+  },
 };
 
 // All known model → level name mappings (for history cards)
@@ -335,6 +389,9 @@ function buildItemLookup(assessmentId: string): Record<string, { prompt: string;
     "schedule-3b": schedule3B as never,
     "schedule-3c": schedule3C as never,
     "schedule-3d": schedule3D as never,
+    "schedule-3e": schedule3E as never,
+    "schedule-3f": schedule3F as never,
+    "av-md":       scheduleAvMD as never,
   };
   const schedule = schedules[assessmentId];
   if (!schedule) return {};

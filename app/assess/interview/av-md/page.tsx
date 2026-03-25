@@ -222,14 +222,15 @@ function InterviewContent() {
   async function handleFinish() {
     if (!student) return;
     setSaving(true);
+    setSaveError(null);
     const calc = calculateResults(responses);
     setResults(calc);
     setIsBorderline(calc.mdLevel > 0 && calc.mdLevel < 5);
 
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { setSaving(false); return; }
-
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { setSaving(false); return; }
+
       const today = new Date().toISOString().split("T")[0];
 
       const { data: sessionData, error: sessionError } = await supabase
@@ -263,7 +264,8 @@ function InterviewContent() {
       setDone(true);
     } catch (err) {
       console.error("Failed to save assessment:", err);
-      setSaveError("Failed to save. Please try again.");
+      const msg = err instanceof Error ? err.message : String(err);
+      setSaveError(`Failed to save: ${msg}`);
     } finally {
       setSaving(false);
     }

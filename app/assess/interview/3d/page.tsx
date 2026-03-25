@@ -173,6 +173,7 @@ function InterviewContent() {
     }
     setValidationError(null);
     setSaving(true);
+    setSaveError(null);
     const calc = calculateResults(responses);
     setResults(calc);
     setIsBorderline(calc.asLevel > 0 && calc.asLevel < 6);
@@ -212,7 +213,8 @@ function InterviewContent() {
       setDone(true);
     } catch (err) {
       console.error("Failed to save assessment:", err);
-      setValidationError("Failed to save assessment. Please try again.");
+      const msg = err instanceof Error ? err.message : String(err);
+      setSaveError(`Failed to save: ${msg}`);
     } finally {
       setSaving(false);
     }

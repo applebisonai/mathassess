@@ -6,6 +6,8 @@ import Nav from "@/components/nav";
 import Link from "next/link";
 import LevelChart, { ChartPoint, ModelDef } from "./LevelChart";
 import SessionNotes from "./SessionNotes";
+import SessionResponsesView from "./SessionResponsesView";
+import type { SessionPlacement } from "./SessionResponsesView";
 import DeleteSessionButton from "./DeleteSessionButton";
 import PrintButton from "./PrintButton";
 import { schedule2A } from "@/lib/assessments/schedule-2a";
@@ -374,7 +376,53 @@ function formatDate(d: string) {
   });
 }
 
-// ── Notes extraction ──────────────────────────────────────────────────────────
+// ── Notes extraction & response view helpers ──────────────────────────────────
+
+// Shared schedule map used by both helpers below
+type ScheduleShape = {
+  taskGroups: {
+    name: string;
+    number: string;
+    items: { id: string; prompt: string; responseFields?: { label: string; type: string }[] }[];
+  }[];
+};
+
+function scheduleMap(): Record<string, ScheduleShape> {
+  return {
+    "schedule-2a": schedule2A as never,
+    "schedule-2b": schedule2B as never,
+    "schedule-2c": schedule2C as never,
+    "av-pv":       scheduleAvPV as never,
+    "av-nwn":      scheduleAvNWN as never,
+    "av-sn":       scheduleAvSN as never,
+    "av-as":       scheduleAvAS as never,
+    "schedule-3a": schedule3A as never,
+    "schedule-3b": schedule3B as never,
+    "schedule-3c": schedule3C as never,
+    "schedule-3d": schedule3D as never,
+    "schedule-3e": schedule3E as never,
+    "schedule-3f": schedule3F as never,
+    "av-md":       scheduleAvMD as never,
+  };
+}
+
+/** Ordered groups + items for the full response view. */
+import type { SessionGroup } from "./SessionResponsesView";
+function buildSessionGroups(assessmentId: string): SessionGroup[] {
+  const schedule = scheduleMap()[assessmentId];
+  if (!schedule) return [];
+  return schedule.taskGroups.map((group) => ({
+    groupName:   group.name,
+    groupNumber: group.number ?? "",
+    items: group.items.map((item) => ({
+      id:    item.id,
+      prompt: item.prompt,
+      extraFields: (item.responseFields ?? [])
+        .filter((f) => f.label !== "Response")
+        .map((f) => f.label),
+    })),
+  }));
+}
 
 // Build a flat itemId → { prompt, groupName } lookup from any schedule
 function buildItemLookup(assessmentId: string): Record<string, { prompt: string; groupName: string }> {
@@ -646,22 +694,34 @@ export default async function StudentProfilePage({
                     </div>
                   </div>
 
+                  {/* Level badges — show both algorithm suggestion and teacher override if different */}
                   {sessionPlacements.length > 0 ? (
                     <div className="flex flex-wrap gap-2 mt-2">
                       {sessionPlacements.map((p) => {
-                        const level = p.confirmed_level ?? p.suggested_level;
-                        const levelName = level !== null && level !== undefined
-                          ? (ALL_MODEL_LEVELS[p.model_name]?.[level] ?? `Level ${level}`)
+                        const confLevel = p.confirmed_level;
+                        const sugLevel  = p.suggested_level;
+                        const displayLevel = confLevel ?? sugLevel;
+                        const wasOverridden =
+                          confLevel !== null && confLevel !== undefined &&
+                          sugLevel  !== null && sugLevel  !== undefined &&
+                          confLevel !== sugLevel;
+                        const levelName = displayLevel !== null && displayLevel !== undefined
+                          ? (ALL_MODEL_LEVELS[p.model_name]?.[displayLevel] ?? `Level ${displayLevel}`)
                           : "—";
                         const color = ALL_MODEL_COLORS[p.model_name] ?? "#6b7280";
                         return (
                           <div key={p.id}
-                            className="flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg border font-medium bg-white"
+                            className={`flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg border font-medium bg-white ${wasOverridden ? "ring-2 ring-amber-300" : ""}`}
                             style={{ borderColor: color, color }}>
                             <span className="font-bold">{p.model_name}</span>
                             <span className="text-gray-600">
-                              {level !== null && level !== undefined ? `${level} — ${levelName}` : "—"}
+                              {displayLevel !== null && displayLevel !== undefined ? `${displayLevel} — ${levelName}` : "—"}
                             </span>
+                            {wasOverridden && (
+                              <span className="ml-1 text-amber-600 font-normal">
+                                (was {sugLevel})
+                              </span>
+                            )}
                           </div>
                         );
                       })}
@@ -670,8 +730,18 @@ export default async function StudentProfilePage({
                     <p className="text-xs text-gray-400 mt-1">No level placements recorded for this session.</p>
                   )}
 
-                  {/* Session notes — collapsible dropdown */}
-                  <SessionNotes notes={extractSessionNotes(session.raw_responses, session.assessment_id)} />
+                  {/* Full response log — shows every item, what was clicked, and scoring explanation */}
+                  <SessionResponsesView
+                    groups={buildSessionGroups(session.assessment_id)}
+                    rawResponses={(session.raw_responses as Record<string, Record<string, string>>) ?? {}}
+                    placements={sessionPlacements.map((p): SessionPlacement => ({
+                      model_name:      p.model_name,
+                      suggested_level: p.suggested_level ?? null,
+                      confirmed_level: p.confirmed_level ?? null,
+                    }))}
+                    modelLevelLabels={ALL_MODEL_LEVELS}
+                    modelColors={ALL_MODEL_COLORS}
+                  />
                 </div>
               );
             })}

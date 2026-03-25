@@ -250,7 +250,7 @@ function InterviewContent() {
 
       const today = new Date().toISOString().split("T")[0];
 
-      const { data: sessionData } = await supabase
+      const { data: sessionData, error: sessionError } = await supabase
       .from("assessment_sessions")
       .insert({
         student_id: student.id,
@@ -263,26 +263,27 @@ function InterviewContent() {
       .select("id")
       .single();
 
-      if (sessionData?.id) {
-      setSavedSessionId(sessionData.id);
+      if (sessionError) throw sessionError;
+
+      setSavedSessionId(sessionData!.id);
       const placements = [
         { model_name: "NID",  suggested_level: calc.nidLevel,  confirmed_level: calc.nidLevel },
         { model_name: "FNWS", suggested_level: calc.fnwsLevel, confirmed_level: calc.fnwsLevel },
         { model_name: "BNWS", suggested_level: calc.bnwsLevel, confirmed_level: calc.bnwsLevel },
       ].map((p) => ({
-        session_id: sessionData.id,
+        session_id: sessionData!.id,
         student_id: student.id,
         date_placed: today,
         ...p,
       }));
 
-      await supabase.from("construct_placements").insert(placements);
-      }
+      const { error: placementError } = await supabase.from("construct_placements").insert(placements);
+      if (placementError) throw placementError;
 
       setDone(true);
     } catch (err) {
       console.error("Failed to save assessment:", err);
-      const msg = err instanceof Error ? err.message : String(err);
+      const msg = (err as any)?.message ?? JSON.stringify(err);
       setSaveError(`Failed to save: ${msg}`);
     } finally {
       setSaving(false);

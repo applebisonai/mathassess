@@ -267,23 +267,21 @@ function InterviewContent() {
 
       if (sessionError) throw sessionError;
 
-      if (sessionData?.id) {
-      setSavedSessionId(sessionData.id);
-        const { error: placementError } = await supabase.from("construct_placements").insert([{
-          session_id:      sessionData.id,
-          student_id:      student.id,
-          model_name:      "EM&D",
-          suggested_level: calc.emdLevel,
-          confirmed_level: calc.emdLevel,
-          date_placed:     today,
-        }]);
-        if (placementError) throw placementError;
-      }
+      setSavedSessionId(sessionData!.id);
+      const { error: placementError } = await supabase.from("construct_placements").insert([{
+        session_id:      sessionData!.id,
+        student_id:      student.id,
+        model_name:      "EM&D",
+        suggested_level: calc.emdLevel,
+        confirmed_level: calc.emdLevel,
+        date_placed:     today,
+      }]);
+      if (placementError) throw placementError;
 
       setDone(true);
     } catch (err) {
       console.error("Failed to save assessment:", err);
-      const msg = err instanceof Error ? err.message : String(err);
+      const msg = (err as any)?.message ?? JSON.stringify(err);
       setSaveError(`Failed to save: ${msg}`);
     } finally {
       setSaving(false);

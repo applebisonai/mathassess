@@ -3,7 +3,7 @@
 import { useEffect, useState, Suspense } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter, useSearchParams } from "next/navigation";
-import { scheduleAvSN, TaskGroup, AssessmentItem } from "@/lib/assessments/schedule-av-sn";
+import { scheduleAvSN, TaskGroup, AssessmentItem, ResponseField } from "@/lib/assessments/schedule-av-sn";
 
 interface Student {
   id: string;
@@ -42,48 +42,68 @@ function calcGroupScore(items: AssessmentItem[], responses: Responses) {
 // ── Scoring logic ─────────────────────────────────────────────────────────────
 
 function calculateResults(responses: Responses) {
-  const correct = (id: string) => responses[id]?.Correct === "correct";
+  // Helper: check if the first CI field of an item is "correct"
+  const resp = (id: string) => responses[id]?.["Response"] === "correct";
+  const altogether = (id: string) => responses[id]?.["Altogether"] === "correct";
 
-  // Spatial patterns
-  const spatialTo6  = ["sp-3","sp-4","sp-5","sp-6"].filter(correct).length;
-  const spatial6to10 = ["sp-7","sp-8","sp-9","sp-10"].filter(correct).length;
+  // TG1: Spatial Patterns
+  const regularSpatial   = ["sn1-reg-4","sn1-reg-3","sn1-reg-6","sn1-reg-5"].filter(resp).length;
+  const irregularSpatial = ["sn1-irr-4","sn1-irr-6","sn1-irr-3","sn1-irr-5"].filter(resp).length;
 
-  // Finger patterns
-  const fingersTo5  = ["fp-a-3","fp-a-4","fp-a-5","fp-b-3","fp-b-4"].filter(correct).length;
-  const fingers6to10 = ["fp-b-6","fp-b-7","fp-b-8","fp-b-9","fp-b-10"].filter(correct).length;
+  // TG2: Finger Patterns
+  const displayFingers = ["sn2-disp-4","sn2-disp-3","sn2-disp-9","sn2-disp-6","sn2-disp-8"].filter(resp).length;
+  const moreThanOneWay = ["sn2-mtow-5a","sn2-mtow-5b","sn2-mtow-7a","sn2-mtow-7b"].filter(resp).length;
 
-  // Partitions
-  const parts5  = ["p5-4","p5-2","p5-1","p5-3","p5-0"].filter(correct).length;
-  const parts10 = ["p10-7","p10-6","p10-4","p10-8","p10-3","p10-5","p10-2","p10-9"].filter(correct).length;
+  // TG3: WITH Materials
+  const partOf5  = ["sn3-p5-4","sn3-p5-2","sn3-p5-1","sn3-p5-3"].filter(resp).length;
+  const partOf10 = ["sn3-p10-8","sn3-p10-6","sn3-p10-3","sn3-p10-4"].filter(resp).length;
+  const combTo20 = ["sn3-c20-8p8","sn3-c20-7p6","sn3-c20-10p4","sn3-c20-5p2"].filter(altogether).length;
 
-  // Doubles / near doubles
-  const doubles = ["d-2","d-3","d-4","d-5"].filter(correct).length;
-  const nearDoubles = ["nd-3","nd-4","nd-5"].filter(correct).length;
+  // TG4: NO Materials
+  const noMatTo5  = ["sn4-c5-3","sn4-c5-1"].filter(resp).length;
+  const noMatTo10 = ["sn4-c10-7","sn4-c10-4","sn4-c10-1"].filter(resp).length;
+  const noMatTo20 = ["sn4-c20-10of18","sn4-c20-7of20","sn4-c20-9of16"].filter(resp).length;
 
-  // Structuring to 20
-  const to20teens = ["s20-10-3","s20-10-7","s20-10-5","s20-10-9"].filter(correct).length;
-  const parts20   = ["s20-14","s20-12","s20-17","s20-15"].filter(correct).length;
+  // TG5: Bare Numbers
+  const bareBasic = ["sn5-2p3"].filter(resp).length;
+  const bareTo10  = ["sn5-5p4","sn5-3p3","sn5-9m6","sn5-8m4"].filter(resp).length;
+  const bareTo20  = ["sn5-9p9","sn5-10p6","sn5-13m5","sn5-20m6"].filter(resp).length;
 
   let snLevel = 0;
-  if (spatialTo6 >= 3 || fingersTo5 >= 4)            snLevel = Math.max(snLevel, 1);
-  if (spatial6to10 >= 3 || fingers6to10 >= 4)         snLevel = Math.max(snLevel, 2);
-  if (parts5 >= 4 && parts10 >= 4)                    snLevel = Math.max(snLevel, 3);
-  if (doubles >= 3 && parts10 >= 6)                   snLevel = Math.max(snLevel, 4);
-  if (nearDoubles >= 2 && to20teens >= 3 && parts20 >= 3) snLevel = Math.max(snLevel, 5);
+
+  // Level 1: Facile spatial patterns + basic finger patterns
+  if (regularSpatial >= 3 && irregularSpatial >= 3) snLevel = Math.max(snLevel, 1);
+
+  // Level 2: Finger patterns to 10 + partitions WITH materials
+  if (displayFingers >= 4 && moreThanOneWay >= 3 && partOf5 >= 3 && partOf10 >= 3)
+    snLevel = Math.max(snLevel, 2);
+
+  // Level 3: Partitions WITHOUT materials + bare numbers to 10
+  if (noMatTo5 >= 2 && noMatTo10 >= 2 && bareTo10 >= 3)
+    snLevel = Math.max(snLevel, 3);
+
+  // Level 4: Combinations to 20 WITH materials
+  if (combTo20 >= 3) snLevel = Math.max(snLevel, 4);
+
+  // Level 5: Partitions WITHOUT materials to 20 + bare numbers to 20
+  if (noMatTo20 >= 2 && bareTo20 >= 3) snLevel = Math.max(snLevel, 5);
 
   return {
     snLevel,
     scores: {
-      spatialTo6:   { correct: spatialTo6,   total: 4 },
-      spatial6to10: { correct: spatial6to10, total: 4 },
-      fingersTo5:   { correct: fingersTo5,   total: 5 },
-      fingers6to10: { correct: fingers6to10, total: 5 },
-      parts5:       { correct: parts5,       total: 5 },
-      parts10:      { correct: parts10,      total: 8 },
-      doubles:      { correct: doubles,      total: 4 },
-      nearDoubles:  { correct: nearDoubles,  total: 3 },
-      to20teens:    { correct: to20teens,    total: 4 },
-      parts20:      { correct: parts20,      total: 4 },
+      regularSpatial:   { correct: regularSpatial,   total: 4 },
+      irregularSpatial: { correct: irregularSpatial, total: 4 },
+      displayFingers:   { correct: displayFingers,   total: 5 },
+      moreThanOneWay:   { correct: moreThanOneWay,   total: 4 },
+      partOf5:          { correct: partOf5,          total: 4 },
+      partOf10:         { correct: partOf10,         total: 4 },
+      combTo20:         { correct: combTo20,         total: 4 },
+      noMatTo5:         { correct: noMatTo5,         total: 2 },
+      noMatTo10:        { correct: noMatTo10,        total: 3 },
+      noMatTo20:        { correct: noMatTo20,        total: 3 },
+      bareBasic:        { correct: bareBasic,        total: 1 },
+      bareTo10:         { correct: bareTo10,         total: 4 },
+      bareTo20:         { correct: bareTo20,         total: 4 },
     },
   };
 }
@@ -96,18 +116,18 @@ function InterviewContent() {
   const router = useRouter();
   const supabase = createClient();
 
-  const [student, setStudent] = useState<Student | null>(null);
+  const [student, setStudent]         = useState<Student | null>(null);
   const [currentGroupIdx, setCurrentGroupIdx] = useState(0);
-  const [responses, setResponses] = useState<Responses>({});
-  const [saving, setSaving] = useState(false);
-  const [done, setDone] = useState(false);
-  const [results, setResults] = useState<ReturnType<typeof calculateResults> | null>(null);
+  const [responses, setResponses]     = useState<Responses>({});
+  const [saving, setSaving]           = useState(false);
+  const [done, setDone]               = useState(false);
+  const [results, setResults]         = useState<ReturnType<typeof calculateResults> | null>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
 
-  const groups = scheduleAvSN.taskGroups;
+  const groups       = scheduleAvSN.taskGroups;
   const currentGroup = groups[currentGroupIdx];
-  const isFirst = currentGroupIdx === 0;
-  const isLast  = currentGroupIdx === groups.length - 1;
+  const isFirst      = currentGroupIdx === 0;
+  const isLast       = currentGroupIdx === groups.length - 1;
 
   useEffect(() => {
     if (!studentId) return;
@@ -119,7 +139,7 @@ function InterviewContent() {
       .then(({ data }) => { if (data) setStudent(data); });
   }, [studentId]);
 
-  // Auto-mark items before START HERE as correct when navigating to a group
+  // Auto-mark items BEFORE START HERE as correct when navigating to a group
   useEffect(() => {
     const group = groups[currentGroupIdx];
     if (!group.startAtItem) return;
@@ -149,7 +169,9 @@ function InterviewContent() {
     return groupBySubLevel(group.items)
       .flatMap(([, items]) => items)
       .filter((item) =>
-        item.responseFields.some((f) => f.type === "correct_incorrect" && !responses[item.id]?.[f.label])
+        item.responseFields.some(
+          (f) => f.type === "correct_incorrect" && !responses[item.id]?.[f.label]
+        )
       );
   }
 
@@ -168,7 +190,9 @@ function InterviewContent() {
   function handleTryNext() {
     const missing = getRequiredButUnanswered(currentGroup);
     if (missing.length > 0) {
-      setValidationError(`Please answer all ${missing.length} required item${missing.length > 1 ? "s" : ""} before continuing.`);
+      setValidationError(
+        `Please answer all ${missing.length} required item${missing.length > 1 ? "s" : ""} before continuing.`
+      );
       return;
     }
     setValidationError(null);
@@ -178,7 +202,9 @@ function InterviewContent() {
   function handleTryFinish() {
     const missing = getRequiredButUnanswered(currentGroup);
     if (missing.length > 0) {
-      setValidationError(`Please answer all ${missing.length} required item${missing.length > 1 ? "s" : ""} before submitting.`);
+      setValidationError(
+        `Please answer all ${missing.length} required item${missing.length > 1 ? "s" : ""} before submitting.`
+      );
       return;
     }
     setValidationError(null);
@@ -210,16 +236,14 @@ function InterviewContent() {
       .single();
 
     if (sessionData?.id) {
-      await supabase.from("construct_placements").insert([
-        {
-          session_id: sessionData.id,
-          student_id: student.id,
-          model_name: "SN",
-          suggested_level: calc.snLevel,
-          confirmed_level: calc.snLevel,
-          date_placed: today,
-        },
-      ]);
+      await supabase.from("construct_placements").insert([{
+        session_id:      sessionData.id,
+        student_id:      student.id,
+        model_name:      "SN",
+        suggested_level: calc.snLevel,
+        confirmed_level: calc.snLevel,
+        date_placed:     today,
+      }]);
     }
 
     setSaving(false);
@@ -229,6 +253,22 @@ function InterviewContent() {
   // ── Results screen ────────────────────────────────────────────────────────
   if (done && student && results) {
     const snLevelInfo = scheduleAvSN.snLevels[results.snLevel];
+    const scoreRows: [string, { correct: number; total: number }, number][] = [
+      ["Regular Spatial Patterns",   results.scores.regularSpatial,   3],
+      ["Irregular Spatial Patterns", results.scores.irregularSpatial, 3],
+      ["Displaying Finger Patterns", results.scores.displayFingers,   4],
+      ["Fingers: More Than One Way", results.scores.moreThanOneWay,   3],
+      ["Partitions of 5 (w/ mat.)",  results.scores.partOf5,          3],
+      ["Partitions of 10 (w/ mat.)", results.scores.partOf10,         3],
+      ["Combinations to 20 (w/ mat.)",results.scores.combTo20,        3],
+      ["Partition to 5 (no mat.)",   results.scores.noMatTo5,         2],
+      ["Partition to 10 (no mat.)",  results.scores.noMatTo10,        2],
+      ["Partition to 20 (no mat.)",  results.scores.noMatTo20,        2],
+      ["Bare Numbers: Basic",        results.scores.bareBasic,        1],
+      ["Bare Numbers: To 10",        results.scores.bareTo10,         3],
+      ["Bare Numbers: To 20",        results.scores.bareTo20,         3],
+    ];
+
     return (
       <div className="min-h-screen bg-gray-50 p-4">
         <div className="max-w-2xl mx-auto">
@@ -255,41 +295,34 @@ function InterviewContent() {
 
             <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wide mb-3">Evidence Summary</h3>
             <div className="space-y-1 text-sm mb-4">
-              {[
-                ["Spatial Patterns to 6",   results.scores.spatialTo6,   2],
-                ["Spatial Patterns 6–10",   results.scores.spatial6to10, 3],
-                ["Finger Patterns to 5",    results.scores.fingersTo5,   4],
-                ["Finger Patterns 6–10",    results.scores.fingers6to10, 4],
-                ["Partitions of 5",         results.scores.parts5,       4],
-                ["Partitions of 10",        results.scores.parts10,      6],
-                ["Doubles",                 results.scores.doubles,      3],
-                ["Near Doubles",            results.scores.nearDoubles,  2],
-                ["10 + _ (teens)",          results.scores.to20teens,    3],
-                ["Partitions of 20",        results.scores.parts20,      3],
-              ].map(([label, score, threshold]) => {
-                const s = score as { correct: number; total: number };
-                const t = threshold as number;
-                const color = s.correct >= t ? "text-green-600" : s.correct === 0 ? "text-red-500" : "text-yellow-600";
+              {scoreRows.map(([label, score, threshold]) => {
+                const color =
+                  score.correct >= threshold ? "text-green-600" :
+                  score.correct === 0         ? "text-red-500"   : "text-yellow-600";
                 return (
-                  <div key={label as string} className="flex items-center justify-between py-1.5 border-b border-gray-100">
-                    <span className="text-gray-600 text-xs">{label as string}</span>
-                    <span className={`font-semibold text-xs ${color}`}>{s.correct} / {s.total}</span>
+                  <div key={label} className="flex items-center justify-between py-1.5 border-b border-gray-100">
+                    <span className="text-gray-600 text-xs">{label}</span>
+                    <span className={`font-semibold text-xs ${color}`}>{score.correct}/{score.total}</span>
                   </div>
                 );
               })}
             </div>
 
             <p className="text-xs text-gray-400 mb-4">
-              * Suggested placement based on performance evidence. Teacher judgment should confirm final level.
+              * Suggested placement based on performance evidence. Teacher judgment and strategy observations should confirm final level.
             </p>
 
             <div className="flex gap-3">
-              <button onClick={() => router.push("/assess/select")}
-                className="flex-1 bg-orange-600 hover:bg-orange-700 text-white font-medium rounded-lg py-2.5 text-sm">
+              <button
+                onClick={() => router.push("/assess/select")}
+                className="flex-1 bg-orange-600 hover:bg-orange-700 text-white font-medium rounded-lg py-2.5 text-sm"
+              >
                 Assess Another Student
               </button>
-              <button onClick={() => router.push("/students")}
-                className="flex-1 border border-gray-200 text-gray-600 font-medium rounded-lg py-2.5 text-sm hover:bg-gray-50">
+              <button
+                onClick={() => router.push("/students")}
+                className="flex-1 border border-gray-200 text-gray-600 font-medium rounded-lg py-2.5 text-sm hover:bg-gray-50"
+              >
                 Back to Students
               </button>
             </div>
@@ -324,7 +357,9 @@ function InterviewContent() {
           Task Group {currentGroupIdx + 1} of {groups.length}
           <div className="flex gap-1 ml-2">
             {groups.map((_, i) => (
-              <button key={i} onClick={() => setCurrentGroupIdx(i)}
+              <button
+                key={i}
+                onClick={() => setCurrentGroupIdx(i)}
                 className={`w-3 h-3 rounded-full transition-colors ${
                   i === currentGroupIdx ? "bg-orange-600" : i < currentGroupIdx ? "bg-orange-200" : "bg-gray-200"
                 }`}
@@ -334,7 +369,7 @@ function InterviewContent() {
         </div>
       </div>
 
-      {/* Materials banner */}
+      {/* Materials banner (first group) */}
       {currentGroupIdx === 0 && (
         <div className="bg-orange-50 border-b border-orange-200 px-4 py-2 text-xs text-orange-700 flex items-center gap-2 flex-wrap">
           <span>📦 Materials needed:</span>
@@ -347,7 +382,7 @@ function InterviewContent() {
       {/* Two-panel layout */}
       <div className="flex flex-1 gap-0 overflow-hidden">
 
-        {/* LEFT: SN level descriptions */}
+        {/* LEFT: SN level descriptions + teacher script */}
         <div className="w-2/5 bg-white border-r border-gray-200 flex flex-col overflow-hidden">
           <div className="bg-orange-600 text-white px-4 py-3">
             <div className="text-xs font-semibold uppercase tracking-wide opacity-75">
@@ -357,7 +392,7 @@ function InterviewContent() {
           </div>
 
           <div className="flex-1 p-4 flex flex-col gap-4 overflow-y-auto">
-            {/* SN Level descriptions */}
+            {/* SN level descriptions */}
             <div className="bg-white border border-gray-200 rounded-xl p-3">
               <div className="mb-3 text-center">
                 <div className="text-sm font-bold text-gray-700">Structuring Numbers</div>
@@ -365,7 +400,10 @@ function InterviewContent() {
               </div>
               <div className="space-y-1.5">
                 {scheduleAvSN.snLevels.map(({ level, name, description }) => (
-                  <div key={level} className="flex items-start gap-2 rounded-lg px-3 py-2 border bg-gray-50 border-gray-100">
+                  <div
+                    key={level}
+                    className="flex items-start gap-2 rounded-lg px-3 py-2 border bg-gray-50 border-gray-100"
+                  >
                     <span className="text-xs font-bold text-orange-600 w-4 shrink-0 mt-0.5">{level}</span>
                     <div>
                       <div className="text-xs font-semibold leading-snug text-gray-800">{name}</div>
@@ -376,7 +414,7 @@ function InterviewContent() {
               </div>
             </div>
 
-            {/* Teacher script */}
+            {/* Teacher script + materials */}
             <div className="bg-gray-50 rounded-xl border border-gray-200 p-4">
               <div className="text-xs text-gray-500 font-medium mb-1">Teacher Script:</div>
               <div className="text-sm text-gray-800 italic">{currentGroup.teacherScript ?? currentGroup.instructions}</div>
@@ -384,6 +422,9 @@ function InterviewContent() {
                 <div className="text-xs text-gray-400 mt-2">📦 {currentGroup.materials}</div>
               )}
             </div>
+
+            {/* Strategy key for current group */}
+            <StrategyKey group={currentGroup} />
           </div>
         </div>
 
@@ -453,6 +494,44 @@ function InterviewContent() {
   );
 }
 
+// ── Strategy key (left panel) ─────────────────────────────────────────────────
+
+function StrategyKey({ group }: { group: TaskGroup }) {
+  // Collect unique strategy option sets used in this group
+  const allOptions = new Set<string>();
+  group.items.forEach((item) => {
+    item.responseFields.forEach((f) => {
+      if (f.type === "strategy" && f.options) f.options.forEach((o) => allOptions.add(o));
+    });
+  });
+  if (allOptions.size === 0) return null;
+
+  const keyMap: Record<string, string> = {
+    K:   "Knows Immediately",
+    P:   "Partitions",
+    C:   "Counts",
+    CF1: "Counts From 1",
+    "CF_": "Counts From another number",
+    F:   "Uses Fingers",
+    A5:  "Adds through 5",
+    A10: "Adds through 10",
+  };
+
+  return (
+    <div className="bg-orange-50 border border-orange-200 rounded-xl p-3">
+      <div className="text-xs font-bold text-orange-700 mb-2 uppercase tracking-wide">Strategy Key</div>
+      <div className="space-y-1">
+        {Array.from(allOptions).map((code) => (
+          <div key={code} className="flex items-center gap-2">
+            <span className="text-xs font-bold text-orange-600 w-8 shrink-0">{code}</span>
+            <span className="text-xs text-gray-600">{keyMap[code] ?? code}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ── Sub-group section ─────────────────────────────────────────────────────────
 
 function SubGroupSection({
@@ -469,43 +548,55 @@ function SubGroupSection({
   const score = calcGroupScore(items, responses);
   const isStartHere = startAtItem ? items.some((i) => i.id === startAtItem) : false;
 
+  // All-correct covers only CI fields
+  function markAllCorrect() {
+    items.forEach((item) => {
+      item.responseFields.forEach((f) => {
+        if (f.type === "correct_incorrect") setResponse(item.id, f.label, "correct");
+      });
+    });
+  }
+
+  const hasCIFields = items.some((item) =>
+    item.responseFields.some((f) => f.type === "correct_incorrect")
+  );
+
   return (
     <div className={`rounded-xl border-2 overflow-hidden ${isStartHere ? "border-green-400" : "border-orange-200 bg-orange-50/30"}`}>
+      {/* START HERE banner */}
       {isStartHere && (
         <div className="bg-green-500 px-3 py-1.5 flex items-center gap-2">
           <span className="text-white font-bold text-xs tracking-wide">▶ START HERE</span>
           {startNote && <span className="text-green-100 text-xs">{startNote}</span>}
         </div>
       )}
-      {score && (
-        <div className="px-3 py-1.5 flex items-center justify-between bg-orange-100/60 text-orange-900">
-          <span className="text-xs font-semibold text-orange-800">{subLevel}</span>
+
+      {/* Sub-group header */}
+      <div className="px-3 py-1.5 flex items-center justify-between bg-orange-100/60 text-orange-900">
+        <span className="text-xs font-semibold text-orange-800">{subLevel}</span>
+        {score && (
           <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
             score.correct / score.total >= 0.75 ? "bg-green-200 text-green-800" :
             score.correct / score.total >= 0.5  ? "bg-yellow-200 text-yellow-800" :
-            "bg-red-100 text-red-700"
+                                                   "bg-red-100 text-red-700"
           }`}>
             {score.correct}/{score.total} ✓
           </span>
-        </div>
-      )}
+        )}
+      </div>
 
+      {/* Item rows */}
       <div className="divide-y divide-white/60 bg-white/60">
         {items.map((item) => (
           <ItemRow key={item.id} item={item} getResponse={getResponse} setResponse={setResponse} />
         ))}
       </div>
 
-      {items.some((item) => item.responseFields.some((f) => f.type === "correct_incorrect")) && (
+      {/* All Correct button */}
+      {hasCIFields && (
         <div className="px-3 py-2 bg-white/40 border-t border-white/60 flex justify-end">
           <button
-            onClick={() => {
-              items.forEach((item) => {
-                item.responseFields.forEach((f) => {
-                  if (f.type === "correct_incorrect") setResponse(item.id, f.label, "correct");
-                });
-              });
-            }}
+            onClick={markAllCorrect}
             className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-green-500 hover:bg-green-600 text-white transition-colors"
           >
             ✓ All Correct
@@ -527,44 +618,67 @@ function ItemRow({
 }) {
   const [notesOpen, setNotesOpen] = useState(false);
 
+  // Detect layout type:
+  //  - "multi" → 3+ fields or mixed types (text + CI) → vertical with labels
+  //  - "inline" → 1–2 fields, same or compatible types → horizontal, no labels
+  const hasMixed  = item.responseFields.some((f) => f.type === "text_input");
+  const useMulti  = item.responseFields.length >= 3 || (hasMixed && item.responseFields.length > 1);
+
   return (
     <div className="px-3 py-3">
-      <div className="flex items-start gap-3 flex-wrap">
-        {item.displayText && (
-          <span className="text-base font-black text-gray-700 min-w-[3rem] text-center shrink-0">
-            {item.displayText}
-          </span>
-        )}
-        <span className="text-sm text-gray-700 flex-1 min-w-0 pt-0.5">{item.prompt}</span>
-        <div className="flex flex-col gap-1.5 shrink-0">
-          {item.responseFields.map((field) => (
-            <span key={field.label} className="flex items-center gap-1.5">
-              {field.type === "correct_incorrect" && (
-                <InlineCorrectIncorrect
+      {useMulti ? (
+        // ── Multi-field layout (e.g. TG3 Combinations to 20) ──────────────
+        <div className="flex items-start gap-3">
+          {item.displayText && (
+            <span className="text-base font-black text-gray-700 min-w-[3.5rem] text-center shrink-0">
+              {item.displayText}
+            </span>
+          )}
+          <div className="flex-1 min-w-0">
+            <div className="text-sm text-gray-700 mb-2">{item.prompt}</div>
+            <div className="flex flex-col gap-1.5">
+              {item.responseFields.map((field) => (
+                <FieldWithLabel
+                  key={field.label}
+                  field={field}
                   value={getResponse(item.id, field.label)}
                   onChange={(v) => setResponse(item.id, field.label, v)}
                 />
-              )}
-              {field.type === "text_input" && (
-                <input
-                  type="text"
-                  placeholder={field.placeholder ?? "Enter response"}
-                  value={getResponse(item.id, field.label)}
-                  onChange={(e) => setResponse(item.id, field.label, e.target.value)}
-                  className="w-32 border border-orange-300 rounded px-2 py-1 text-xs focus:outline-none focus:border-orange-500"
-                />
-              )}
-            </span>
-          ))}
+              ))}
+            </div>
+          </div>
+          <button
+            onClick={() => setNotesOpen((o) => !o)}
+            className="text-gray-300 hover:text-gray-500 text-xs shrink-0"
+            title="Add note"
+          >📝</button>
         </div>
-        <button
-          onClick={() => setNotesOpen((o) => !o)}
-          className="text-gray-300 hover:text-gray-500 text-xs ml-1 pt-0.5"
-          title="Add note"
-        >
-          📝
-        </button>
-      </div>
+      ) : (
+        // ── Inline layout (TG1/TG2/TG4/TG5 — display + CI + strategy) ────
+        <div className="flex items-center gap-3 flex-wrap">
+          {item.displayText && (
+            <span className="text-base font-black text-gray-700 min-w-[3rem] text-center shrink-0">
+              {item.displayText}
+            </span>
+          )}
+          <span className="text-sm text-gray-700 flex-1 min-w-0">{item.prompt}</span>
+          <div className="flex items-center gap-2 shrink-0">
+            {item.responseFields.map((field) => (
+              <FieldInline
+                key={field.label}
+                field={field}
+                value={getResponse(item.id, field.label)}
+                onChange={(v) => setResponse(item.id, field.label, v)}
+              />
+            ))}
+          </div>
+          <button
+            onClick={() => setNotesOpen((o) => !o)}
+            className="text-gray-300 hover:text-gray-500 text-xs"
+            title="Add note"
+          >📝</button>
+        </div>
+      )}
 
       {notesOpen && (
         <input
@@ -584,7 +698,71 @@ function ItemRow({
   );
 }
 
-// ── Inline correct/incorrect ──────────────────────────────────────────────────
+// ── FieldWithLabel: labelled field for multi-field layout ─────────────────────
+
+function FieldWithLabel({
+  field, value, onChange,
+}: {
+  field: ResponseField;
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  return (
+    <div className="flex items-center gap-2">
+      <span className="text-xs text-gray-400 w-20 text-right shrink-0">{field.label}:</span>
+      <FieldRenderer field={field} value={value} onChange={onChange} />
+    </div>
+  );
+}
+
+// ── FieldInline: no label, for inline layout ──────────────────────────────────
+
+function FieldInline({
+  field, value, onChange,
+}: {
+  field: ResponseField;
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  return <FieldRenderer field={field} value={value} onChange={onChange} />;
+}
+
+// ── FieldRenderer: renders the correct input for a ResponseField ──────────────
+
+function FieldRenderer({
+  field, value, onChange,
+}: {
+  field: ResponseField;
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  if (field.type === "correct_incorrect") {
+    return <InlineCorrectIncorrect value={value} onChange={onChange} />;
+  }
+  if (field.type === "text_input") {
+    return (
+      <input
+        type="text"
+        placeholder={field.placeholder ?? ""}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-16 border border-orange-300 rounded px-2 py-1 text-xs focus:outline-none focus:border-orange-500 text-center"
+      />
+    );
+  }
+  if (field.type === "strategy" && field.options) {
+    return (
+      <StrategySelector
+        options={field.options}
+        value={value}
+        onChange={onChange}
+      />
+    );
+  }
+  return null;
+}
+
+// ── InlineCorrectIncorrect ────────────────────────────────────────────────────
 
 function InlineCorrectIncorrect({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   return (
@@ -605,6 +783,34 @@ function InlineCorrectIncorrect({ value, onChange }: { value: string; onChange: 
             : "bg-white border-gray-300 text-gray-400 hover:border-red-400"
         }`}
       >✗</button>
+    </div>
+  );
+}
+
+// ── StrategySelector ──────────────────────────────────────────────────────────
+
+function StrategySelector({
+  options, value, onChange,
+}: {
+  options: string[];
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  return (
+    <div className="flex gap-1 flex-wrap">
+      {options.map((opt) => (
+        <button
+          key={opt}
+          onClick={() => onChange(value === opt ? "" : opt)}
+          className={`px-1.5 py-0.5 rounded text-xs font-bold border transition-all ${
+            value === opt
+              ? "bg-orange-500 border-orange-600 text-white"
+              : "bg-white border-gray-300 text-gray-500 hover:border-orange-400 hover:text-orange-600"
+          }`}
+        >
+          {opt}
+        </button>
+      ))}
     </div>
   );
 }

@@ -293,28 +293,44 @@ export const scheduleAvSN = {
           prompt: "Show 8 beads. \"How many more to make 10?\" (Answer: 2)",
           displayText: "8 + ?",
           targetLevel: 2,
-          responseFields: [RESP, KCF],
+          responseFields: [
+            RESP,
+            { label: "Student said", type: "text_input", placeholder: "#" },
+            { label: "Strategy", type: "strategy", options: ["K", "CF1", "CF_", "F"] },
+          ],
         },
         {
           id: "sn3-p10-6", number: "Partitions of 10",
           prompt: "Show 6 beads. \"How many more to make 10?\" (Answer: 4)",
           displayText: "6 + ?",
           targetLevel: 2,
-          responseFields: [RESP, KCF],
+          responseFields: [
+            RESP,
+            { label: "Student said", type: "text_input", placeholder: "#" },
+            { label: "Strategy", type: "strategy", options: ["K", "CF1", "CF_", "F"] },
+          ],
         },
         {
           id: "sn3-p10-3", number: "Partitions of 10",
           prompt: "Show 3 beads. \"How many more to make 10?\" (Answer: 7)",
           displayText: "3 + ?",
           targetLevel: 2,
-          responseFields: [RESP, KCF],
+          responseFields: [
+            RESP,
+            { label: "Student said", type: "text_input", placeholder: "#" },
+            { label: "Strategy", type: "strategy", options: ["K", "CF1", "CF_", "F"] },
+          ],
         },
         {
           id: "sn3-p10-4", number: "Partitions of 10",
           prompt: "Show 4 beads. \"How many more to make 10?\" (Answer: 6)",
           displayText: "4 + ?",
           targetLevel: 2,
-          responseFields: [RESP, KCF],
+          responseFields: [
+            RESP,
+            { label: "Student said", type: "text_input", placeholder: "#" },
+            { label: "Strategy", type: "strategy", options: ["K", "CF1", "CF_", "F"] },
+          ],
         },
         // ── Combinations to 20: 8+8, 7+6, 10+4, 5+2 ────────────────────────
         // Record Top row, Bottom row, Altogether (CI), Strategy

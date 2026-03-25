@@ -142,6 +142,7 @@ function InterviewContent() {
   const [saveError, setSaveError]             = useState<string | null>(null);
   const [savedSessionId, setSavedSessionId] = useState<string | null>(null);
   const [isBorderline, setIsBorderline] = useState(false);
+  const [showEndConfirm, setShowEndConfirm] = useState(false);
 
   const groups       = schedule3E.taskGroups;
   const currentGroup = groups[currentGroupIdx];
@@ -225,6 +226,14 @@ function InterviewContent() {
       setValidationError(`Please answer all ${missing.length} required item${missing.length > 1 ? "s" : ""} before submitting.`);
       return;
     }
+    setValidationError(null);
+    handleFinish();
+  }
+
+  function handleEndEarly() {
+    // Score immediately — blank/unanswered items already evaluate as incorrect
+    // in calculateResults() since resp(id) checks for === "correct".
+    // No validation needed; teacher is intentionally stopping early.
     setValidationError(null);
     handleFinish();
   }
@@ -460,12 +469,41 @@ function InterviewContent() {
           {validationError && <div className="px-4 py-2 bg-red-50 border-t border-red-200"><p className="text-xs text-red-600 font-medium">⚠ {validationError}</p></div>}
           {saveError && <div className="px-4 py-2 bg-red-50 border-t border-red-200"><p className="text-xs text-red-600 font-medium">⚠ {saveError}</p></div>}
 
+          {/* End Assessment Early — confirmation */}
+          {showEndConfirm && (
+            <div className="border-t border-orange-200 bg-orange-50 px-4 py-3 flex flex-col gap-2">
+              <p className="text-xs font-semibold text-orange-800">
+                End assessment now? All unanswered items will be scored as incorrect.
+              </p>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleEndEarly}
+                  disabled={saving}
+                  className="flex-1 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white text-xs font-semibold rounded-lg py-2"
+                >
+                  {saving ? "Saving…" : "Yes — Score & End Now"}
+                </button>
+                <button
+                  onClick={() => setShowEndConfirm(false)}
+                  className="flex-1 border border-orange-300 text-orange-700 text-xs font-medium rounded-lg py-2 hover:bg-orange-100"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
+
           <div className="border-t border-gray-200 bg-white px-4 py-3 flex justify-between items-center">
             <button onClick={() => { setValidationError(null); setCurrentGroupIdx((i) => Math.max(0, i - 1)); }}
               disabled={isFirst} className="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-40">
               ← Previous
             </button>
-            <div className="text-xs text-gray-400">Tap dots above to jump</div>
+            <button
+              onClick={() => setShowEndConfirm((v) => !v)}
+              className="text-xs text-red-400 hover:text-red-600 underline underline-offset-2"
+            >
+              End Early
+            </button>
             {isLast ? (
               <button onClick={handleTryFinish} disabled={saving}
                 className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium disabled:bg-emerald-400">

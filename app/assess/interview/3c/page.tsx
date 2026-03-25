@@ -4,6 +4,7 @@ import { useEffect, useState, Suspense } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter, useSearchParams } from "next/navigation";
 import { schedule3C, TaskGroup, AssessmentItem } from "@/lib/assessments/schedule-3c";
+import InlineCorrectIncorrect from "@/components/InlineCorrectIncorrect";
 
 interface Student {
   id: string;
@@ -114,6 +115,7 @@ function InterviewContent() {
   const [done, setDone] = useState(false);
   const [results, setResults] = useState<ReturnType<typeof calculateResults> | null>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const groups = schedule3C.taskGroups;
   const currentGroup = groups[currentGroupIdx];
@@ -142,7 +144,11 @@ function InterviewContent() {
   // Returns items required but unanswered
   function getRequiredButUnanswered(group: TaskGroup): AssessmentItem[] {
     return group.items.filter((item) =>
-      item.responseFields.some((f) => f.type === "correct_incorrect" && !responses[item.id]?.[f.label])
+      item.responseFields.some(
+          (f) =>
+            (f.type === "correct_incorrect" || f.type === "fluency_scale") &&
+            !responses[item.id]?.[f.label]
+        )
     );
   }
 
@@ -187,9 +193,10 @@ function InterviewContent() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { setSaving(false); return; }
 
-    const today = new Date().toISOString().split("T")[0];
+    try {
+      const today = new Date().toISOString().split("T")[0];
 
-    const { data: sessionData } = await supabase
+      const { data: sessionData } = await supabase
       .from("assessment_sessions")
       .insert({
         student_id: student.id,
@@ -202,7 +209,7 @@ function InterviewContent() {
       .select("id")
       .single();
 
-    if (sessionData?.id) {
+      if (sessionData?.id) {
       await supabase.from("construct_placements").insert({
         session_id: sessionData.id,
         student_id: student.id,
@@ -211,10 +218,15 @@ function InterviewContent() {
         suggested_level: calc.cpvLevel,
         confirmed_level: calc.cpvLevel,
       });
-    }
+      }
 
-    setSaving(false);
-    setDone(true);
+      setDone(true);
+    } catch (err) {
+      console.error("Failed to save assessment:", err);
+      setSaveError("Failed to save. Please try again.");
+    } finally {
+      setSaving(false);
+    }
   }
 
   // ── Results screen ────────────────────────────────────────────────────────────
@@ -404,6 +416,12 @@ function InterviewContent() {
           {validationError && (
             <div className="px-4 py-2 bg-red-50 border-t border-red-200">
               <p className="text-xs text-red-600 font-medium">⚠ {validationError}</p>
+            </div>
+          )}
+
+          {saveError && (
+            <div className="px-4 py-2 bg-red-50 border-t border-red-200">
+              <p className="text-xs text-red-600 font-medium">⚠ {saveError}</p>
             </div>
           )}
 
@@ -602,31 +620,6 @@ function ItemRow({
 
 // ── Inline correct/incorrect ───────────────────────────────────────────────────
 
-function InlineCorrectIncorrect({
-  value, onChange,
-}: {
-  value: string;
-  onChange: (v: string) => void;
-}) {
-  return (
-    <div className="flex gap-1">
-      {[
-        { v: "correct",   label: "✓", active: "bg-green-100 border-green-400 text-green-700" },
-        { v: "incorrect", label: "✗", active: "bg-red-100 border-red-400 text-red-700" },
-      ].map(({ v, label, active }) => (
-        <button
-          key={v}
-          onClick={() => onChange(value === v ? "" : v)}
-          className={`w-8 h-8 rounded-lg border-2 font-bold text-sm transition-colors ${
-            value === v ? active : "border-gray-200 text-gray-400 hover:border-gray-300"
-          }`}
-        >
-          {label}
-        </button>
-      ))}
-    </div>
-  );
-}
 
 // ── Fluency picker ────────────────────────────────────────────────────────────
 

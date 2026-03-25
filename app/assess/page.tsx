@@ -3,79 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Nav from "@/components/nav";
-
-const CATEGORIES = [
-  {
-    id: "lfin",
-    name: "LFIN",
-    fullName: "Learning Framework in Number",
-    color: "blue",
-    icon: "📐",
-    description: "Wright & Ellemor-Collins — Schedules 2A–3F",
-    assessments: [
-      { id: "schedule-2a", name: "Schedule 2A", description: "Forward/Backward Number Word Sequences & Numeral ID", gradeRange: "K–1", models: ["FNWS", "BNWS", "NID"], available: true },
-      { id: "schedule-2b", name: "Schedule 2B", description: "Spatial Patterns, Finger Patterns & Structuring to 20", gradeRange: "K–2", models: ["SN20"], available: true },
-      { id: "schedule-2c", name: "Schedule 2C", description: "Early Arithmetical Strategies — Addition & Subtraction", gradeRange: "K–2", models: ["SEAL"], available: true },
-      { id: "schedule-3a", name: "Schedule 3A", description: "Number Words and Numerals — NID, FNWS & BNWS", gradeRange: "K–3", models: ["NID", "FNWS", "BNWS"], available: true },
-      { id: "schedule-3b", name: "Schedule 3B", description: "Structuring Numbers to 20 — SN20", gradeRange: "K–3", models: ["SN20"], available: true },
-      { id: "schedule-3c", name: "Schedule 3C", description: "Conceptual Place Value — Incrementing & Decrementing by 10s and 100s", gradeRange: "1–3", models: ["CPV"], available: true },
-      { id: "schedule-3d", name: "Schedule 3D", description: "Addition & Subtraction to 100 — Formal & Higher Decade", gradeRange: "2–5", models: ["A&S"], available: true },
-      { id: "schedule-3e", name: "Schedule 3E", description: "Decimals & Percentages — Tenths, Hundredths & Equivalence", gradeRange: "4–5", models: ["DEC"], available: false },
-      { id: "schedule-3f", name: "Schedule 3F", description: "Multiplication & Division Facts — Strategies & Automaticity", gradeRange: "3–5", models: ["MDF"], available: false },
-    ],
-  },
-  {
-    id: "addvantage",
-    name: "AddVantage MR",
-    fullName: "AddVantage Math Recovery",
-    color: "green",
-    icon: "➕",
-    description: "US Math Recovery Council — Courses 1 & 2",
-    assessments: [
-      { id: "av-nwn", name: "Number Words and Numerals", description: "Course 1 — FNWS, BNWS & Numeral Identification — Levels 0–5", gradeRange: "K–3", models: ["FNWS", "BNWS", "NID"], available: true, route: "/assess/interview/av-nwn" },
-      { id: "av-sn", name: "Structuring Numbers", description: "Course 1 — Spatial patterns, finger patterns, partitions of 5 & 10, doubles to 20 — Levels 0–5", gradeRange: "K–3", models: ["SN"], available: true, route: "/assess/interview/av-sn" },
-      { id: "av-as", name: "Addition & Subtraction", description: "Course 1 — Screened collections, missing addend, bare numbers, relational thinking — Levels 0–5", gradeRange: "K–3", models: ["CAS"], available: true, route: "/assess/interview/av-as" },
-      { id: "av-pv", name: "Place Value", description: "Course 2 — Tens & ones sequences, two-digit addition/subtraction with & without materials", gradeRange: "2–4", models: ["CPV"], available: true },
-      { id: "av-multdiv", name: "Multiplication & Division", description: "Course 2 — Equal groups, arrays, relational thinking, proportional reasoning", gradeRange: "2–5", models: ["M&D"], available: false },
-    ],
-  },
-  {
-    id: "nns",
-    name: "Number Screeners",
-    fullName: "Number Sense Screeners",
-    color: "orange",
-    icon: "🎯",
-    description: "Quick screeners for tier placement & progress monitoring",
-    assessments: [
-      { id: "nss-k", name: "Number Sense Screener — K", description: "Counting, subitizing, number order & simple addition (Jordan et al.)", gradeRange: "K", models: [], available: false },
-      { id: "nss-1", name: "Number Sense Screener — 1", description: "Number word sequences, numeral ID, counting on, fact fluency", gradeRange: "1", models: [], available: false },
-      { id: "ns-brief", name: "Brief Number Sense Check", description: "Quick 10-item screener — counting, magnitude, operations", gradeRange: "K–3", models: [], available: false },
-      { id: "tema3", name: "TEMA-3 Informal Tasks", description: "Test of Early Mathematics Ability — informal diagnostic subset", gradeRange: "K–2", models: [], available: false },
-    ],
-  },
-  {
-    id: "bridges",
-    name: "Bridges / CCSS",
-    fullName: "Bridges in Mathematics & Common Core Checks",
-    color: "teal",
-    icon: "🌉",
-    description: "Bridges curriculum assessments & CCSS unit checks",
-    assessments: [
-      { id: "br-unit-check", name: "Unit Pre/Post Checks", description: "Beginning and end-of-unit checks aligned to Bridges units", gradeRange: "K–5", models: [], available: false },
-      { id: "br-checkups", name: "Checkups 1–5", description: "Mid-module progress checkups embedded in Bridges curriculum", gradeRange: "K–5", models: [], available: false },
-      { id: "br-cumulative", name: "Cumulative Review", description: "End-of-year cumulative assessment across all domains", gradeRange: "K–5", models: [], available: false },
-    ],
-  },
-  {
-    id: "teacher",
-    name: "Teacher Created",
-    fullName: "My Custom Assessments",
-    color: "purple",
-    icon: "📝",
-    description: "Upload a PDF — auto-converted to a digital form",
-    assessments: [],
-  },
-];
+import { ASSESSMENT_CATALOG } from "@/lib/assessments/catalog";
 
 const COLOR_HEADER: Record<string, string> = {
   blue:   "bg-blue-600",
@@ -120,7 +48,7 @@ export default function AssessCatalogPage() {
         </div>
 
         <div className="space-y-3">
-          {CATEGORIES.map((cat) => {
+          {ASSESSMENT_CATALOG.map((cat) => {
             const isOpen = expanded === cat.id;
             const availableCount = cat.assessments.filter((a) => a.available).length;
 

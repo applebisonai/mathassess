@@ -4,6 +4,8 @@ import { useEffect, useState, Suspense } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter, useSearchParams } from "next/navigation";
 import Nav from "@/components/nav";
+import { ASSESSMENT_CATALOG } from "@/lib/assessments/catalog";
+import { gradeLabel } from "@/lib/utils";
 
 interface Student {
   id: string;
@@ -12,252 +14,20 @@ interface Student {
   grade_level: number;
 }
 
-const GRADE_LABEL = (g: number) => (g === 0 ? "K" : `${g}`);
-
-// Assessment library organized by category
-const CATEGORIES = [
-  {
-    id: "lfin",
-    name: "LFIN",
-    fullName: "Learning Framework in Number",
-    color: "blue",
-    icon: "📐",
-    description: "Wright & Ellemor-Collins — Schedules 2A–3F",
-    assessments: [
-      {
-        id: "schedule-2a",
-        name: "Schedule 2A",
-        description: "Forward/Backward Number Word Sequences & Numeral ID",
-        gradeRange: "K–1",
-        models: ["FNWS", "BNWS", "NID"],
-        route: "/assess/interview/2a",
-        available: true,
-      },
-      {
-        id: "schedule-2b",
-        name: "Schedule 2B",
-        description: "Spatial Patterns, Finger Patterns & Structuring to 20",
-        gradeRange: "K–2",
-        models: ["SN20"],
-        route: "/assess/interview/2b",
-        available: true,
-      },
-      {
-        id: "schedule-2c",
-        name: "Schedule 2C",
-        description: "Early Arithmetical Strategies — Addition & Subtraction",
-        gradeRange: "K–2",
-        models: ["SEAL"],
-        route: "/assess/interview/2c",
-        available: true,
-      },
-      {
-        id: "schedule-3a",
-        name: "Schedule 3A",
-        description: "Number Words and Numerals — NID, FNWS & BNWS",
-        gradeRange: "K–3",
-        models: ["NID", "FNWS", "BNWS"],
-        route: "/assess/interview/3a",
-        available: true,
-      },
-      {
-        id: "schedule-3b",
-        name: "Schedule 3B",
-        description: "Structuring Numbers to 20 — Spatial Patterns, Partitions & Formal Operations",
-        gradeRange: "K–3",
-        models: ["SN20"],
-        route: "/assess/interview/3b",
-        available: true,
-        materials: ["Task Cards", "Addition and Subtraction Cards"],
-      },
-      {
-        id: "schedule-3c",
-        name: "Schedule 3C",
-        description: "Conceptual Place Value — Incrementing & Decrementing by 10s and 100s",
-        gradeRange: "1–3",
-        models: ["CPV"],
-        route: "/assess/interview/3c",
-        available: true,
-        materials: ["Task Cards", "15 × 10-stick bundles", "13 × 100-dot squares", "Cover"],
-      },
-      {
-        id: "schedule-3d",
-        name: "Schedule 3D",
-        description: "Addition & Subtraction to 100 — Formal & Higher Decade",
-        gradeRange: "2–5",
-        models: ["A&S"],
-        route: "/assess/interview/3d",
-        available: true,
-        materials: ["10 Task Cards", "10 Numeral Cards", "Decuple Line"],
-      },
-      {
-        id: "schedule-3e",
-        name: "Schedule 3E",
-        description: "Decimals & Percentages — Tenths, Hundredths & Equivalence",
-        gradeRange: "4–5",
-        models: ["DEC"],
-        route: "",
-        available: false,
-      },
-      {
-        id: "schedule-3f",
-        name: "Schedule 3F",
-        description: "Multiplication & Division Facts — Strategies & Automaticity",
-        gradeRange: "3–5",
-        models: ["MDF"],
-        route: "",
-        available: false,
-      },
-    ],
-  },
-  {
-    id: "addvantage",
-    name: "AddVantage MR",
-    fullName: "AddVantage Math Recovery",
-    color: "green",
-    icon: "➕",
-    description: "US Math Recovery Council — Courses 1 & 2",
-    assessments: [
-      {
-        id: "av-nwn",
-        name: "Add+VantageMR: Number Words and Numerals",
-        gradeRange: "K–3",
-        description: "FNWS, BNWS & Numeral ID",
-        models: ["FNWS", "BNWS", "NID"],
-        route: "/assess/interview/av-nwn",
-        available: true,
-      },
-      {
-        id: "av-sn",
-        name: "Add+VantageMR: Structuring Numbers",
-        gradeRange: "K–3",
-        description: "Spatial patterns, finger patterns, partitions of 5 & 10, doubles",
-        models: ["SN"],
-        route: "/assess/interview/av-sn",
-        available: true,
-      },
-      {
-        id: "av-as",
-        name: "Add+VantageMR: Addition & Subtraction",
-        description: "Screened collections, missing addend, bare numbers, relational thinking",
-        gradeRange: "K–3",
-        models: ["CAS"],
-        route: "/assess/interview/av-as",
-        available: true,
-      },
-      {
-        id: "av-pv",
-        name: "Place Value",
-        description: "Course 2 — Tens & ones sequences, two-digit addition/subtraction with & without materials",
-        gradeRange: "2–4",
-        models: ["CPV"],
-        route: "/assess/interview/av-pv",
-        available: true,
-      },
-      {
-        id: "av-multdiv",
-        name: "Multiplication & Division",
-        description: "Course 2 — Equal groups, arrays, relational thinking, proportional reasoning",
-        gradeRange: "2–5",
-        models: ["M&D"],
-        route: "",
-        available: false,
-      },
-    ],
-  },
-  {
-    id: "nns",
-    name: "Number Screeners",
-    fullName: "Number Sense Screeners",
-    color: "orange",
-    icon: "🎯",
-    description: "Quick screeners for tier placement & progress monitoring",
-    assessments: [
-      {
-        id: "nss-k",
-        name: "Number Sense Screener — K",
-        description: "Counting, subitizing, number order & simple addition (Jordan et al.)",
-        gradeRange: "K",
-        models: [],
-        route: "",
-        available: false,
-      },
-      {
-        id: "nss-1",
-        name: "Number Sense Screener — 1",
-        description: "Number word sequences, numeral ID, counting on, fact fluency",
-        gradeRange: "1",
-        models: [],
-        route: "",
-        available: false,
-      },
-      {
-        id: "ns-brief",
-        name: "Brief Number Sense Check",
-        description: "Quick 10-item screener — counting, magnitude, operations",
-        gradeRange: "K–3",
-        models: [],
-        route: "",
-        available: false,
-      },
-      {
-        id: "tema3",
-        name: "TEMA-3 Informal Tasks",
-        description: "Test of Early Mathematics Ability — informal diagnostic subset",
-        gradeRange: "K–2",
-        models: [],
-        route: "",
-        available: false,
-      },
-    ],
-  },
-  {
-    id: "bridges",
-    name: "Bridges / CCSS",
-    fullName: "Bridges in Mathematics & Common Core Checks",
-    color: "teal",
-    icon: "🌉",
-    description: "Bridges curriculum assessments & CCSS unit checks",
-    assessments: [
-      {
-        id: "br-unit-check",
-        name: "Unit Pre/Post Checks",
-        description: "Beginning and end-of-unit checks aligned to Bridges units",
-        gradeRange: "K–5",
-        models: [],
-        route: "",
-        available: false,
-      },
-      {
-        id: "br-checkups",
-        name: "Checkups 1–5",
-        description: "Mid-module progress checkups embedded in Bridges curriculum",
-        gradeRange: "K–5",
-        models: [],
-        route: "",
-        available: false,
-      },
-      {
-        id: "br-cumulative",
-        name: "Cumulative Review",
-        description: "End-of-year cumulative assessment across all domains",
-        gradeRange: "K–5",
-        models: [],
-        route: "",
-        available: false,
-      },
-    ],
-  },
-  {
-    id: "teacher",
-    name: "Teacher Created",
-    fullName: "My Custom Assessments",
-    color: "purple",
-    icon: "📝",
-    description: "Upload a PDF — auto-converted to a digital form",
-    assessments: [],
-  },
-];
+const COLOR_SELECTED: Record<string, string> = {
+  blue:   "border-blue-500 bg-blue-50",
+  green:  "border-green-500 bg-green-50",
+  purple: "border-purple-500 bg-purple-50",
+  orange: "border-orange-500 bg-orange-50",
+  teal:   "border-teal-500 bg-teal-50",
+};
+const COLOR_BADGE: Record<string, string> = {
+  blue:   "bg-blue-100 text-blue-700",
+  green:  "bg-green-100 text-green-700",
+  purple: "bg-purple-100 text-purple-700",
+  orange: "bg-orange-100 text-orange-700",
+  teal:   "bg-teal-100 text-teal-700",
+};
 
 function SelectContent() {
   const [students, setStudents] = useState<Student[]>([]);
@@ -285,33 +55,17 @@ function SelectContent() {
       setLoading(false);
     }
     loadStudents();
-  }, [preSelectedStudent]);
+  }, [preSelectedStudent]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const category = CATEGORIES.find((c) => c.id === selectedCategory);
+  const category = ASSESSMENT_CATALOG.find((c) => c.id === selectedCategory);
   const assessment = category?.assessments.find((a) => a.id === selectedAssessmentId);
   const student = students.find((s) => s.id === selectedStudent);
+  const canStart = selectedStudent && assessment?.available;
 
   function handleStart() {
     if (!selectedStudent || !assessment?.route) return;
     router.push(`${assessment.route}?student=${selectedStudent}`);
   }
-
-  const COLOR_BORDER: Record<string, string> = {
-    blue: "border-blue-500 bg-blue-50",
-    green: "border-green-500 bg-green-50",
-    purple: "border-purple-500 bg-purple-50",
-    orange: "border-orange-500 bg-orange-50",
-    teal: "border-teal-500 bg-teal-50",
-  };
-  const COLOR_BADGE: Record<string, string> = {
-    blue: "bg-blue-100 text-blue-700",
-    green: "bg-green-100 text-green-700",
-    purple: "bg-purple-100 text-purple-700",
-    orange: "bg-orange-100 text-orange-700",
-    teal: "bg-teal-100 text-teal-700",
-  };
-
-  const canStart = selectedStudent && assessment?.available;
 
   return (
     <div className="min-h-screen bg-slate-200">
@@ -346,7 +100,7 @@ function SelectContent() {
                     }`}
                   >
                     <div className="font-medium">{s.first_name} {s.last_name}</div>
-                    <div className="text-xs text-gray-400 mt-0.5">Grade {GRADE_LABEL(s.grade_level)}</div>
+                    <div className="text-xs text-gray-400 mt-0.5">Grade {gradeLabel(s.grade_level)}</div>
                   </button>
                 ))}
               </div>
@@ -357,13 +111,13 @@ function SelectContent() {
           <div className="bg-white rounded-xl border border-gray-200 p-5">
             <h2 className="font-semibold text-gray-800 mb-3">Step 2: Choose Assessment Category</h2>
             <div className="grid grid-cols-3 gap-3">
-              {CATEGORIES.map((cat) => (
+              {ASSESSMENT_CATALOG.map((cat) => (
                 <button
                   key={cat.id}
                   onClick={() => { setSelectedCategory(cat.id); setSelectedAssessmentId(""); }}
                   className={`p-4 rounded-xl border-2 text-left transition-colors ${
                     selectedCategory === cat.id
-                      ? COLOR_BORDER[cat.color]
+                      ? COLOR_SELECTED[cat.color]
                       : "border-gray-200 hover:border-gray-300 bg-white"
                   }`}
                 >
@@ -375,7 +129,7 @@ function SelectContent() {
             </div>
           </div>
 
-          {/* STEP 3: Specific Assessment (only shown after category picked) */}
+          {/* STEP 3: Specific Assessment */}
           {category && (
             <div className="bg-white rounded-xl border border-gray-200 p-5">
               <h2 className="font-semibold text-gray-800 mb-3">
@@ -399,7 +153,7 @@ function SelectContent() {
                         !a.available
                           ? "border-gray-100 bg-gray-50 opacity-50 cursor-not-allowed"
                           : selectedAssessmentId === a.id
-                          ? `border-2 ${COLOR_BORDER[category.color]}`
+                          ? `border-2 ${COLOR_SELECTED[category.color]}`
                           : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
                       }`}
                     >
@@ -434,47 +188,9 @@ function SelectContent() {
               <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4">
                 <div className="text-sm font-medium text-amber-800 mb-1">📦 You will need:</div>
                 <ul className="text-sm text-amber-700 space-y-0.5">
-                  {selectedAssessmentId === "schedule-2b" ? (
-                    <>
-                      <li>• Dice pattern cards</li>
-                      <li>• Paper and pen</li>
-                    </>
-                  ) : selectedAssessmentId === "schedule-2c" ? (
-                    <>
-                      <li>• Task cards (number sentences for TG6)</li>
-                      <li>• Counters — two colours (~30 of each)</li>
-                      <li>• Two screens (small boards or folders)</li>
-                    </>
-                  ) : selectedAssessmentId === "av-as" ? (
-                    <>
-                      <li>• Counters (~20)</li>
-                      <li>• Two screens (small boards or folders)</li>
-                      <li>• Task cards (bare number problems)</li>
-                    </>
-                  ) : selectedAssessmentId === "av-pv" ? (
-                    <>
-                      <li>• 7 bundles of 10 sticks</li>
-                      <li>• 15+ loose sticks</li>
-                      <li>• Numeral task cards (63+21, 38+24, 57−34, 43−15, 257+30, 342+120, 672+151, 304−198)</li>
-                      <li>• Cover / screen</li>
-                    </>
-                  ) : selectedAssessmentId === "schedule-3a" ? (
-                    <>
-                      <li>• Numeral task cards (two-digit, three-digit, four-digit, five-digit)</li>
-                      <li>• Paper and marker pen for student (writing numerals task)</li>
-                    </>
-                  ) : assessment.materials?.length ? (
-                    <>
-                      {assessment.materials.map((m: string) => (
-                        <li key={m}>• {m}</li>
-                      ))}
-                    </>
-                  ) : (
-                    <>
-                      <li>• Numeral cards (0–100)</li>
-                      <li>• Paper and pen for the student</li>
-                    </>
-                  )}
+                  {(assessment.materials ?? ["Numeral cards (0–100)", "Paper and pen for the student"]).map((m) => (
+                    <li key={m}>• {m}</li>
+                  ))}
                 </ul>
               </div>
               <button

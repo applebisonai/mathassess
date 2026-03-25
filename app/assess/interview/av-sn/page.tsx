@@ -4,6 +4,7 @@ import { useEffect, useState, Suspense } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter, useSearchParams } from "next/navigation";
 import { scheduleAvSN, TaskGroup, AssessmentItem, ResponseField } from "@/lib/assessments/schedule-av-sn";
+import InlineCorrectIncorrect from "@/components/InlineCorrectIncorrect";
 
 interface Student {
   id: string;
@@ -123,6 +124,7 @@ function InterviewContent() {
   const [done, setDone]               = useState(false);
   const [results, setResults]         = useState<ReturnType<typeof calculateResults> | null>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const groups       = scheduleAvSN.taskGroups;
   const currentGroup = groups[currentGroupIdx];
@@ -220,9 +222,10 @@ function InterviewContent() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { setSaving(false); return; }
 
-    const today = new Date().toISOString().split("T")[0];
+    try {
+      const today = new Date().toISOString().split("T")[0];
 
-    const { data: sessionData } = await supabase
+      const { data: sessionData } = await supabase
       .from("assessment_sessions")
       .insert({
         student_id: student.id,
@@ -235,7 +238,7 @@ function InterviewContent() {
       .select("id")
       .single();
 
-    if (sessionData?.id) {
+      if (sessionData?.id) {
       await supabase.from("construct_placements").insert([{
         session_id:      sessionData.id,
         student_id:      student.id,
@@ -244,10 +247,15 @@ function InterviewContent() {
         confirmed_level: calc.snLevel,
         date_placed:     today,
       }]);
-    }
+      }
 
-    setSaving(false);
-    setDone(true);
+      setDone(true);
+    } catch (err) {
+      console.error("Failed to save assessment:", err);
+      setSaveError("Failed to save. Please try again.");
+    } finally {
+      setSaving(false);
+    }
   }
 
   // ── Results screen ────────────────────────────────────────────────────────
@@ -458,6 +466,12 @@ function InterviewContent() {
           {validationError && (
             <div className="px-4 py-2 bg-red-50 border-t border-red-200">
               <p className="text-xs text-red-600 font-medium">⚠ {validationError}</p>
+            </div>
+          )}
+
+          {saveError && (
+            <div className="px-4 py-2 bg-red-50 border-t border-red-200">
+              <p className="text-xs text-red-600 font-medium">⚠ {saveError}</p>
             </div>
           )}
 
@@ -762,30 +776,6 @@ function FieldRenderer({
   return null;
 }
 
-// ── InlineCorrectIncorrect ────────────────────────────────────────────────────
-
-function InlineCorrectIncorrect({ value, onChange }: { value: string; onChange: (v: string) => void }) {
-  return (
-    <div className="flex gap-1">
-      <button
-        onClick={() => onChange(value === "correct" ? "" : "correct")}
-        className={`w-7 h-7 rounded text-sm font-bold border transition-all ${
-          value === "correct"
-            ? "bg-green-500 border-green-600 text-white"
-            : "bg-white border-gray-300 text-gray-400 hover:border-green-400"
-        }`}
-      >✓</button>
-      <button
-        onClick={() => onChange(value === "incorrect" ? "" : "incorrect")}
-        className={`w-7 h-7 rounded text-sm font-bold border transition-all ${
-          value === "incorrect"
-            ? "bg-red-500 border-red-600 text-white"
-            : "bg-white border-gray-300 text-gray-400 hover:border-red-400"
-        }`}
-      >✗</button>
-    </div>
-  );
-}
 
 // ── StrategySelector ──────────────────────────────────────────────────────────
 

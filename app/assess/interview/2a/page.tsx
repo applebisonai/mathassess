@@ -4,6 +4,7 @@ import { useEffect, useState, Suspense } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter, useSearchParams } from "next/navigation";
 import { schedule2A, TaskGroup, AssessmentItem } from "@/lib/assessments/schedule-2a";
+import InlineCorrectIncorrect from "@/components/InlineCorrectIncorrect";
 
 interface Student {
   id: string;
@@ -126,6 +127,7 @@ function InterviewContent() {
   const [done, setDone] = useState(false);
   const [results, setResults] = useState<ReturnType<typeof calculateResults> | null>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const groups = schedule2A.taskGroups;
   const currentGroup = groups[currentGroupIdx];
@@ -228,54 +230,63 @@ function InterviewContent() {
     setResults(calc);
 
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    if (!user) { setSaving(false); return; }
 
-    const today = new Date().toISOString().split("T")[0];
+    try {
+      const today = new Date().toISOString().split("T")[0];
 
-    const { data: sessionData } = await supabase
-      .from("assessment_sessions")
-      .insert({
-        student_id: student.id,
-        teacher_id: user.id,
-        assessment_id: "schedule-2a",
-        date_administered: today,
-        status: "completed",
-        raw_responses: responses,
-      })
-      .select("id")
-      .single();
+      const { data: sessionData, error: sessionError } = await supabase
+        .from("assessment_sessions")
+        .insert({
+          student_id: student.id,
+          teacher_id: user.id,
+          assessment_id: "schedule-2a",
+          date_administered: today,
+          status: "completed",
+          raw_responses: responses,
+        })
+        .select("id")
+        .single();
 
-    if (sessionData?.id) {
-      await supabase.from("construct_placements").insert([
-        {
-          session_id: sessionData.id,
-          student_id: student.id,
-          model_name: "FNWS",
-          suggested_level: calc.fnwsLevel,
-          confirmed_level: calc.fnwsLevel,
-          date_placed: today,
-        },
-        {
-          session_id: sessionData.id,
-          student_id: student.id,
-          model_name: "BNWS",
-          suggested_level: calc.bnwsLevel,
-          confirmed_level: calc.bnwsLevel,
-          date_placed: today,
-        },
-        {
-          session_id: sessionData.id,
-          student_id: student.id,
-          model_name: "NID",
-          suggested_level: calc.nidLevel,
-          confirmed_level: calc.nidLevel,
-          date_placed: today,
-        },
-      ]);
+      if (sessionError) throw sessionError;
+
+      if (sessionData?.id) {
+        const { error: placementError } = await supabase.from("construct_placements").insert([
+          {
+            session_id: sessionData.id,
+            student_id: student.id,
+            model_name: "FNWS",
+            suggested_level: calc.fnwsLevel,
+            confirmed_level: calc.fnwsLevel,
+            date_placed: today,
+          },
+          {
+            session_id: sessionData.id,
+            student_id: student.id,
+            model_name: "BNWS",
+            suggested_level: calc.bnwsLevel,
+            confirmed_level: calc.bnwsLevel,
+            date_placed: today,
+          },
+          {
+            session_id: sessionData.id,
+            student_id: student.id,
+            model_name: "NID",
+            suggested_level: calc.nidLevel,
+            confirmed_level: calc.nidLevel,
+            date_placed: today,
+          },
+        ]);
+        if (placementError) throw placementError;
+      }
+
+      setDone(true);
+    } catch (err) {
+      console.error("Failed to save assessment:", err);
+      setSaveError("Failed to save. Please try again.");
+    } finally {
+      setSaving(false);
     }
-
-    setSaving(false);
-    setDone(true);
   }
 
   // --- DONE / RESULTS SCREEN ---
@@ -464,6 +475,12 @@ function InterviewContent() {
           {validationError && (
             <div className="px-4 py-2 bg-red-50 border-t border-red-200">
               <p className="text-xs text-red-600 font-medium">⚠ {validationError}</p>
+            </div>
+          )}
+
+          {saveError && (
+            <div className="px-4 py-2 bg-red-50 border-t border-red-200">
+              <p className="text-xs text-red-600 font-medium">⚠ {saveError}</p>
             </div>
           )}
 
@@ -712,32 +729,6 @@ function ClickableNumberGrid({
 }
 
 // --- Inline ✓ / ✗ buttons ---
-function InlineCorrectIncorrect({ value, onChange }: { value: string; onChange: (v: string) => void }) {
-  return (
-    <div className="flex gap-1">
-      <button
-        onClick={() => onChange(value === "correct" ? "" : "correct")}
-        className={`px-2.5 py-1 rounded text-xs font-semibold border transition-colors ${
-          value === "correct"
-            ? "bg-green-100 border-green-400 text-green-700"
-            : "bg-white border-gray-200 text-gray-400 hover:border-green-300"
-        }`}
-      >
-        ✓
-      </button>
-      <button
-        onClick={() => onChange(value === "incorrect" ? "" : "incorrect")}
-        className={`px-2.5 py-1 rounded text-xs font-semibold border transition-colors ${
-          value === "incorrect"
-            ? "bg-red-100 border-red-400 text-red-700"
-            : "bg-white border-gray-200 text-gray-400 hover:border-red-300"
-        }`}
-      >
-        ✗
-      </button>
-    </div>
-  );
-}
 
 // --- Inline Fluency buttons ---
 function InlineFluency({ value, onChange }: { value: string; onChange: (v: string) => void }) {

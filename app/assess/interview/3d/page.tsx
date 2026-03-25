@@ -111,6 +111,7 @@ function InterviewContent() {
   const [done, setDone] = useState(false);
   const [results, setResults] = useState<ReturnType<typeof calculateResults> | null>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const groups = schedule3D.taskGroups;
   const currentGroup = groups[currentGroupIdx];
@@ -147,7 +148,11 @@ function InterviewContent() {
 
   function getRequiredButUnanswered(group: typeof currentGroup): AssessmentItem[] {
     return group.items.filter((item) =>
-      item.responseFields.some((f) => f.type === "correct_incorrect" && !responses[item.id]?.[f.label])
+      item.responseFields.some(
+          (f) =>
+            (f.type === "correct_incorrect" || (f.type as string) === "fluency_scale") &&
+            !responses[item.id]?.[f.label]
+        )
     );
   }
 
@@ -162,33 +167,45 @@ function InterviewContent() {
     const calc = calculateResults(responses);
     setResults(calc);
 
-    const today = new Date().toISOString().split("T")[0];
-    const { data: session } = await supabase
-      .from("assessment_sessions")
-      .insert({
-        student_id: studentId,
-        teacher_id: (await supabase.auth.getUser()).data.user?.id,
-        assessment_id: "schedule-3d",
-        date_administered: today,
-        status: "completed",
-        raw_responses: responses,
-      })
-      .select("id")
-      .single();
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { setSaving(false); return; }
 
-    if (session) {
-      await supabase.from("construct_placements").insert({
-        session_id: session.id,
-        student_id: studentId,
-        date_placed: today,
-        model_name: "A&S",
-        suggested_level: calc.asLevel,
-        confirmed_level: calc.asLevel,
-      });
+      const today = new Date().toISOString().split("T")[0];
+      const { data: session, error: sessionError } = await supabase
+        .from("assessment_sessions")
+        .insert({
+          student_id: studentId,
+          teacher_id: user.id,
+          assessment_id: "schedule-3d",
+          date_administered: today,
+          status: "completed",
+          raw_responses: responses,
+        })
+        .select("id")
+        .single();
+
+      if (sessionError) throw sessionError;
+
+      if (session) {
+        const { error: placementError } = await supabase.from("construct_placements").insert({
+          session_id: session.id,
+          student_id: studentId,
+          date_placed: today,
+          model_name: "A&S",
+          suggested_level: calc.asLevel,
+          confirmed_level: calc.asLevel,
+        });
+        if (placementError) throw placementError;
+      }
+
+      setDone(true);
+    } catch (err) {
+      console.error("Failed to save assessment:", err);
+      setValidationError("Failed to save assessment. Please try again.");
+    } finally {
+      setSaving(false);
     }
-
-    setSaving(false);
-    setDone(true);
   }
 
   function handleTryNext() {
@@ -399,6 +416,12 @@ function InterviewContent() {
           {validationError && (
             <div className="px-4 py-2 bg-red-50 border-t border-red-200">
               <p className="text-xs text-red-600 font-medium">⚠ {validationError}</p>
+            </div>
+          )}
+
+          {saveError && (
+            <div className="px-4 py-2 bg-red-50 border-t border-red-200">
+              <p className="text-xs text-red-600 font-medium">⚠ {saveError}</p>
             </div>
           )}
 

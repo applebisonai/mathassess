@@ -599,6 +599,12 @@ export default async function StudentProfilePage({
             <div className="flex items-center gap-2">
               <PrintButton />
               <Link
+                href={`/students/${student.id}/edit`}
+                className="border border-gray-300 text-gray-600 hover:bg-gray-50 text-sm font-medium px-4 py-2 rounded-lg transition-colors print:hidden"
+              >
+                Edit
+              </Link>
+              <Link
                 href={`/assess/select?student=${student.id}`}
                 className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
               >

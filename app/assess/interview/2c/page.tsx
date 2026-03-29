@@ -99,6 +99,10 @@ function calculateResults(responses: Responses) {
   // Count total non-counting observations
   const allStrategies = [...tg1Strategies, tg2Strategy, ...tg3Strategies, ...tg5Strategies, ...tg6Strategies, tg7Strategy];
   const nonCountingTotal = allStrategies.filter((s) => s === "Non-counting" || s === "Known Fact").length;
+  // SEAL Level 5 = "Facile – Non-count-by-ones strategies"
+  // Requires non-counting evidence on at least one harder subtractive task (TG5/TG6/TG7)
+  // to prevent purely additive non-counting triggering Level 5 prematurely.
+  const subtractiveNonCounting = tg5NonCounting || tg6NonCounting || tg7NonCounting;
 
   // Level determination
   let sealLevel = 0;
@@ -107,7 +111,9 @@ function calculateResults(responses: Responses) {
   if (sealLevel >= 1 && (tg1HasFigurative || tg3Any)) sealLevel = Math.max(sealLevel, 2);
   if (tg2CountingOn && !isNotAttempted(responses, "2.1")) sealLevel = Math.max(sealLevel, 3);
   if (sealLevel >= 3 && ((tg5_1Correct && !isNotAttempted(responses, "5.1")) || (tg5_2Correct && !isNotAttempted(responses, "5.2"))) && tg5HasAdvanced) sealLevel = Math.max(sealLevel, 4);
-  if (nonCountingTotal >= 3 || (tg5NonCounting && tg6NonCounting) || (tg3NonCounting && tg5NonCounting)) sealLevel = Math.max(sealLevel, 5);
+  // Level 5: ≥3 non-counting across tasks AND at least one on a subtractive task,
+  // OR non-counting seen on two specific harder task combinations.
+  if ((nonCountingTotal >= 3 && subtractiveNonCounting) || (tg5NonCounting && tg6NonCounting) || (tg3NonCounting && tg5NonCounting)) sealLevel = Math.max(sealLevel, 5);
 
   return {
     sealLevel,

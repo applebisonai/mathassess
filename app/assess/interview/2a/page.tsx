@@ -75,9 +75,14 @@ function calculateResults(responses: Responses) {
   const nwa1130Score = calcScore(nwa1130, responses);
   const nwa31100Score = calcScore(nwa31100, responses);
 
+  // FNWS levels per LFIN model:
+  // Level 3 = Facile FNWS to 'ten'   → facile NWA 0–10 (≥4 correct)
+  // Level 4 = Facile FNWS to 'thirty' → facile NWA 11–30 (≥4 correct)
+  // Level 5 = Facile FNWS to '100'   → facile NWA 31–100 (≥4 correct)
+  // Default 1 = Initial FNWS (can produce some sequences; Level 2 = intermediate, not directly scored here)
   let fnwsLevel = 1;
-  if (nwa01Score && nwa01Score.correct >= 4) fnwsLevel = 2;
-  if (nwa1130Score && nwa1130Score.correct >= 4) fnwsLevel = 3;
+  if (nwa01Score && nwa01Score.correct >= 4) fnwsLevel = 3;
+  if (nwa1130Score && nwa1130Score.correct >= 4) fnwsLevel = 4;
   if (nwa31100Score && nwa31100Score.correct >= 4) fnwsLevel = 5;
 
   // NID level: based on TG3 (numeral ID)
@@ -106,8 +111,12 @@ function calculateResults(responses: Responses) {
   const nwb1130Score = calcScore(nwb1130, responses);
   const nwb31100Score = calcScore(nwb31100, responses);
 
+  // BNWS levels per LFIN model:
+  // Level 3 = Facile BNWS to 'ten'   → facile NWB 0–10 (≥4 correct)
+  // Level 4 = Facile BNWS to 'thirty' → facile NWB 11–30 (≥4 correct)
+  // Level 5 = Facile BNWS to '100'   → facile NWB 31–100 (≥4 correct)
   let bnwsLevel = 1;
-  if (nwb110Score && nwb110Score.correct >= 4) bnwsLevel = 2;
+  if (nwb110Score && nwb110Score.correct >= 4) bnwsLevel = 3;
   if (nwb1130Score && nwb1130Score.correct >= 4) bnwsLevel = 4;
   if (nwb31100Score && nwb31100Score.correct >= 4) bnwsLevel = 5;
 

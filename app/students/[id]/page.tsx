@@ -9,7 +9,7 @@ import SessionNotes from "./SessionNotes";
 import SessionResponsesView from "./SessionResponsesView";
 import type { SessionPlacement } from "./SessionResponsesView";
 import DeleteSessionButton from "./DeleteSessionButton";
-import PrintButton from "./PrintButton";
+import PrintButton from "@/components/PrintButton";
 import { schedule2A } from "@/lib/assessments/schedule-2a";
 import { schedule2B } from "@/lib/assessments/schedule-2b";
 import { schedule2C } from "@/lib/assessments/schedule-2c";
@@ -577,12 +577,18 @@ export default async function StudentProfilePage({
   const allModels = Object.keys(currentLevels);
 
   return (
-    <div className="min-h-screen bg-slate-200">
-      <Nav teacherName={teacherName} />
-      <main className="max-w-4xl mx-auto px-4 py-8">
+    <div className="min-h-screen bg-slate-200 print:bg-white">
+      <style>{`
+        @media print {
+          * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+          @page { margin: 1.5cm; }
+        }
+      `}</style>
+      <div className="print:hidden"><Nav teacherName={teacherName} /></div>
+      <main className="max-w-4xl mx-auto px-4 py-8 print:px-0 print:py-0 print:max-w-full">
 
         {/* Back */}
-        <Link href="/students" className="text-sm text-gray-400 hover:text-gray-600 mb-6 inline-flex items-center gap-1">
+        <Link href="/students" className="text-sm text-gray-400 hover:text-gray-600 mb-6 inline-flex items-center gap-1 print:hidden">
           ← My Students
         </Link>
 
@@ -606,7 +612,7 @@ export default async function StudentProfilePage({
               </Link>
               <Link
                 href={`/assess/select?student=${student.id}`}
-                className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+                className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors print:hidden"
               >
                 + New Assessment
               </Link>

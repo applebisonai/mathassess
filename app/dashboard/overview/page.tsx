@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Nav from "@/components/nav";
 import Link from "next/link";
+import PrintButton from "@/components/PrintButton";
 
 const MODEL_COLORS: Record<string, string> = {
   "NID": "#22c55e",
@@ -70,29 +71,46 @@ export default async function OverviewPage() {
 
   const GRADE_LABEL = (g: number) => (g === 0 ? "K" : `${g}`);
 
+  const printDate = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+
   return (
-    <div className="min-h-screen bg-slate-200">
-      <Nav teacherName={teacherName} />
-      <main className="max-w-7xl mx-auto px-4 py-8">
+    <div className="min-h-screen bg-slate-200 print:bg-white">
+      <style>{`
+        @media print {
+          * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+          @page { margin: 1cm; size: landscape; }
+        }
+      `}</style>
+      <div className="print:hidden"><Nav teacherName={teacherName} /></div>
+      <main className="max-w-7xl mx-auto px-4 py-8 print:px-0 print:py-0 print:max-w-full">
+
+        {/* Print-only header */}
+        <div className="hidden print:block mb-4">
+          <h1 className="text-xl font-bold text-gray-900">Class Overview — Assessment Levels</h1>
+          <p className="text-gray-500 text-sm">Printed {printDate}</p>
+        </div>
 
         {/* Header */}
-        <div className="flex items-center justify-between mb-7">
+        <div className="flex items-center justify-between mb-7 print:hidden">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Class Overview</h1>
             <p className="text-gray-400 text-sm mt-0.5">
               All students and their latest assessment levels
             </p>
           </div>
-          <Link
-            href="/dashboard"
-            className="text-sm text-gray-500 hover:text-gray-700 font-medium"
-          >
-            ← Back to Dashboard
-          </Link>
+          <div className="flex items-center gap-3">
+            <PrintButton />
+            <Link
+              href="/dashboard"
+              className="text-sm text-gray-500 hover:text-gray-700 font-medium"
+            >
+              ← Back to Dashboard
+            </Link>
+          </div>
         </div>
 
         {/* Table */}
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-x-auto">
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-x-auto print:rounded-none print:border-0 print:shadow-none">
           <table className="w-full text-sm">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>

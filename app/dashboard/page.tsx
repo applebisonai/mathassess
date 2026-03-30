@@ -81,29 +81,54 @@ export default async function DashboardPage() {
       <main className="max-w-5xl mx-auto px-4 py-8 space-y-7">
 
         {/* ── Hero header ─────────────────────────────────── */}
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-6 flex items-center justify-between shadow-md">
-          <div>
-            <h1 className="text-2xl font-bold text-white">{greeting(teacherName)}</h1>
-            <p className="text-blue-200 text-sm mt-1">{dateLabel}</p>
-          </div>
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-6 shadow-md">
+          <h1 className="text-2xl font-bold text-white">{greeting(teacherName)}</h1>
+          <p className="text-blue-200 text-sm mt-1">{dateLabel}</p>
+        </div>
+
+        {/* ── Quick Actions ────────────────────────────────── */}
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
+          <h2 className="font-semibold text-gray-900 mb-3">Quick Actions</h2>
           <div className="flex gap-3">
             <Link
-              href="/dashboard/overview"
-              className="bg-white text-blue-700 hover:bg-blue-50 font-semibold text-sm px-5 py-2.5 rounded-xl shadow-sm transition-colors"
+              href="/assess/select"
+              className="flex items-center gap-3 flex-1 p-3 rounded-xl bg-blue-600 hover:bg-blue-700 transition-colors"
             >
-              📊 Class Overview
+              <span className="text-white text-lg">▶</span>
+              <div>
+                <div className="text-sm font-semibold text-white">Start an Assessment</div>
+                <div className="text-xs text-blue-200">Select student &amp; schedule</div>
+              </div>
             </Link>
             <Link
-              href="/assess/select"
-              className="bg-white text-blue-700 hover:bg-blue-50 font-semibold text-sm px-5 py-2.5 rounded-xl shadow-sm transition-colors"
+              href="/assess"
+              className="flex items-center gap-3 flex-1 p-3 rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors"
             >
-              ▶ Start Assessment
+              <span className="text-gray-500 text-lg">📐</span>
+              <div>
+                <div className="text-sm font-medium text-gray-800">Browse Assessments</div>
+                <div className="text-xs text-gray-400">LFIN, AddVantage &amp; more</div>
+              </div>
+            </Link>
+            <Link
+              href="/dashboard/overview"
+              className="flex items-center gap-3 flex-1 p-3 rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors"
+            >
+              <span className="text-gray-500 text-lg">📊</span>
+              <div>
+                <div className="text-sm font-medium text-gray-800">Class Overview</div>
+                <div className="text-xs text-gray-400">View all student levels</div>
+              </div>
             </Link>
             <Link
               href="/students/add"
-              className="bg-blue-500 hover:bg-blue-400 text-white font-medium text-sm px-4 py-2.5 rounded-xl border border-blue-400 transition-colors"
+              className="flex items-center gap-3 flex-1 p-3 rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors"
             >
-              + Add Student
+              <span className="text-gray-500 text-lg">➕</span>
+              <div>
+                <div className="text-sm font-medium text-gray-800">Add Student</div>
+                <div className="text-xs text-gray-400">Add to your roster</div>
+              </div>
             </Link>
           </div>
         </div>
@@ -236,33 +261,6 @@ export default async function DashboardPage() {
                   <p className="text-xs">No assessments yet</p>
                 </div>
               )}
-            </div>
-
-            {/* Quick Actions */}
-            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
-              <h2 className="font-semibold text-gray-900 mb-3">Quick Actions</h2>
-              <div className="space-y-2">
-                <Link
-                  href="/assess/select"
-                  className="flex items-center gap-3 w-full text-left p-3 rounded-xl bg-blue-600 hover:bg-blue-700 transition-colors group"
-                >
-                  <span className="text-white text-lg">▶</span>
-                  <div>
-                    <div className="text-sm font-semibold text-white">Start an Assessment</div>
-                    <div className="text-xs text-blue-200">Select student &amp; schedule</div>
-                  </div>
-                </Link>
-                <Link
-                  href="/assess"
-                  className="flex items-center gap-3 w-full text-left p-3 rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors"
-                >
-                  <span className="text-gray-500 text-lg">📐</span>
-                  <div>
-                    <div className="text-sm font-medium text-gray-800">Browse Assessments</div>
-                    <div className="text-xs text-gray-400">LFIN, AddVantage &amp; more</div>
-                  </div>
-                </Link>
-              </div>
             </div>
 
           </div>
